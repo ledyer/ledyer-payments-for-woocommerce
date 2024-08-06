@@ -1,0 +1,42 @@
+{
+    "name": "ledyer/ledyer-payments-for-woocommerce",
+    "description": "",
+    "version": "0.0.1",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": "~7.4 || ~8.0"
+    },
+    "require-dev": {
+        "php-stubs/woocommerce-stubs": "^8.1",
+        "wp-coding-standards/wpcs": "^3.0",
+        "phpcompatibility/php-compatibility": "^9.3",
+        "phpunit/phpunit": "^9.6"
+    },
+    "license": "GPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Ledyer\\Payments\\": "src/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "phpcs": [
+            "phpcs --extensions=php -s -p"
+        ],
+        "phpcbf": [
+            "phpcbf -p"
+        ],
+        "phpunit": [
+            "phpunit --configuration phpunit.xml"
+        ]
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}

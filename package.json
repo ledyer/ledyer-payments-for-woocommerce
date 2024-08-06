@@ -1,0 +1,26 @@
+{
+  "name": "ledyer-payments-for-woocommerce",
+  "version": "0.0.1",
+  "description": "Ledyer Payments for WooCommerce",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "lint": "pnpx prettier assets/js --paren-spacing --tab-width 4 --print-width 120 --no-semi --write",
+    "makepot": "pnpx grunt makepot",
+    "cssmin": "pnpx grunt cssmin",
+    "jsmin": "pnpx webpack",
+    "build": "pnpm makepot && pnpm cssmin && pnpm lint &&pnpm jsmin"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@wordpress/eslint-plugin": "^20.1.0",
+    "grunt": "^1.6.1",
+    "grunt-contrib-cssmin": "^5.0.0",
+    "grunt-contrib-uglify": "^5.2.2",
+    "grunt-wp-i18n": "^1.0.3",
+    "prettier": "npm:wp-prettier@^3.0.3",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
