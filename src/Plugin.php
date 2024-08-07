@@ -13,6 +13,10 @@ class Plugin {
 	 * @return void
 	 */
 	public function init() {
+		if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+			return;
+		}
+
 		$this->load_dependencies();
 
 		$this->setup_hooks();
@@ -32,28 +36,70 @@ class Plugin {
 	 * @return void
 	 */
 	private function setup_hooks() {
-		// Hook for plugin activation
-		register_activation_hook( __FILE__, array( $this, 'activate' ) );
-
-		// Hook for plugin deactivation
-		register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
+		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateways' ) );
+		add_action( 'before_woocommerce_init', array( $this, 'declare_wc_compatibility' ) );
 	}
 
 	/**
-	 * Handle plugin activation.
+	 * Declare compatibility with WooCommerce features.
 	 *
 	 * @return void
 	 */
-	public function activate() {
-		// Do something on activation
+	public function declare_wc_compatibility() {
+		// Declare HPOS compatibility.
+		// Declare Checkout Blocks incompatibility
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, false );
+		}
+	}
+
+
+	/**
+	 * Add plugin action links.
+	 *
+	 * Used for adding a quick link to the gateway settings' page on the Plugin page.
+	 *
+	 * @param array $links The list of actions for this plugin.
+	 * @return array
+	 */
+	public function plugin_action_links( $links ) {
+		$settings_link = $this->get_settings_link();
+		$plugin_links  = array(
+			'<a href="' . $settings_link . '">' . __( 'Settings', 'ledyer-payments-for-woocommerce' ) . '</a>',
+		);
+
+		return array_merge( $plugin_links, $links );
 	}
 
 	/**
-	 * Handle plugin deactivation.
+	 * Get the absolute URL to the plugin's settings.
 	 *
-	 * @return void
+	 * @return string
 	 */
-	public function deactivate() {
-		// Do something on deactivation
+	public function get_settings_link() {
+		return esc_url(
+			add_query_arg(
+				array(
+					'page'    => 'wc-settings',
+					'tab'     => 'checkout',
+					'section' => Gateway::ID,
+
+				),
+				'admin.php'
+			)
+		);
+	}
+
+	/**
+	 * Register the payment gateway.
+	 *
+	 * @param array $methods Payment methods.
+	 * @return array.
+	 */
+	public function add_gateways( $methods ) {
+		$methods[] = '\Ledyer\Payments\Gateway';
+
+		return $methods;
 	}
 }

@@ -87,10 +87,10 @@ if ( is_readable( $autoloader ) ) {
 						'<code>composer install</code>',
 						'<code>' . esc_html( str_replace( ABSPATH, '', __DIR__ ) ) . '</code>'
 					);
-					?>
+				?>
 			</p>
 		</div>
-		<?php
+			<?php
 		}
 	);
 	return;
@@ -99,3 +99,5 @@ if ( is_readable( $autoloader ) ) {
 $plugin = new Plugin();
 // Just like we do now in our plugins we add a action for plugins_loaded to kickstart the plugins code. Here we are calling the namespace and class directly and the static method inside init.
 add_action( 'plugins_loaded', array( $plugin, 'init' ) );
+
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $plugin, 'plugin_action_links' ) );
