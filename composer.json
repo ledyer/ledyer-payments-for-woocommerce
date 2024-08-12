@@ -3,7 +3,10 @@
     "description": "",
     "version": "0.0.1",
     "type": "wordpress-plugin",
+    "license": "GPL-3.0-or-later",
     "require": {
+        "krokedil/wp-api": "^1.0",
+        "krokedil/woocommerce": "^1.0",
         "php": "~7.4 || ~8.0"
     },
     "require-dev": {
@@ -12,7 +15,16 @@
         "phpcompatibility/php-compatibility": "^9.3",
         "phpunit/phpunit": "^9.6"
     },
-    "license": "GPL-3.0-or-later",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:krokedil/wp-api.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:krokedil/woocommerce.git"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Ledyer\\Payments\\": "src/"

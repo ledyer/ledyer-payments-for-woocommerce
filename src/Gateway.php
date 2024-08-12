@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-
 class Gateway extends \WC_Payment_Gateway {
 
 	public const ID = 'ledyer_payments';
@@ -61,7 +60,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_icon() {
-		$image_url = '';
+		$image_url = 'https://developers.ledyer.com/img/logo-lightmode.svg';
 		return "<img src='{$image_url}' style='max-width: 90%' alt='Ledyer Payments logo' />";
 	}
 

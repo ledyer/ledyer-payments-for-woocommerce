@@ -91,7 +91,7 @@ class Settings {
 				'title'       => __( 'Security level', 'ledyer-payments-for-woocommerce' ),
 				'type'        => 'select',
 				'default'     => '200',
-				'description' => __( 'Please refer to the <a href="https://static.ledyer.com/docs/en-US/ledyer-security_levels.pdf">documentation</a> on what these level mean. This will override the security level you have set in the merchant portal.', 'ledyer-payments-for-woocommerce' ),
+				'description' => __( 'Refer to the <a href="https://static.ledyer.com/docs/en-US/ledyer-security_levels.pdf">documentation</a> on what these level mean. This will override the security level you have set in the merchant portal.', 'ledyer-payments-for-woocommerce' ),
 				'options'     => array(
 					'110' => '110',
 					'120' => '120',
@@ -111,6 +111,13 @@ class Settings {
 				'type'        => 'checkbox',
 				'description' => __( 'Logging is required for troubleshooting any issues related to the plugin. It is recommended that you always have it enabled.', 'ledyer-payments-for-woocommerce' ),
 				'default'     => 'yes',
+			),
+			'extended_logging'     => array(
+				'title'       => __( 'Detailed logging', 'ledyer-payments-for-woocommerce' ),
+				'label'       => __( 'Enable', 'ledyer-payments-for-woocommerce' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Enable detailed logging to capture extra data. Use this only when needed for debugging hard-to-replicate issues, as it generates significantly more log entries.', 'ledyer-payments-for-woocommerce' ),
+				'default'     => 'no',
 			),
 		);
 
