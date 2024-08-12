@@ -7,6 +7,8 @@
 
 namespace Ledyer\Payments;
 
+use Ledyer\Payments\Requests\POST\CreateSession;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -39,6 +41,8 @@ class Gateway extends \WC_Payment_Gateway {
 				'process_admin_options',
 			)
 		);
+
+		add_filter( 'wc_get_template', array( $this, 'payment_categories' ), 10, 3 );
 	}
 
 	/**
@@ -93,5 +97,29 @@ class Gateway extends \WC_Payment_Gateway {
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		return array();
+	}
+
+	/**
+	 * Display the payment categories under the gateway on the checkout page.
+	 *
+	 * @param string $located Target template file location.
+	 * @param string $template_name The name of the template.
+	 * @param array  $args Arguments for the template.
+	 * @return string
+	 */
+	public function payment_categories( $located, $template_name, $args ) {
+		if ( ! is_checkout() ) {
+			return $located;
+		}
+
+		if ( 'checkout/payment-method.php' !== $template_name || self::ID !== $args['gateway']->id ) {
+			return $located;
+		}
+
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		$request            = new CreateSession();
+		$response           = $request->request();
+
+		return $located;
 	}
 }
