@@ -17,7 +17,7 @@ class CreateSession extends POST {
 	public function __construct( $args = array() ) {
 		parent::__construct( $args );
 		$this->log_title = 'Create session';
-		$this->endpoint  = '/v1/payment-session';
+		$this->endpoint  = '/v1/payment-sessions';
 	}
 
 	/**
