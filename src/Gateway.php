@@ -74,7 +74,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return boolean
 	 */
 	public function is_available() {
-		return 'yes' === $this->enabled;
+		return wc_string_to_bool( $this->enabled );
 	}
 
 	/**
