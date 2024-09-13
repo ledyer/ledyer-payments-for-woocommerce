@@ -24,10 +24,20 @@ abstract class BaseRequest extends Request {
 		parent::__construct( $config, $settings, $args );
 	}
 
+	/**
+	 * Calculate the auth header.
+	 *
+	 * @return string
+	 */
 	protected function calculate_auth() {
 		return $this->get_access_token();
 	}
 
+	/**
+	 * Get the access token.
+	 *
+	 * @return string
+	 */
 	protected function get_access_token() {
 		$key          = Gateway::ID . '_access_token';
 		$access_token = get_transient( $key );
@@ -60,11 +70,19 @@ abstract class BaseRequest extends Request {
 		return $access_token;
 	}
 
+	/**
+	 * Get the error message.
+	 *
+	 * @param array $response The response.
+	 *
+	 * @return \WP_Error
+	 */
 	protected function get_error_message( $response ) {
 		$error_message = '';
-		if ( null !== json_decode( $response['body'], true ) ) {
-			foreach ( json_decode( $response['body'], true )['error_messages'] as $error ) {
-				$error_message = "$error_message $error";
+		$errors        = json_decode( $response['body'], true );
+		if ( ! empty( $errors ) ) {
+			foreach ( $errors['errors'] as $i => $error ) {
+				$error_message .= "[$i] " . implode( ' ', $error );
 			}
 		}
 		$code          = wp_remote_retrieve_response_code( $response );
