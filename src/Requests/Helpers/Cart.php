@@ -83,8 +83,6 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 		return $order_lines;
 	}
 
-
-
 	/**
 	 * Get or create the cart reference if it doesn't already exist.
 	 *
@@ -100,5 +98,23 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 		}
 
 		return $reference;
+	}
+
+
+	public function get_confirmation_url() {
+		$url = add_query_arg(
+			array(
+				'session_id' => '{session_id}',
+				'order_id'   => '{order_id}',
+			),
+			wc_get_checkout_url()
+		);
+
+		return apply_filters( Gateway::ID . '_confirmation_url', $url );
+	}
+
+	public function get_notification_url() {
+		$url = add_query_arg( 'gateway', Gateway::ID, home_url() );
+		return apply_filters( Gateway::ID . '_notification_url', $url );
 	}
 }

@@ -38,6 +38,10 @@ class CreateSession extends POST {
 				'security' => array(
 					'level' => absint( $this->settings['security_level'] ),
 				),
+				'urls'     => array(
+					'confirmation' => $cart->get_confirmation_url(),
+					'notification' => $cart->get_notification_url(),
+				),
 			),
 			'totalOrderAmount'        => $cart->get_total(),
 			'totalOrderAmountExclVat' => $cart->get_subtotal(),
