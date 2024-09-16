@@ -7,8 +7,6 @@
 
 namespace Ledyer\Payments;
 
-use Ledyer\Payments\Requests\POST\CreateSession;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -116,10 +114,6 @@ class Gateway extends \WC_Payment_Gateway {
 			return $located;
 		}
 
-		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$request            = new CreateSession();
-		$response           = $request->request();
-
-		return $located;
+		return untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/templates/payment-categories.php';
 	}
 }

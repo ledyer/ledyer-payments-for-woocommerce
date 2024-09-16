@@ -44,38 +44,30 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 		return $item->get_total_amount() + $item->get_total_tax_amount();
 	}
 
-	private function get_total_discount_amount( $item ) {
-		return $item->get_total_discount_amount() + $item->get_total_discount_tax_amount();
-	}
-
 	public function get_order_lines() {
 		$order_lines = array();
 
 		foreach ( $this->get_line_items() as $item ) {
 			$order_lines[] = array(
-				'description'        => $item->get_name(),
-				'quantity'           => $item->get_quantity(),
-				'reference'          => $item->get_sku(),
-				'totalAmount'        => $this->get_total_amount( $item ),
-				'totalVatAmount'     => $item->get_total_tax_amount(),
-				'unitDiscountAmount' => $this->get_total_discount_amount( $item ),
-				'type'               => $this->get_type( $item ),
-				'unitPrice'          => $item->get_unit_price(),
-				'vat'                => $item->get_tax_rate(),
+				'description'    => $item->get_name(),
+				'quantity'       => $item->get_quantity(),
+				'reference'      => $item->get_sku(),
+				'totalAmount'    => $this->get_total_amount( $item ),
+				'totalVatAmount' => $item->get_total_tax_amount(),
+				'type'           => $this->get_type( $item ),
+				'vat'            => $item->get_tax_rate(),
 			);
 		}
 
 		foreach ( $this->get_line_shipping() as $item ) {
 			$order_lines[] = array(
-				'description'        => $item->get_name(),
-				'quantity'           => $item->get_quantity(),
-				'reference'          => $item->get_sku(),
-				'totalAmount'        => $this->get_total_amount( $item ),
-				'totalVatAmount'     => $item->get_total_tax_amount(),
-				'unitDiscountAmount' => $this->get_total_discount_amount( $item ),
-				'type'               => $this->get_type( $item ),
-				'unitPrice'          => $item->get_unit_price(),
-				'vat'                => $item->get_tax_rate(),
+				'description'    => $item->get_name(),
+				'quantity'       => $item->get_quantity(),
+				'reference'      => $item->get_sku(),
+				'totalAmount'    => $this->get_total_amount( $item ),
+				'totalVatAmount' => $item->get_total_tax_amount(),
+				'type'           => $this->get_type( $item ),
+				'vat'            => $item->get_tax_rate(),
 			);
 
 		}
