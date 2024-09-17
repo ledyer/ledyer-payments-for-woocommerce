@@ -7,6 +7,9 @@ namespace Ledyer\Payments;
  * Handles the plugins initialization.
  */
 class Plugin {
+	public $api     = null;
+	public $session = null;
+
 	/**
 	 * Plugin constructor.
 	 *
@@ -27,6 +30,8 @@ class Plugin {
 	 * @return void
 	 */
 	private function load_dependencies() {
+		$this->api     = new API();
+		$this->session = new Session();
 	}
 
 	/**
