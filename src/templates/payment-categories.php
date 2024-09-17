@@ -4,21 +4,19 @@
  */
 
 use Ledyer\Payments\Gateway;
+use Ledyer\Payments\Plugin;
 use Ledyer\Payments\Requests\POST\CreateSession;
 
 $order_id = absint( get_query_var( 'order-pay', 0 ) );
 if ( empty( $order_id ) ) {
 	$order = wc_get_order( $order_id );
 
-	// TODO: Create a new session as 'woocommerce_after_calculate_totals' is only triggered on the cart (and checkout) page.
+	// Create a new session as 'woocommerce_after_calculate_totals' is only triggered on the cart (and checkout) page.
+	Plugin::$session->get_session( $order );
 }
 
-// TODO: Store payment categories in Gateway session handler.
-$request            = new CreateSession();
-$response           = $request->request();
-$payment_categories = $response['configuration'];
-
-if ( is_array( $payment_categories ) ) {
+$payment_categories = Plugin::$session->get_payment_categories();
+if ( ! empty( $payment_categories ) && is_array( $payment_categories ) ) {
 	$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 	$gateway            = $available_gateways[ Gateway::ID ];
 	$chosen_gateway     = $available_gateways[ array_key_first( $available_gateways ) ];
