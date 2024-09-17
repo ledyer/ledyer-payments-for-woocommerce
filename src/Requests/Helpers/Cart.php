@@ -5,7 +5,11 @@ use Ledyer\Payments\Gateway;
 
 class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 
+	private $settings = array();
+
 	public function __construct() {
+		$this->settings = get_option( 'woocommerce_' . Gateway::ID . '_settings', array() );
+
 		// TODO: Move config to the plugin's main file.
 		$config = array(
 			'slug'         => 'lp',
@@ -73,6 +77,21 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 		}
 
 		return $order_lines;
+	}
+
+	public function get_country() {
+		/* The billing country selected on the checkout page is to prefer over the store's base location. It makes more sense that we check for available payment methods based on the customer's country. */
+		if ( method_exists( 'WC_Customer', 'get_billing_country' ) && ! empty( WC()->customer ) ) {
+			$country = WC()->customer->get_billing_country();
+			if ( ! empty( $country ) ) {
+				return apply_filters( Gateway::ID . '_country', $country );
+			}
+		}
+
+		/* Ignores whatever country the customer selects on the checkout page, and always uses the store's base location. Only used as fallback. */
+		$base_location = wc_get_base_location();
+		$country       = $base_location['country'];
+		return apply_filters( Gateway::ID . '_country', $country );
 	}
 
 	/**
