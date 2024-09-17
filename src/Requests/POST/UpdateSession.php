@@ -7,17 +7,17 @@ use Ledyer\Payments\Requests\Helpers\Cart;
 /**
  * Create session request class.
  */
-class CreateSession extends POST {
+class UpdateSession extends POST {
 
 	/**
-	 * CreateSession constructor.
+	 * UpdateSession constructor.
 	 *
 	 * @return array Arguments that should be accessible from within the request.
 	 */
-	public function __construct() {
+	public function __construct( $session_id ) {
 		parent::__construct();
-		$this->log_title = 'Create session';
-		$this->endpoint  = '/v1/payment-sessions';
+		$this->log_title = 'Update session';
+		$this->endpoint  = `/v1/payment-sessions/{$session_id}`;
 	}
 
 	/**
@@ -37,10 +37,6 @@ class CreateSession extends POST {
 			'settings'                => array(
 				'security' => array(
 					'level' => absint( $this->settings['security_level'] ),
-				),
-				'urls'     => array(
-					'confirmation' => $cart->get_confirmation_url(),
-					'notification' => $cart->get_notification_url(),
 				),
 			),
 			'totalOrderAmount'        => $cart->get_total(),
