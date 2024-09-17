@@ -97,14 +97,17 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 	/**
 	 * Get or create the cart reference if it doesn't already exist.
 	 *
-	 * @return string A 23-character unique reference.
+	 * @return string A minimum of 23-characters unique reference.
 	 */
 	public function get_reference() {
 		$key = Gateway::ID . '_cart_reference';
 
 		$reference = WC()->session->get( $key );
 		if ( empty( $reference ) ) {
-			$reference = uniqid( '', true );
+			// The prefix is used for identifying which client ID was used to create the reference.
+			$prefix = substr( $this->settings['client_id'], -6 );
+
+			$reference = uniqid( $prefix, true );
 			WC()->session->set( $key, $reference );
 		}
 
