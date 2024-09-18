@@ -5,6 +5,7 @@ jQuery( function ( $ ) {
 
     const handleProceedWithLedyer = async () => {
         try {
+            const authArgs = { ...KLPParams.customer, sessionId: KLPParams.sessionId }
             const authResponse = await window.ledyer.payments.api.authorize( authArgs )
 
             // ... some time will pass while the user is interacting with the dialog

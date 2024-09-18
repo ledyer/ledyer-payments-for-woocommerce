@@ -7,6 +7,8 @@
 
 namespace Krokedil\Ledyer\Payments;
 
+use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -26,6 +28,9 @@ class Assets {
 		if ( ! ( is_checkout() || is_order_received_page() ) ) {
 			return;
 		}
+
+		$customer   = ( new Cart() )->get_customer();
+		$session_id = Ledyer()->session()->get_session_id();
 
 		$standard_woo_checkout_fields = array(
 			'billing_first_name',
@@ -62,6 +67,8 @@ class Assets {
 			'ledyer-payments-for-woocommerce',
 			'KLPParams',
 			array(
+				'customer'                  => $customer,
+				'sessionId'                 => $session_id,
 				'changePaymentMethodNonce'  => wp_create_nonce( Gateway::ID . '_wc_change_payment_method' ),
 				'changePaymentMethodUrl'    => \WC_AJAX::get_endpoint( Gateway::ID . '_wc_change_payment_method' ),
 				'getOrderNonce'             => wp_create_nonce( Gateway::ID . '_get_order' ),

@@ -261,6 +261,20 @@ class Session {
 		return $this->session_country ?? $helper->get_country();
 	}
 
+	/**
+	 * Get the session ID.
+	 *
+	 * If the session doesn't exist, we'll try to create it. If that fails, `null` is returned.
+	 *
+	 * @return string|null The session ID.
+	 */
+	public function get_session_id() {
+		if ( empty( $this->gateway_session ) ) {
+			$this->get_session();
+		}
+
+		return $this->gateway_session['id'] ?? null;
+	}
 	public function get_payment_categories() {
 		return $this->gateway_session['configuration'] ?? array();
 	}
