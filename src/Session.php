@@ -7,7 +7,6 @@
 
 namespace Krokedil\Ledyer\Payments;
 
-use Krokedil\Ledyer\Payments\Plugin;
 use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
 use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
 
@@ -25,6 +24,20 @@ class Session {
 
 
 	/**
+	 * Remaps key to preserve consistent key naming.
+	 *
+	 * @param array $result
+	 * @return array
+	 */
+	private function remap( $result ) {
+		// Ledyer refers to id as sessionId on create session and id on update session.
+		$id           = $result['sessionId'] ?? $result['id'];
+		$result['id'] = $id;
+
+		return $result;
+	}
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -33,6 +46,7 @@ class Session {
 	private function clear_session() {
 		$this->gateway_session = null;
 		$this->session_hash    = null;
+		$this->session_country = null;
 	}
 
 	/**
@@ -135,7 +149,7 @@ class Session {
 
 		$helper = empty( $order ) ? new Cart() : new Order( $order );
 
-		$this->gateway_session = ! empty( $result ) ? $result : $this->gateway_session;
+		$this->gateway_session = ! empty( $result ) ? $this->remap( $result ) : $this->gateway_session;
 		$this->session_hash    = $this->get_hash( $order );
 		$this->session_country = $helper->get_country();
 
@@ -235,7 +249,7 @@ class Session {
 
 		// The session has been set or modified, we must update the existing session or create one if it doesn't already exist.
 		if ( $this->gateway_session ) {
-			$result = Ledyer()->api()->update_session( $this->gateway_session['sessionId'] );
+			$result = Ledyer()->api()->update_session( $this->gateway_session['id'] );
 			return $this->process_result( $result, $order );
 		}
 
