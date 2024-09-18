@@ -50,6 +50,8 @@ class Plugin {
 	private function load_dependencies() {
 		$this->api     = new API();
 		$this->session = new Session();
+
+		new Assets();
 	}
 
 	/**
