@@ -44,7 +44,7 @@ class CreateSession extends POST {
 				),
 			),
 			'totalOrderAmount'        => $cart->get_total(),
-			'totalOrderAmountExclVat' => $cart->get_subtotal(),
+			'totalOrderAmountExclVat' => $cart->get_total() - $cart->get_total_tax(),
 			'totalOrderVatAmount'     => $cart->get_total_tax(),
 		);
 	}

@@ -17,7 +17,7 @@ class UpdateSession extends POST {
 	public function __construct( $session_id ) {
 		parent::__construct();
 		$this->log_title = 'Update session';
-		$this->endpoint  = `/v1/payment-sessions/{$session_id}`;
+		$this->endpoint  = "/v1/payment-sessions/$session_id";
 	}
 
 	/**
@@ -40,7 +40,7 @@ class UpdateSession extends POST {
 				),
 			),
 			'totalOrderAmount'        => $cart->get_total(),
-			'totalOrderAmountExclVat' => $cart->get_subtotal(),
+			'totalOrderAmountExclVat' => $cart->get_total() - $cart->get_total_tax(),
 			'totalOrderVatAmount'     => $cart->get_total_tax(),
 		);
 	}
