@@ -7,8 +7,26 @@ namespace Ledyer\Payments;
  * Handles the plugins initialization.
  */
 class Plugin {
-	public $api     = null;
-	public $session = null;
+	use Traits\Singleton;
+
+	/**
+	 * API gateway.
+	 *
+	 * @var API
+	 */
+	private $api = null;
+	public function api() {
+		return $this->api;
+	}
+	/**
+	 * Session handler.
+	 *
+	 * @var Session
+	 */
+	private $session = null;
+	public function session() {
+		return $this->session;
+	}
 
 	/**
 	 * Plugin constructor.
@@ -58,7 +76,6 @@ class Plugin {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, false );
 		}
 	}
-
 
 	/**
 	 * Add plugin action links.

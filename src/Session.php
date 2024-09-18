@@ -235,11 +235,11 @@ class Session {
 
 		// The session has been set or modified, we must update the existing session or create one if it doesn't already exist.
 		if ( $this->gateway_session ) {
-			$result = Plugin::$api->update_session( $this->gateway_session['sessionId'] );
+			$result = Ledyer()->api()->update_session( $this->gateway_session['sessionId'] );
 			return $this->process_result( $result, $order );
 		}
 
-		$result = Plugin::$api->create_session();
+		$result = Ledyer()->api()->create_session();
 		return $this->process_result( $result, $order );
 	}
 	public function get_country( $order = null ) {
