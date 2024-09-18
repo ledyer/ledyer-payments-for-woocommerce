@@ -5,11 +5,11 @@
  * Session management.
  */
 
-namespace Ledyer\Payments;
+namespace Krokedil\Ledyer\Payments;
 
-use Ledyer\Payments\Plugin;
-use Ledyer\Payments\Requests\Helpers\Cart;
-use Ledyer\Payments\Requests\Helpers\Order;
+use Krokedil\Ledyer\Payments\Plugin;
+use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
+use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

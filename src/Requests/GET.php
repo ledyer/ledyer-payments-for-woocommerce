@@ -1,5 +1,5 @@
 <?php
-namespace Ledyer\Payments\Requests;
+namespace Krokedil\Ledyer\Payments\Requests;
 
 /**
  * POST request class.

@@ -1,8 +1,8 @@
 <?php
-namespace Ledyer\Payments\Requests\POST;
+namespace Krokedil\Ledyer\Payments\Requests\POST;
 
-use Ledyer\Payments\Requests\POST;
-use Ledyer\Payments\Requests\Helpers\Cart;
+use Krokedil\Ledyer\Payments\Requests\POST;
+use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
 
 /**
  * Create session request class.

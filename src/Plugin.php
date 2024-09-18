@@ -1,5 +1,5 @@
 <?php
-namespace Ledyer\Payments;
+namespace Krokedil\Ledyer\Payments;
 
 /**
  * Class Plugin
@@ -120,7 +120,7 @@ class Plugin {
 	 * @return array.
 	 */
 	public function add_gateways( $methods ) {
-		$methods[] = '\Ledyer\Payments\Gateway';
+		$methods[] = __NAMESPACE__ . '\Gateway';
 		return $methods;
 	}
 }

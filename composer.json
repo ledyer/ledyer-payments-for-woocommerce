@@ -1,5 +1,5 @@
 {
-    "name": "ledyer/ledyer-payments-for-woocommerce",
+    "name": "krokedil/ledyer-payments-for-woocommerce",
     "description": "",
     "version": "0.0.1",
     "type": "wordpress-plugin",
@@ -27,7 +27,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Ledyer\\Payments\\": "src/"
+            "Krokedil\\Ledyer\\Payments\\": "src/"
         }
     },
     "config": {

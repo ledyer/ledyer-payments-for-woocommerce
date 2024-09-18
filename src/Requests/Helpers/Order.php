@@ -1,7 +1,7 @@
 <?php
-namespace Ledyer\Payments\Requests\Helpers;
+namespace Krokedil\Ledyer\Payments\Requests\Helpers;
 
-use Ledyer\Payments\Gateway;
+use Krokedil\Ledyer\Payments\Gateway;
 
 class Order extends \Krokedil\WooCommerce\Order\Order {
 

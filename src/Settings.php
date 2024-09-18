@@ -1,5 +1,5 @@
 <?php
-namespace Ledyer\Payments;
+namespace Krokedil\Ledyer\Payments;
 
 /**
  * Class Settings
@@ -121,7 +121,7 @@ class Settings {
 			),
 		);
 
-		return apply_filters( 'ledyer_payments_settings', $settings );
+		return apply_filters( Gateway::ID . '_settings', $settings );
 	}
 
 	/**
@@ -133,6 +133,6 @@ class Settings {
 	 */
 	public static function maybe_update_access_token() {
 		// Always renew the access token when the settings is updated.
-		delete_transient( 'ledyer_payments_access_token' );
+		delete_transient( Gateway::ID . '_access_token' );
 	}
 }

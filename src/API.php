@@ -5,7 +5,7 @@
  * API gateway.
  */
 
-namespace Ledyer\Payments;
+namespace Krokedil\Ledyer\Payments;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

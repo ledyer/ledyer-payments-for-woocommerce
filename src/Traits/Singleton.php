@@ -1,5 +1,5 @@
 <?php
-namespace Ledyer\Payments\Traits;
+namespace Krokedil\Ledyer\Payments\Traits;
 
 defined( 'ABSPATH' ) || exit;
 

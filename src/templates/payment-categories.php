@@ -3,8 +3,7 @@
  * Replace the template checkout/payment-method.php with Ledyer's payment categories.
  */
 
-use Ledyer\Payments\Gateway;
-use Ledyer\Payments\Plugin;
+use Krokedil\Ledyer\Payments\Gateway;
 
 $order_id = absint( get_query_var( 'order-pay', 0 ) );
 if ( empty( $order_id ) ) {

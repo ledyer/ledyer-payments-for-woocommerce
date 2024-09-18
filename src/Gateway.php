@@ -5,7 +5,7 @@
  * Register the Ledyer Payments payment gateway.
  */
 
-namespace Ledyer\Payments;
+namespace Krokedil\Ledyer\Payments;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -52,7 +52,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$this->form_fields = Settings::setting_fields();
 
 		// Delete the access token whenever the settings are modified.
-		add_action( 'update_option_woocommerce_ledyer_payments_settings', array( '\Ledyer\Payments\Settings', 'maybe_update_access_token' ) );
+		add_action( 'update_option_woocommerce_' . self::ID . '_settings', array( __NAMESPACE__ . '\Settings', 'maybe_update_access_token' ) );
 	}
 
 

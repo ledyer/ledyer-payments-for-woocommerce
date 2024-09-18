@@ -11,6 +11,7 @@
  *
  * WC requires at least: 5.6.0
  * WC tested up to: 8.1.0
+ * Requires Plugins: woocommerce
  *
  * Copyright (c) 2024 Krokedil
  *
@@ -26,11 +27,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
- * @package Ledyer_Payments
  */
 
-use Ledyer\Payments\Plugin;
+use Krokedil\Ledyer\Payments\Plugin;
 
 // Just like any other plugin, add a check to prevent people from accessing the files directly. This should be added to all files in the plugin.
 defined( 'ABSPATH' ) || exit;

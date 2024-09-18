@@ -11,7 +11,7 @@
     "build": "pnpm makepot && pnpm cssmin && pnpm lint &&pnpm jsmin"
   },
   "keywords": [],
-  "author": "",
+  "author": "Krokedil",
   "license": "ISC",
   "devDependencies": {
     "@wordpress/eslint-plugin": "^20.1.0",
