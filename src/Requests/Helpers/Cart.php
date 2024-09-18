@@ -22,7 +22,7 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 	/**
 	 * Get the Ledyer type mapping of the item.
 	 *
-	 * @param \Krokedil\WooCommerce\OrderLineData $item Item.
+	 * @param \Krokedil\WooCommerce\Cart\CartLineItem $item Item.
 	 * @return string
 	 */
 	private function get_type( $item ) {
@@ -39,7 +39,7 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 	}
 
 	/**
-	 * Get the total amount of the item.
+	 * Get the total amount of the item incl. tax.
 	 *
 	 * @param \Krokedil\WooCommerce\OrderLineData $item Item.
 	 * @return float
@@ -51,6 +51,9 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 	public function get_order_lines() {
 		$order_lines = array();
 
+		/**
+		 * @var \Krokedil\WooCommerce\OrderLineData $item
+		 */
 		foreach ( $this->get_line_items() as $item ) {
 			$order_lines[] = array(
 				'description'    => $item->get_name(),
