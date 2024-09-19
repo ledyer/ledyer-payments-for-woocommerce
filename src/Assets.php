@@ -64,7 +64,7 @@ class Assets {
 			'_wp_http_referer',
 		);
 
-		$src          = LP_PLUGIN_URL . '/assets/js/checkout.js';
+		$src          = LP_PLUGIN_URL . '/assets/js/ledyer-payments.js';
 		$dependencies = array( 'jquery' );
 		wp_register_script( self::CHECKOUT_HANDLE, $src, $dependencies, LP_VERSION, false );
 
