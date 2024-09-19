@@ -8,7 +8,7 @@ class Order extends \Krokedil\WooCommerce\Order\Order {
 	public function __construct( $order ) {
 		// TODO: Move config to the plugin's main file.
 		$config = array(
-			'slug'         => 'lp',
+			'slug'         => Gateway::ID,
 			'price_format' => 'minor',
 		);
 

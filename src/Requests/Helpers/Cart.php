@@ -12,7 +12,7 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 
 		// TODO: Move config to the plugin's main file.
 		$config = array(
-			'slug'         => 'lp',
+			'slug'         => Gateway::ID,
 			'price_format' => 'minor',
 		);
 

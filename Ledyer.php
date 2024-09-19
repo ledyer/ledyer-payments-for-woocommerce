@@ -5,12 +5,12 @@
  * Description: Ledyer Payments for WooCommerce.
  * Author: krokedil
  * Author URI: https://krokedil.com/
- * Version: 0.0.1
+ * Version: 1.0.0
  * Text Domain: ledyer-payments-for-woocommerce
  * Domain Path: /languages
  *
  * WC requires at least: 5.6.0
- * WC tested up to: 8.1.0
+ * WC tested up to: 9.3.2
  * Requires Plugins: woocommerce
  *
  * Copyright (c) 2024 Krokedil
