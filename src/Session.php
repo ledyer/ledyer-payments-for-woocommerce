@@ -227,7 +227,7 @@ class Session {
 			return;
 		}
 
-		// Check if we get an order.
+		// Check if we got an order.
 		$order  = $this->get_order( $order );
 		$helper = empty( $order ) ? new Cart() : new Order( $order );
 
@@ -239,7 +239,7 @@ class Session {
 		$this->update_session( $order );
 
 		// A country change warrants a new session. Clear the session so when we check if we have one, we get false, resulting in a new session.
-		if ( ! empty( $this->gateway_session ) && $helper->get_country() !== $this->session_country ) {
+		if ( $helper->get_country() !== $this->session_country ) {
 			$this->clear_session();
 		}
 
