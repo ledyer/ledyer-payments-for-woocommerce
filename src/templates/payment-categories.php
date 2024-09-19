@@ -6,7 +6,7 @@
 use Krokedil\Ledyer\Payments\Gateway;
 
 $order_id = absint( get_query_var( 'order-pay', 0 ) );
-if ( empty( $order_id ) ) {
+if ( ! empty( $order_id ) ) {
 	$order = wc_get_order( $order_id );
 
 	// Create a new session as 'woocommerce_after_calculate_totals' is only triggered on the cart (and checkout) page.
@@ -22,15 +22,16 @@ if ( ! empty( $payment_categories ) && is_array( $payment_categories ) ) {
 	foreach ( apply_filters( Gateway::ID . '_available_payment_categories', $payment_categories ) as $payment_category ) {
 		$gateway = $available_gateways[ Gateway::ID ];
 
-		$gateway->id           = Gateway::ID . $payment_category['type'];
-		$gateway->name         = $payment_category['name'];
+		// Refer to the note about gateway ID in the Plugin.php file, for the 'woocommerce_checkout_posted_data' hook.
+		$gateway->id           = Gateway::ID . "_{$payment_category['type']}";
+		$gateway->title        = $payment_category['name'];
 		$gateway->description  = $payment_category['description'];
 		$payment_category_icon = $payment_category['assets']['urls']['logo'] ?? null;
 
 		// Make sure the first payment category is chosen by default.
 		if ( false !== strpos( $chosen_gateway->id, Gateway::ID ) || $gateway->chosen ) {
 			$gateway->chosen = false;
-			if ( $gateway->name == $payment_categories[ array_key_first( $payment_categories ) ]['name'] ) {
+			if ( $gateway->title == $payment_categories[ array_key_first( $payment_categories ) ]['name'] ) {
 				$gateway->chosen = true;
 			}
 		}

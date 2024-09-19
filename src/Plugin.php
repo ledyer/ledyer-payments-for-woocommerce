@@ -1,6 +1,8 @@
 <?php
 namespace Krokedil\Ledyer\Payments;
 
+use Krokedil\Ledyer\Payments\Gateway;
+
 /**
  * Class Plugin
  *
@@ -62,6 +64,22 @@ class Plugin {
 	private function setup_hooks() {
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateways' ) );
 		add_action( 'before_woocommerce_init', array( $this, 'declare_wc_compatibility' ) );
+
+		/**
+		 * Override the payment categories ID.
+		 *
+		 * In the templates/payment-categories.php file, we insert the payment categories as unique payment methods (gateways), each with a distinct ID. When Woo process the payment, it will look for a gateway with those IDs, but they don't exist. Only the Gateway::ID actually exists. For this reason, we must override the payment method ID to Gateway::ID when the checkout data is posted.
+		 */
+		add_filter(
+			'woocommerce_checkout_posted_data',
+			function ( $data ) {
+				if ( false !== strpos( $data['payment_method'], Gateway::ID ) ) {
+					$data['payment_method'] = Gateway::ID;
+				}
+
+				return $data;
+			}
+		);
 	}
 
 	/**
