@@ -32,6 +32,10 @@ class Gateway extends \WC_Payment_Gateway {
 		$this->init_form_fields();
 		$this->init_settings();
 
+		$this->title       = $this->get_option( 'title' );
+		$this->description = $this->get_option( 'description' );
+		$this->enabled     = $this->get_option( 'enabled' );
+
 		add_action(
 			'woocommerce_update_options_payment_gateways_' . $this->id,
 			array(
@@ -69,6 +73,8 @@ class Gateway extends \WC_Payment_Gateway {
 	/**
 	 * Whether the payment gateway is available.
 	 *
+	 * @filter Gateway::ID . '_is_available'
+	 *
 	 * @return boolean
 	 */
 	public function is_available() {
@@ -83,7 +89,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return bool
 	 */
 	private function check_availability() {
-		return ! wc_string_to_bool( $this->enabled );
+		return wc_string_to_bool( $this->enabled );
 	}
 
 	/**
