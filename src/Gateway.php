@@ -67,12 +67,23 @@ class Gateway extends \WC_Payment_Gateway {
 	}
 
 	/**
-	 * Whether the payment gateway should be enabled.
+	 * Whether the payment gateway is available.
 	 *
 	 * @return boolean
 	 */
 	public function is_available() {
-		return wc_string_to_bool( $this->enabled );
+		return apply_filters( self::ID . '_is_available', $this->check_availability() );
+	}
+
+	/**
+	 * Check if the gateway should be available.
+	 *
+	 * This function is extracted to create the 'Gateway::ID . _is_available' filter.
+	 *
+	 * @return bool
+	 */
+	private function check_availability() {
+		return ! wc_string_to_bool( $this->enabled );
 	}
 
 	/**
