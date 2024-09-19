@@ -31,6 +31,16 @@ class Plugin {
 	}
 
 	/**
+	 * Logger.
+	 *
+	 * @var Logger
+	 */
+	private $logger = null;
+	public function logger() {
+		return $this->logger;
+	}
+
+	/**
 	 * Plugin constructor.
 	 *
 	 * @return void
@@ -52,7 +62,9 @@ class Plugin {
 	private function load_dependencies() {
 		$this->api     = new API();
 		$this->session = new Session();
+		$this->logger  = new Logger();
 
+		new AJAX();
 		new Assets();
 	}
 
