@@ -71,7 +71,7 @@ class Assets {
 		$pay_for_order = is_wc_endpoint_url( 'order-pay' ) ? true : false;
 		wp_localize_script(
 			self::CHECKOUT_HANDLE,
-			'KLPParams',
+			'LedyerPaymentsParams',
 			array(
 				'customer'                  => $customer,
 				'sessionId'                 => $session_id,
