@@ -22,6 +22,15 @@ class Session {
 	private $session_hash    = null;
 	private $session_country = null;
 
+	/**
+	 * Payment categories.
+	 *
+	 * When the  `gateway_session` is updated, the update request doesn't include the configuration data. Therefore, we have to store it separately.
+	 *
+	 * @var array
+	 */
+	private $payment_categories = array();
+
 
 	/**
 	 * Remaps key to preserve consistent key naming.
@@ -43,14 +52,23 @@ class Session {
 	public function __construct() {
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'get_session' ), 999999 );
 	}
+	/**
+	 * Clear the internal session data.
+	 *
+	 * This should only be called when we need to update the session.
+	 *
+	 * @return void
+	 */
 	private function clear_session() {
 		$this->gateway_session = null;
 		$this->session_hash    = null;
 		$this->session_country = null;
+
+		// No need to clear the $payment_categories as it is overwritten when a new session is created.
 	}
 
 	/**
-	 * Clears the session internal data.
+	 * Clears the session data stored to WC.
 	 *
 	 * @param \WC_Order|numeric|null $order The order object or order ID. Pass `null` to clear the session from WC_Session (default).
 	 * @return void
@@ -153,6 +171,10 @@ class Session {
 		$this->session_hash    = $this->get_hash( $order );
 		$this->session_country = $helper->get_country();
 
+		if ( isset( $this->gateway_session['configuration'] ) ) {
+			$this->payment_categories = $this->gateway_session['configuration'];
+		}
+
 		// Persist the session to Woo.
 		$this->wc_update_session( $order );
 
@@ -169,9 +191,10 @@ class Session {
 	private function wc_update_session( $order = null ) {
 		$session_data = wp_json_encode(
 			array(
-				'gateway_session' => $this->gateway_session,
-				'session_hash'    => $this->session_hash,
-				'session_country' => $this->session_country,
+				'gateway_session'    => $this->gateway_session,
+				'session_hash'       => $this->session_hash,
+				'session_country'    => $this->session_country,
+				'payment_categories' => $this->payment_categories,
 			)
 		);
 
@@ -195,7 +218,7 @@ class Session {
 			return $order;
 		}
 
-		$session_data = empty( $order ) ? WC()->session->get( self::SESSION_KEY ) : $order->get_meta( self::SESSION_KEY, true );
+		$session_data = empty( $order ) ? WC()->session->get( self::SESSION_KEY ) : $order->get_meta( self::SESSION_KEY );
 		if ( empty( $session_data ) ) {
 			return false;
 		}
@@ -205,9 +228,10 @@ class Session {
 			return false;
 		}
 
-		$this->gateway_session = $decoded_data['gateway_session'];
-		$this->session_hash    = $decoded_data['session_hash'];
-		$this->session_country = $decoded_data['session_country'];
+		$this->gateway_session    = $decoded_data['gateway_session'];
+		$this->session_hash       = $decoded_data['session_hash'];
+		$this->session_country    = $decoded_data['session_country'];
+		$this->payment_categories = $decoded_data['payment_categories'];
 		return true;
 	}
 
@@ -275,7 +299,13 @@ class Session {
 
 		return $this->gateway_session['id'] ?? null;
 	}
+
+	/**
+	 * Get the payment categories.
+	 *
+	 * @return array
+	 */
 	public function get_payment_categories() {
-		return $this->gateway_session['configuration'] ?? array();
+		return $this->payment_categories;
 	}
 }
