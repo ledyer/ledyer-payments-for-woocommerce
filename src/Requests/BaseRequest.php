@@ -14,7 +14,7 @@ abstract class BaseRequest extends Request {
 		$settings = get_option( 'woocommerce_' . Gateway::ID . '_settings', array() );
 		$config   = array(
 			'slug'               => Gateway::ID,
-			'plugin_version'     => LP_VERSION,
+			'plugin_version'     => LEDYER_PAYMENTS_VERSION,
 			'plugin_short_name'  => 'LP',
 			'logging_enabled'    => wc_string_to_bool( $settings['logging'] ),
 			'extended_debugging' => wc_string_to_bool( $settings['extended_logging'] ),

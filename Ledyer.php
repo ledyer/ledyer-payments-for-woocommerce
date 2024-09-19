@@ -35,10 +35,10 @@ use Krokedil\Ledyer\Payments\Plugin;
 defined( 'ABSPATH' ) || exit;
 
 // Following our practice of using constants, we define a few here for the plugin version, main file, path and URL. These can then be used later in the plugin when needed.
-define( 'LP_VERSION', '1.0.0' );
-define( 'LP_MAIN_FILE', __FILE__ );
-define( 'LP_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
-define( 'LP_PLUGIN_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
+define( 'LEDYER_PAYMENTS_VERSION', '1.0.0' );
+define( 'LEDYER_PAYMENTS_MAIN_FILE', __FILE__ );
+define( 'LEDYER_PAYMENTS_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
+define( 'LEDYER_PAYMENTS_PLUGIN_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
 
 
 // Add in a declaration that we support HPOS. Any new plugin we develop should support this, so we add it here. Anonymous function is ok in this case, since this should not be removable.

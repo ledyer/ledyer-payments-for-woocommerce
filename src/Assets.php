@@ -66,7 +66,7 @@ class Assets {
 
 		$src          = LP_PLUGIN_URL . '/assets/js/ledyer-payments.js';
 		$dependencies = array( 'jquery' );
-		wp_register_script( self::CHECKOUT_HANDLE, $src, $dependencies, LP_VERSION, false );
+		wp_register_script( self::CHECKOUT_HANDLE, $src, $dependencies, LEDYER_PAYMENTS_VERSION, false );
 
 		$pay_for_order = is_wc_endpoint_url( 'order-pay' ) ? true : false;
 		wp_localize_script(
@@ -84,13 +84,14 @@ class Assets {
 				'payForOrder'               => $pay_for_order,
 				'standardWooCheckoutFields' => $standard_woo_checkout_fields,
 				'submitOrder'               => \WC_AJAX::get_endpoint( 'checkout' ),
+				'gatewayId'                 => Gateway::ID,
 			)
 		);
 
 		wp_enqueue_script( self::CHECKOUT_HANDLE );
 
 		$env = wc_string_to_bool( $settings['test_mode'] ) ? 'sandbox' : 'live';
-		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), LP_VERSION, true );
+		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), LEDYER_PAYMENTS_VERSION, true );
 	}
 
 	/**
