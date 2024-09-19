@@ -64,7 +64,7 @@ class Assets {
 			'_wp_http_referer',
 		);
 
-		$src          = LP_PLUGIN_URL . '/assets/js/ledyer-payments.js';
+		$src          = plugins_url( 'src/assets/js/ledyer-payments.js', LEDYER_PAYMENTS_MAIN_FILE );
 		$dependencies = array( 'jquery' );
 		wp_register_script( self::CHECKOUT_HANDLE, $src, $dependencies, LEDYER_PAYMENTS_VERSION, false );
 
