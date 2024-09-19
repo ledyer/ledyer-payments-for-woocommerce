@@ -15,8 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Assets {
 
+	const SDK_HANDLE      = 'ledyer-payments-bootstrap';
+	const CHECKOUT_HANDLE = 'ledyer-payments-for-woocommerce';
+
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+
+		// The client SDK requires that <script> tag ID is set to 'ledyer-payments'.
+		add_action( 'script_loader_tag', array( $this, 'script_loader_tag' ), 10, 2 );
 	}
 
 	public function enqueue_scripts() {
@@ -60,11 +66,11 @@ class Assets {
 
 		$src          = LP_PLUGIN_URL . '/assets/js/checkout.js';
 		$dependencies = array( 'jquery' );
-		wp_register_script( 'ledyer-payments-for-woocommerce', $src, $dependencies, LP_VERSION, false );
+		wp_register_script( self::CHECKOUT_HANDLE, $src, $dependencies, LP_VERSION, false );
 
 		$pay_for_order = is_wc_endpoint_url( 'order-pay' ) ? true : false;
 		wp_localize_script(
-			'ledyer-payments-for-woocommerce',
+			self::CHECKOUT_HANDLE,
 			'KLPParams',
 			array(
 				'customer'                  => $customer,
@@ -81,9 +87,31 @@ class Assets {
 			)
 		);
 
-		wp_enqueue_script( 'ledyer-payments-for-woocommerce' );
+		wp_enqueue_script( self::CHECKOUT_HANDLE );
 
 		$env = wc_string_to_bool( $settings['test_mode'] ) ? 'sandbox' : 'live';
-		wp_enqueue_script( 'ledyer-payments-bootstrap', "https://payments.$env.ledyer.com/bootstrap.js", array( 'ledyer-payments-for-woocommerce' ), LP_VERSION, true );
+		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), LP_VERSION, true );
+	}
+
+	/**
+	 * Modifies the script loader tag for a specific handle.
+	 *
+	 * This method is responsible for modifying the script loader tag for a specific handle.
+	 * It checks if the handle matches the SDK handle and if so, it replaces the ID attribute
+	 * in the tag with a new value.
+	 *
+	 * @param string $tag    The original script loader tag.
+	 * @param string $handle The handle of the script being loaded.
+	 *
+	 * @return string The modified script loader tag.
+	 */
+	public function script_loader_tag( $tag, $handle ) {
+		if ( self::SDK_HANDLE !== $handle ) {
+			return $tag;
+		}
+
+		$pattern     = '/id="([^"]*)"/';
+		$replacement = 'id="ledyer-payments"';
+		return preg_replace( $pattern, $replacement, $tag );
 	}
 }
