@@ -46,4 +46,20 @@ class AJAX {
 
 		wp_send_json_success();
 	}
+
+	public static function ledyer_payments_create_order() {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, Gateway::ID . '_create_order' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+		}
+
+		$order_id   = filter_input( INPUT_POST, 'order_id', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$auth_token = filter_input( INPUT_POST, 'auth_token', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$result     = Ledyer()->api()->create_order( $order_id, $auth_token );
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( $result->get_error_message() );
+		}
+
+		wp_send_json_success();
+	}
 }

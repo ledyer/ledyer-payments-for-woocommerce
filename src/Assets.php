@@ -84,6 +84,8 @@ class Assets {
 				'getOrderUrl'               => \WC_AJAX::get_endpoint( Gateway::ID . '_get_order' ),
 				'logToFileNonce'            => wp_create_nonce( Gateway::ID . '_wc_log_js' ),
 				'logToFileUrl'              => \WC_AJAX::get_endpoint( Gateway::ID . '_wc_log_js' ),
+				'createOrderNonce'          => wp_create_nonce( Gateway::ID . '_create_order' ),
+				'createOrder'               => \WC_AJAX::get_endpoint( Gateway::ID . '_create_order' ),
 				'payForOrder'               => $pay_for_order,
 				'standardWooCheckoutFields' => $standard_woo_checkout_fields,
 				'submitOrderUrl'            => \WC_AJAX::get_endpoint( 'checkout' ),
@@ -95,7 +97,7 @@ class Assets {
 		wp_enqueue_script( self::CHECKOUT_HANDLE );
 
 		$env = wc_string_to_bool( $settings['test_mode'] ) ? 'sandbox' : 'live';
-		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), null, true );
+		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), LEDYER_PAYMENTS_VERSION, true );
 	}
 
 	/**

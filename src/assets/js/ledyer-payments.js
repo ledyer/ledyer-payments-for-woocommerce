@@ -6,8 +6,7 @@ jQuery( function ( $ ) {
     const gatewayParams = LedyerPaymentsParams
     const { gatewayId, customer, sessionId } = gatewayParams
 
-    const handleProceedWithLedyer = async () => {
-        debugger
+    const handleProceedWithLedyer = async ( orderId ) => {
         try {
             const authArgs = { sessionId, ...customer }
             const authResponse = await window.ledyer.payments.api.authorize( authArgs )
@@ -19,6 +18,24 @@ jQuery( function ( $ ) {
                 if ( authResponse.status === "authorized" ) {
                     // Get the authorization token to create an order from your backend
                     const authToken = authResponse.authToken
+                    const { createOrderUrl, createOrderNonce } = gatewayParams
+
+                    $.ajax( {
+                        type: "POST",
+                        url: createOrderUrl,
+                        data: {
+                            order_id: orderId,
+                            auth_token: authToken,
+                            nonce: createOrderNonce,
+                        },
+                        dataType: "json",
+                        success: async ( data ) => {
+                            console.log( data )
+                        },
+                        error: ( data ) => {
+                            console.error( data )
+                        },
+                    } )
                 }
 
                 if ( authResponse.status === "awaitingSignatory" ) {
@@ -97,12 +114,13 @@ jQuery( function ( $ ) {
                     if ( "success" === data.result ) {
                         console.log( "Woo order created successfully", data )
                         logToFile( 'Successfully placed order. Sending "shouldProceed: true".' )
+
+                        const { order_id: orderId } = data
+                        await handleProceedWithLedyer( orderId )
                     } else {
                         console.warn( "AJAX request succeeded, but the Woo order was not created.", data )
                         throw "SubmitOrder failed"
                     }
-
-                    await handleProceedWithLedyer()
                 } catch ( err ) {
                     console.error( err )
                     if ( data.messages ) {
