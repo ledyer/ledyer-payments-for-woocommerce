@@ -99,7 +99,12 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return array An associative array containing the success status and redirect URl.
 	 */
 	public function process_payment( $order_id ) {
-		return array( 'result' => 'success' );
+		$order = wc_get_order( $order_id );
+
+		return array(
+			'redirect' => $order->get_checkout_order_received_url(),
+			'result'   => 'success',
+		);
 	}
 
 	/**

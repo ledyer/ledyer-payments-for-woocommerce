@@ -35,7 +35,10 @@ class Assets {
 			return;
 		}
 
-		$customer   = ( new Cart() )->get_customer();
+		$cart      = new Cart();
+		$customer  = $cart->get_customer();
+		$reference = $cart->get_reference();
+
 		$session_id = Ledyer()->session()->get_session_id();
 
 		$standard_woo_checkout_fields = array(
@@ -68,7 +71,7 @@ class Assets {
 		$dependencies = array( 'jquery' );
 		wp_register_script( self::CHECKOUT_HANDLE, $src, $dependencies, LEDYER_PAYMENTS_VERSION, false );
 
-		$pay_for_order = is_wc_endpoint_url( 'order-pay' ) ? true : false;
+		$pay_for_order = is_wc_endpoint_url( 'order-pay' );
 		wp_localize_script(
 			self::CHECKOUT_HANDLE,
 			'LedyerPaymentsParams',
@@ -83,8 +86,9 @@ class Assets {
 				'logToFileUrl'              => \WC_AJAX::get_endpoint( Gateway::ID . '_wc_log_js' ),
 				'payForOrder'               => $pay_for_order,
 				'standardWooCheckoutFields' => $standard_woo_checkout_fields,
-				'submitOrder'               => \WC_AJAX::get_endpoint( 'checkout' ),
+				'submitOrderUrl'            => \WC_AJAX::get_endpoint( 'checkout' ),
 				'gatewayId'                 => Gateway::ID,
+				'reference'                 => $reference,
 			)
 		);
 
