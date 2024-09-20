@@ -95,7 +95,7 @@ class Assets {
 		wp_enqueue_script( self::CHECKOUT_HANDLE );
 
 		$env = wc_string_to_bool( $settings['test_mode'] ) ? 'sandbox' : 'live';
-		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), LEDYER_PAYMENTS_VERSION, true );
+		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), null, true );
 	}
 
 	/**

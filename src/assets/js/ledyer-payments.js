@@ -29,11 +29,11 @@ jQuery( function ( $ ) {
             }
         } catch ( error ) {
             // Handle error
-            console.log(error)
+            console.log( error )
         }
     }
 
-    const logToFile = ( message, level = 'notice' ) => {
+    const logToFile = ( message, level = "notice" ) => {
         const { logToFileUrl, logToFileNonce, reference } = gatewayParams
 
         $.ajax( {
@@ -110,19 +110,19 @@ jQuery( function ( $ ) {
                         const messages = data.messages.replace( /<\/?[^>]+(>|$)/g, "" )
 
                         console.warn( "submitOrder: error %s", messages )
-                        logToFile( "Checkout error | " + messages, 'error' )
+                        logToFile( "Checkout error | " + messages, "error" )
                         submitOrderFail( "submitOrder", messages )
                     } else {
-                        logToFile( "Checkout error | No message", 'error' )
+                        logToFile( "Checkout error | No message", "error" )
                         submitOrderFail( "submitOrder", "Checkout error" )
                     }
                 }
             },
-            error: (data) => {
+            error: ( data ) => {
                 try {
-                    logToFile( "AJAX error | " + JSON.stringify( data ), 'error' )
+                    logToFile( "AJAX error | " + JSON.stringify( data ), "error" )
                 } catch ( e ) {
-                    logToFile( "AJAX error | Failed to parse error message.", 'error' )
+                    logToFile( "AJAX error | Failed to parse error message.", "error" )
                 }
                 submitOrderFail( "AJAX", "Internal Server Error" )
             },
