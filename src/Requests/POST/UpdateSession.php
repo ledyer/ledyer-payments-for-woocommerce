@@ -5,7 +5,7 @@ use Krokedil\Ledyer\Payments\Requests\POST;
 use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
 
 /**
- * Create session request class.
+ * Update checkout session request class.
  */
 class UpdateSession extends POST {
 

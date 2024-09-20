@@ -79,38 +79,61 @@ class Order extends \Krokedil\WooCommerce\Order\Order {
 		return $this->order->get_billing_country();
 	}
 
+	public function get_currency() {
+		return $this->order->get_currency();
+	}
+
 	/**
-	 * Get or create the cart reference if it doesn't already exist.
+	 * Get the order ID.
 	 *
-	 * @return string A 23-character unique reference.
+	 * @return string The order id.
 	 */
 	public function get_reference() {
-		$key = Gateway::ID . '_cart_reference';
-
-		$reference = WC()->session->get( $key );
-		if ( empty( $reference ) ) {
-			$reference = uniqid( '', true );
-			WC()->session->set( $key, $reference );
-		}
-
-		return $reference;
+		return $this->order->get_order_number();
 	}
 
+		/**
+		 * Get the customer data, and format to match the Ledyer client SDK.
+		 *
+		 * @return array
+		 */
+	public function get_customer() {
+		$customer_data = parent::get_customer();
 
-	public function get_confirmation_url() {
-		$url = add_query_arg(
-			array(
-				'session_id' => '{session_id}',
-				'order_id'   => '{order_id}',
+		$customer = array(
+			'billingAddress'  => array(
+				'attentionName' => $customer_data->get_billing_first_name(),
+				'city'          => $customer_data->get_billing_city(),
+				'companyName'   => $customer_data->get_billing_company(),
+				'country'       => $customer_data->get_billing_country(),
+				'postalCode'    => $customer_data->get_billing_postcode(),
+				'streetAddress' => $customer_data->get_billing_address_1(),
 			),
-			wc_get_checkout_url()
+			'shippingAddress' => array(
+				'attentionName' => $customer_data->get_shipping_first_name(),
+				'city'          => $customer_data->get_shipping_city(),
+				'companyName'   => $customer_data->get_shipping_company(),
+				'country'       => $customer_data->get_shipping_country(),
+				'postalCode'    => $customer_data->get_shipping_postcode(),
+				'streetAddress' => $customer_data->get_shipping_address_1(),
+				'contact'       => array(
+					'email'     => $customer_data->get_billing_email(),
+					'firstName' => $customer_data->get_billing_first_name(),
+					'lastName'  => $customer_data->get_billing_last_name(),
+					'phone'     => $customer_data->get_billing_phone(),
+				),
+			),
+			'customer'        => array(
+				'companyId'  => '',
+				'email'      => $customer_data->get_billing_email(),
+				'firstName'  => $customer_data->get_billing_first_name(),
+				'lastName'   => $customer_data->get_billing_last_name(),
+				'phone'      => $customer_data->get_billing_phone(),
+				'reference1' => $this->get_reference(),
+				'reference2' => '',
+			),
 		);
 
-		return apply_filters( Gateway::ID . '_confirmation_url', $url );
-	}
-
-	public function get_notification_url() {
-		$url = add_query_arg( 'gateway', Gateway::ID, home_url() );
-		return apply_filters( Gateway::ID . '_notification_url', $url );
+		return $customer;
 	}
 }

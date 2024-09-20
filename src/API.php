@@ -27,6 +27,13 @@ class API {
 		return $this->check_for_api_error( $response );
 	}
 
+	public function create_order( $order_id, $auth_token ) {
+		$request  = new Requests\POST\CreateOrder( $order_id, $auth_token );
+		$response = $request->request();
+
+		return $this->check_for_api_error( $response );
+	}
+
 	public function check_for_api_error( $response ) {
 		if ( is_wp_error( $response ) ) {
 			if ( ! is_admin() ) {
