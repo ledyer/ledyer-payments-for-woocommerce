@@ -12,7 +12,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Logger {
-	public function log( $log_data ) {
-		\Krokedil\WpApi\Logger::log( Gateway::ID, $log_data );
+
+	private $logger;
+
+	public function __construct() {
+		$this->logger = new \WC_Logger();
+	}
+
+	/**
+	 * Add a log entry.
+	 *
+	 * @param string $message Log message.
+	 * @param string $level One of the following:
+	 *    - `emergency`: System is unusable.
+	 *    - `alert`: Action must be taken immediately.
+	 *    - `critical`: Critical conditions.
+	 *    - `error`: Error conditions.
+	 *    - `warning`: Warning conditions.
+	 *    - `notice`: Normal but significant condition.
+	 *    - `info`: Informational messages.
+	 *    - `debug`: Debug-level messages.
+	 */
+	public function log( $message, $level = 'debug' ) {
+		if ( is_callable( array( $this->logger, $level ) ) ) {
+			$this->logger->{$level}( $message );
+		} else {
+			$this->logger->debug( $message );
+		}
 	}
 }
