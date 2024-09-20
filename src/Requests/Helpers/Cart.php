@@ -107,10 +107,7 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 
 		$reference = WC()->session->get( $key );
 		if ( empty( $reference ) ) {
-			// The prefix is used for identifying which client ID was used to create the reference.
-			$prefix = substr( $this->settings['client_id'], -6 );
-
-			$reference = uniqid( $prefix, true );
+			$reference = uniqid( '', true );
 			WC()->session->set( $key, $reference );
 		}
 
