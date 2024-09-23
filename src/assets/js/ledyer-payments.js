@@ -47,8 +47,10 @@ jQuery( function ( $ ) {
             }
         } catch ( error ) {
             // Handle error
-            console.log(error)
+            console.log( error )
         }
+
+        unblockUI()
     }
 
     const logToFile = ( message, level = "notice" ) => {
@@ -67,6 +69,31 @@ jQuery( function ( $ ) {
         } )
     }
 
+    const blockUI = () => {
+        /* Order review. */
+        $( ".woocommerce-checkout-review-order-table" ).block( {
+            message: null,
+            overlayCSS: {
+                background: "#fff",
+                opacity: 0.6,
+            },
+        } )
+
+        $( "form.checkout" ).addClass( "processing" )
+        $( "form.checkout" ).block( {
+            message: null,
+            overlayCSS: {
+                background: "#fff",
+                opacity: 0.6,
+            },
+        } )
+    }
+
+    const unblockUI = () => {
+        $( ".woocommerce-checkout-review-order-table" ).unblock()
+        $( "form.checkout" ).removeClass( "processing" ).unblock()
+    }
+
     const isActiveGateway = () => {
         if ( $( 'input[name="payment_method"]:checked' ).length ) {
             const currentGateway = $( 'input[name="payment_method"]:checked' ).val()
@@ -79,8 +106,7 @@ jQuery( function ( $ ) {
     const submitOrderFail = ( error, message ) => {
         console.error( "[%s] Woo failed to create the order. Reason: %s", error, message )
 
-        $( ".woocommerce-checkout-review-order-table" ).unblock()
-        $( "form.checkout" ).removeClass( "processing" ).unblock()
+        unblockUI()
         $( document.body ).trigger( "checkout_error" )
         $( document.body ).trigger( "update_checkout" )
     }
@@ -95,15 +121,7 @@ jQuery( function ( $ ) {
         }
 
         e.preventDefault()
-
-        $( "form.checkout" ).addClass( "processing" )
-        $( ".woocommerce-checkout-review-order-table" ).block( {
-            message: null,
-            overlayCSS: {
-                background: "#fff",
-                opacity: 0.6,
-            },
-        } )
+        blockUI()
 
         const { submitOrderUrl } = gatewayParams
         $.ajax( {
