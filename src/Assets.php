@@ -35,8 +35,8 @@ class Assets {
 			return;
 		}
 
+		// The reference is stored in the session.
 		$cart      = new Cart();
-		$customer  = $cart->get_customer();
 		$reference = $cart->get_reference();
 
 		$session_id = Ledyer()->session()->get_session_id();
@@ -76,7 +76,6 @@ class Assets {
 			self::CHECKOUT_HANDLE,
 			'LedyerPaymentsParams',
 			array(
-				'customer'                  => $customer,
 				'sessionId'                 => $session_id,
 				'changePaymentMethodNonce'  => wp_create_nonce( Gateway::ID . '_wc_change_payment_method' ),
 				'changePaymentMethodUrl'    => \WC_AJAX::get_endpoint( Gateway::ID . '_wc_change_payment_method' ),

@@ -100,6 +100,8 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 	/**
 	 * Get or create the cart reference if it doesn't already exist.
 	 *
+	 * The reference is persisted to the session as Gateway::ID . '_cart_reference'.
+	 *
 	 * @return string A minimum of 23-characters unique reference.
 	 */
 	public function get_reference() {

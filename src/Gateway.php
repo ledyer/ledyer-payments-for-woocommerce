@@ -7,6 +7,8 @@
 
 namespace Krokedil\Ledyer\Payments;
 
+use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -99,10 +101,12 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return array An associative array containing the success status and redirect URl.
 	 */
 	public function process_payment( $order_id ) {
-		$order = wc_get_order( $order_id );
+		$order    = new Order( wc_get_order( $order_id ) );
+		$customer = $order->get_customer();
 
 		return array(
-			'redirect' => $order->get_checkout_order_received_url(),
+			'customer' => $customer,
+			'redirect' => $order->order->get_checkout_order_received_url(),
 			'result'   => 'success',
 		);
 	}

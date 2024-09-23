@@ -4,11 +4,12 @@ jQuery( function ( $ ) {
     }
 
     const gatewayParams = LedyerPaymentsParams
-    const { gatewayId, customer, sessionId } = gatewayParams
+    const { gatewayId, sessionId } = gatewayParams
 
-    const handleProceedWithLedyer = async ( orderId ) => {
+    const handleProceedWithLedyer = async ( orderId, customer ) => {
         try {
             const authArgs = { sessionId, ...customer }
+            console.log( authArgs )
             const authResponse = await window.ledyer.payments.api.authorize( authArgs )
 
             // ... some time will pass while the user is interacting with the dialog
@@ -46,7 +47,7 @@ jQuery( function ( $ ) {
             }
         } catch ( error ) {
             // Handle error
-            console.log( error )
+            console.log(error)
         }
     }
 
@@ -78,6 +79,7 @@ jQuery( function ( $ ) {
     const submitOrderFail = ( error, message ) => {
         console.error( "[%s] Woo failed to create the order. Reason: %s", error, message )
 
+        $( ".woocommerce-checkout-review-order-table" ).unblock()
         $( "form.checkout" ).removeClass( "processing" ).unblock()
         $( document.body ).trigger( "checkout_error" )
         $( document.body ).trigger( "update_checkout" )
@@ -115,8 +117,9 @@ jQuery( function ( $ ) {
                         console.log( "Woo order created successfully", data )
                         logToFile( 'Successfully placed order. Sending "shouldProceed: true".' )
 
-                        const { order_id: orderId } = data
-                        await handleProceedWithLedyer( orderId )
+                        console.log( data )
+                        const { order_id: orderId, customer } = data
+                        await handleProceedWithLedyer( orderId, customer )
                     } else {
                         console.warn( "AJAX request succeeded, but the Woo order was not created.", data )
                         throw "SubmitOrder failed"
