@@ -92,6 +92,9 @@ class Plugin {
 				return $data;
 			}
 		);
+
+		// Ledyer Payments is intended for B2B customers, and therefore we require the company number to be filled in.
+		add_filter( 'woocommerce_billing_fields', array( $this, 'checkout_field' ) );
 	}
 
 	/**
@@ -143,6 +146,25 @@ class Plugin {
 				'admin.php'
 			)
 		);
+	}
+
+	public function checkout_field( $fields ) {
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		if ( ! isset( $available_gateways[ Gateway::ID ] ) ) {
+			return $fields;
+		}
+
+		$fields['billing_company']['required'] = true;
+
+		$priority                         = $fields['billing_company']['priority'];
+		$billing_company_number           = array(
+			'label'    => __( 'Company number', 'ledyer-payments-for-woocommerce' ),
+			'required' => true,
+			'class'    => array( 'form-row-wide' ),
+			'priority' => $priority + 1,
+		);
+		$fields['billing_company_number'] = $billing_company_number;
+		return $fields;
 	}
 
 	/**
