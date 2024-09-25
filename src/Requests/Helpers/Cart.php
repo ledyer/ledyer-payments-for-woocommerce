@@ -6,11 +6,9 @@ use Krokedil\Ledyer\Payments\Gateway;
 class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 
 	private $settings = array();
-
 	public function __construct() {
 		$this->settings = get_option( 'woocommerce_' . Gateway::ID . '_settings', array() );
 
-		// TODO: Move config to the plugin's main file.
 		$config = array(
 			'slug'         => Gateway::ID,
 			'price_format' => 'minor',
@@ -115,52 +113,6 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 
 		return $reference;
 	}
-
-	/**
-	 * Get the customer data, and format to match the Ledyer client SDK.
-	 *
-	 * @return array
-	 */
-	public function get_customer() {
-		$customer_data = parent::get_customer();
-
-		$customer = array(
-			'billingAddress'  => array(
-				'attentionName' => $customer_data->get_billing_first_name(),
-				'city'          => $customer_data->get_billing_city(),
-				'companyName'   => $customer_data->get_billing_company(),
-				'country'       => $customer_data->get_billing_country(),
-				'postalCode'    => $customer_data->get_billing_postcode(),
-				'streetAddress' => $customer_data->get_billing_address_1(),
-			),
-			'shippingAddress' => array(
-				'attentionName' => $customer_data->get_shipping_first_name(),
-				'city'          => $customer_data->get_shipping_city(),
-				'companyName'   => $customer_data->get_shipping_company(),
-				'country'       => $customer_data->get_shipping_country(),
-				'postalCode'    => $customer_data->get_shipping_postcode(),
-				'streetAddress' => $customer_data->get_shipping_address_1(),
-				'contact'       => array(
-					'email'     => $customer_data->get_billing_email(),
-					'firstName' => $customer_data->get_billing_first_name(),
-					'lastName'  => $customer_data->get_billing_last_name(),
-					'phone'     => $customer_data->get_billing_phone(),
-				),
-			),
-			'customer'        => array(
-				'companyId'  => '',
-				'email'      => $customer_data->get_billing_email(),
-				'firstName'  => $customer_data->get_billing_first_name(),
-				'lastName'   => $customer_data->get_billing_last_name(),
-				'phone'      => $customer_data->get_billing_phone(),
-				'reference1' => $this->get_reference(),
-				'reference2' => '',
-			),
-		);
-
-		return $customer;
-	}
-
 
 	public function get_confirmation_url() {
 		$url = add_query_arg(

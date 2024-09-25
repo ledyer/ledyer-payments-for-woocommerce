@@ -92,17 +92,17 @@ class Order extends \Krokedil\WooCommerce\Order\Order {
 		return $this->order->get_order_number();
 	}
 
-		/**
-		 * Get the customer data, and format to match the Ledyer client SDK.
-		 *
-		 * @return array
-		 */
+	/**
+	 * Get the customer data, and format to match the Ledyer client SDK.
+	 *
+	 * @return array
+	 */
 	public function get_customer() {
 		$customer_data = parent::get_customer();
 
 		$customer = array(
 			'customer'        => array(
-				'companyId'  => '556751-5019',
+				'companyId'  => $this->order->get_meta( '_billing_company_number' ),
 				'email'      => $customer_data->get_billing_email(),
 				'firstName'  => $customer_data->get_billing_first_name(),
 				'lastName'   => $customer_data->get_billing_last_name(),
