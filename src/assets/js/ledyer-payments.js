@@ -6,10 +6,10 @@ jQuery( function ( $ ) {
     const gatewayParams = LedyerPaymentsParams
     const { gatewayId, sessionId } = gatewayParams
 
-    const handleProceedWithLedyer = async ( orderId, customer ) => {
+    const handleProceedWithLedyer = async (orderId, customerData) => {
         try {
-            const authArgs = { sessionId, ...customer }
-            console.log( authArgs )
+            const { billingAddress, shippingAddress, customer } = customerData
+            const authArgs = { customer: { ...customer, billingAddress, shippingAddress }, sessionId }
             const authResponse = await window.ledyer.payments.api.authorize( authArgs )
 
             // ... some time will pass while the user is interacting with the dialog
@@ -47,7 +47,7 @@ jQuery( function ( $ ) {
             }
         } catch ( error ) {
             // Handle error
-            console.log( error )
+            console.log( "error: %s", error )
         }
 
         unblockUI()
@@ -132,10 +132,9 @@ jQuery( function ( $ ) {
             success: async ( data ) => {
                 try {
                     if ( "success" === data.result ) {
-                        console.log( "Woo order created successfully", data )
+                        console.debug( "Woo order created successfully", data )
                         logToFile( 'Successfully placed order. Sending "shouldProceed: true".' )
 
-                        console.log( data )
                         const { order_id: orderId, customer } = data
                         await handleProceedWithLedyer( orderId, customer )
                     } else {

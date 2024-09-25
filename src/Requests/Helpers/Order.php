@@ -101,6 +101,15 @@ class Order extends \Krokedil\WooCommerce\Order\Order {
 		$customer_data = parent::get_customer();
 
 		$customer = array(
+			'customer'        => array(
+				'companyId'  => '556751-5019',
+				'email'      => $customer_data->get_billing_email(),
+				'firstName'  => $customer_data->get_billing_first_name(),
+				'lastName'   => $customer_data->get_billing_last_name(),
+				'phone'      => $customer_data->get_billing_phone(),
+				'reference1' => $this->get_reference(),
+				'reference2' => '',
+			),
 			'billingAddress'  => array(
 				'attentionName' => $customer_data->get_billing_first_name(),
 				'city'          => $customer_data->get_billing_city(),
@@ -122,15 +131,6 @@ class Order extends \Krokedil\WooCommerce\Order\Order {
 					'lastName'  => $customer_data->get_billing_last_name(),
 					'phone'     => $customer_data->get_billing_phone(),
 				),
-			),
-			'customer'        => array(
-				'companyId'  => '',
-				'email'      => $customer_data->get_billing_email(),
-				'firstName'  => $customer_data->get_billing_first_name(),
-				'lastName'   => $customer_data->get_billing_last_name(),
-				'phone'      => $customer_data->get_billing_phone(),
-				'reference1' => $this->get_reference(),
-				'reference2' => '',
 			),
 		);
 
