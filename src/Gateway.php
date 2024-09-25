@@ -68,8 +68,8 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_icon() {
-		$image_url = 'https://developers.ledyer.com/img/logo-lightmode.svg';
-		return "<img src='{$image_url}' style='max-width: 90%' alt='Ledyer Payments logo' />";
+		$image_path = plugin_dir_url( __FILE__ ) . 'assets/img/ledyer-darkgray.svg';
+		return "<img src='{$image_path}' style='max-width: 90%' alt='Ledyer Payments logo' />";
 	}
 
 	/**
