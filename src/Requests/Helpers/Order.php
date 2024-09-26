@@ -5,12 +5,20 @@ use Krokedil\Ledyer\Payments\Gateway;
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce\Order\Order as BaseOrder;
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
 class Order extends BaseOrder {
-
+	/**
+	 * Order constructor.
+	 *
+	 * @param \WC_Order|int|string $order The WooCommerce order or numeric id.
+	 */
 	public function __construct( $order ) {
 		$config = array(
 			'slug'         => Gateway::ID,
 			'price_format' => 'minor',
 		);
+
+		if ( ! $order instanceof \WC_Order ) {
+			$order = wc_get_order( $order );
+		}
 
 		parent::__construct( $order, $config );
 	}
@@ -101,15 +109,13 @@ class Order extends BaseOrder {
 		$customer_data = parent::get_customer();
 
 		$customer = array(
-			'customer'        => array(
-				'companyId'  => $this->order->get_meta( '_billing_company_number' ),
-				'email'      => $customer_data->get_billing_email(),
-				'firstName'  => $customer_data->get_billing_first_name(),
-				'lastName'   => $customer_data->get_billing_last_name(),
-				'phone'      => $customer_data->get_billing_phone(),
-				'reference1' => $this->get_reference(),
-				'reference2' => '',
-			),
+			'companyId'       => $this->order->get_meta( '_billing_company_number' ),
+			'email'           => $customer_data->get_billing_email(),
+			'firstName'       => $customer_data->get_billing_first_name(),
+			'lastName'        => $customer_data->get_billing_last_name(),
+			'phone'           => $customer_data->get_billing_phone(),
+			'reference1'      => $this->get_reference(),
+			'reference2'      => '',
 			'billingAddress'  => array(
 				'attentionName' => $customer_data->get_billing_first_name(),
 				'city'          => $customer_data->get_billing_city(),

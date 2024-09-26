@@ -8,38 +8,38 @@ jQuery( function ( $ ) {
 
     const handleProceedWithLedyer = async ( orderId, customerData ) => {
         try {
-            const { billingAddress, shippingAddress, customer } = customerData
-            const authArgs = { customer: { ...customer, billingAddress, shippingAddress }, sessionId }
+            const authArgs = { customer: { ...customerData }, sessionId }
             const authResponse = await window.ledyer.payments.api.authorize( authArgs )
 
             // ... some time will pass while the user is interacting with the dialog
 
             if ( authResponse ) {
                 // if status is authorized, the order is ready to be created
-                if ( authResponse.status === "authorized" ) {
+                if ( authResponse.state === "authorized" ) {
                     // Get the authorization token to create an order from your backend
-                    const authToken = authResponse.authToken
+                    const authToken = authResponse.authorizationToken
                     const { createOrderUrl, createOrderNonce } = gatewayParams
 
                     $.ajax( {
                         type: "POST",
                         url: createOrderUrl,
+                        dataType: "json",
                         data: {
                             order_id: orderId,
                             auth_token: authToken,
                             nonce: createOrderNonce,
                         },
-                        dataType: "json",
-                        success: async ( data ) => {
-                            console.log( data )
+                        success: ( data ) => {
+                            console.debug( data )
                         },
-                        error: ( data ) => {
-                            console.error( data )
+                        error: ( jqXHR, textStatus, errorThrown ) => {
+                            console.debug( "Error:", textStatus, errorThrown )
+                            console.debug( "Response:", jqXHR.responseText )
                         },
                     } )
                 }
 
-                if ( authResponse.status === "awaitingSignatory" ) {
+                if ( authResponse.state === "awaitingSignatory" ) {
                     // A signatory is required to complete the purchase
                 }
 
@@ -47,7 +47,7 @@ jQuery( function ( $ ) {
             }
         } catch ( error ) {
             // Handle error
-            console.log( "error: %s", error )
+            console.debug( "error: %s", error )
         }
 
         unblockUI()
@@ -67,6 +67,7 @@ jQuery( function ( $ ) {
 
     const logToFile = ( message, level = "notice" ) => {
         const { logToFileUrl, logToFileNonce, reference } = gatewayParams
+        console.debug( message )
 
         $.ajax( {
             url: logToFileUrl,
@@ -79,6 +80,11 @@ jQuery( function ( $ ) {
                 nonce: logToFileNonce,
             },
         } )
+    }
+
+    const unblockUI = () => {
+        $( ".woocommerce-checkout-review-order-table" ).unblock()
+        $( "form.checkout" ).removeClass( "processing" ).unblock()
     }
 
     const blockUI = () => {
@@ -101,11 +107,6 @@ jQuery( function ( $ ) {
         } )
     }
 
-    const unblockUI = () => {
-        $( ".woocommerce-checkout-review-order-table" ).unblock()
-        $( "form.checkout" ).removeClass( "processing" ).unblock()
-    }
-
     const isActiveGateway = () => {
         if ( $( 'input[name="payment_method"]:checked' ).length ) {
             const currentGateway = $( 'input[name="payment_method"]:checked' ).val()
@@ -116,7 +117,7 @@ jQuery( function ( $ ) {
     }
 
     const submitOrderFail = ( error, message ) => {
-        console.error( "[%s] Woo failed to create the order. Reason: %s", error, message )
+        console.debug( "[%s] Woo failed to create the order. Reason: %s", error, message )
 
         printNotice( message )
         unblockUI()
@@ -145,10 +146,10 @@ jQuery( function ( $ ) {
             success: async ( data ) => {
                 try {
                     if ( "success" === data.result ) {
-                        console.debug( "Woo order created successfully", data )
-                        logToFile( 'Successfully placed order. Sending "shouldProceed: true".' )
-
                         const { order_id: orderId, customer } = data
+
+                        logToFile( `Successfully placed order ${ orderId }. Sending "shouldProceed: true".` )
+
                         await handleProceedWithLedyer( orderId, customer )
                     } else {
                         console.warn( "AJAX request succeeded, but the Woo order was not created.", data )
@@ -160,7 +161,6 @@ jQuery( function ( $ ) {
                         // Strip HTML code from messages.
                         const messages = data.messages.replace( /<\/?[^>]+(>|$)/g, "" )
 
-                        console.warn( "submitOrder: error %s", messages )
                         logToFile( "Checkout error | " + messages, "error" )
                         submitOrderFail( "submitOrder", messages )
                     } else {
@@ -175,7 +175,7 @@ jQuery( function ( $ ) {
                 } catch ( e ) {
                     logToFile( "AJAX error | Failed to parse error message.", "error" )
                 }
-                submitOrderFail( "AJAX", "Internal Server Error" )
+                submitOrderFail( "AJAX", "Something went wrong" )
             },
         } )
     }
