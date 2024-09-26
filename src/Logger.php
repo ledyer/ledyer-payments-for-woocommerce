@@ -7,6 +7,8 @@
 
 namespace Krokedil\Ledyer\Payments;
 
+use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -34,7 +36,11 @@ class Logger {
 	 *    - `debug`: Debug-level messages.
 	 */
 	public function log( $message, $level = 'debug' ) {
-		$context = array( 'source' => Gateway::ID );
+		$context = array(
+			'source'    => Gateway::ID,
+			'timestamp' => current_time( 'mysql' ),
+			'reference' => ( new Cart() )->get_reference(),
+		);
 
 		if ( is_callable( array( $this->logger, $level ) ) ) {
 			$this->logger->{$level}( $message, $context );
