@@ -7,10 +7,7 @@ use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
 
 class Cart extends CartBase {
 
-	private $settings = array();
 	public function __construct() {
-		$this->settings = get_option( 'woocommerce_' . Gateway::ID . '_settings', array() );
-
 		$config = array(
 			'slug'         => Gateway::ID,
 			'price_format' => 'minor',

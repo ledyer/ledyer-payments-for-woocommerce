@@ -40,6 +40,11 @@ class Plugin {
 		return $this->logger;
 	}
 
+	private $settings = array();
+	public function settings( $key ) {
+		return $this->settings[ $key ] ?? null;
+	}
+
 	/**
 	 * Plugin constructor.
 	 *
@@ -66,6 +71,8 @@ class Plugin {
 
 		new AJAX();
 		new Assets();
+
+		$this->settings = get_option( 'woocommerce_' . Gateway::ID . '_settings', array() );
 	}
 
 	/**

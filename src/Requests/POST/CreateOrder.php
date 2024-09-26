@@ -39,6 +39,7 @@ class CreateOrder extends POST {
 			'locale'                  => str_replace( '_', '-', get_locale() ),
 			'orderLines'              => $order->get_order_lines(),
 			'reference'               => $order->get_reference(),
+			'storeId'                 => Ledyer()->settings( 'store_id' ),
 			'totalOrderAmount'        => $order->get_total(),
 			'totalOrderAmountExclVat' => $order->get_total() - $order->get_total_tax(),
 			'totalOrderVatAmount'     => $order->get_total_tax(),
