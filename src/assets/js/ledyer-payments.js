@@ -6,7 +6,7 @@ jQuery( function ( $ ) {
     const gatewayParams = LedyerPaymentsParams
     const { gatewayId, sessionId } = gatewayParams
 
-    const handleProceedWithLedyer = async (orderId, customerData) => {
+    const handleProceedWithLedyer = async ( orderId, customerData ) => {
         try {
             const { billingAddress, shippingAddress, customer } = customerData
             const authArgs = { customer: { ...customer, billingAddress, shippingAddress }, sessionId }
@@ -51,6 +51,18 @@ jQuery( function ( $ ) {
         }
 
         unblockUI()
+    }
+
+    const printNotice = ( message ) => {
+        const elementId = `${ gatewayId }-error-notice`
+
+        // Remove any existing notice that we have created. This won't remove the default WooCommerce notices.
+        $( `#${ elementId }` ).remove()
+
+        const html = `<div id='${ elementId }' class='woocommerce-NoticeGroup'><ul class='woocommerce-error' role='alert'><li>${ message }</li></ul></div>`
+        $( "form.checkout" ).prepend( html )
+
+        document.getElementById( elementId ).scrollIntoView( { behavior: "smooth" } )
     }
 
     const logToFile = ( message, level = "notice" ) => {
@@ -106,6 +118,7 @@ jQuery( function ( $ ) {
     const submitOrderFail = ( error, message ) => {
         console.error( "[%s] Woo failed to create the order. Reason: %s", error, message )
 
+        printNotice( message )
         unblockUI()
         $( document.body ).trigger( "checkout_error" )
         $( document.body ).trigger( "update_checkout" )
