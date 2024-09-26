@@ -34,10 +34,12 @@ class Logger {
 	 *    - `debug`: Debug-level messages.
 	 */
 	public function log( $message, $level = 'debug' ) {
+		$context = array( 'source' => Gateway::ID );
+
 		if ( is_callable( array( $this->logger, $level ) ) ) {
-			$this->logger->{$level}( $message );
+			$this->logger->{$level}( $message, $context );
 		} else {
-			$this->logger->debug( $message );
+			$this->logger->debug( $message, $context );
 		}
 	}
 }
