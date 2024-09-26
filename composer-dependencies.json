@@ -1,0 +1,29 @@
+{
+  "require": {
+    "php": ">=7.4",
+    "krokedil/wp-api": "^1.0.0",
+    "krokedil/woocommerce": "^1.0.0"
+  },
+  "config": {
+    "platform": {
+      "php": "7.4"
+    }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:krokedil/wp-api.git"
+    },
+    {
+      "type": "vcs",
+      "url": "git@github.com:krokedil/woocommerce.git"
+    }
+  ],
+    "autoload": {
+        "psr-4": {
+            "Krokedil\\Ledyer\\Payments\\": "src/"
+        }
+    },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

@@ -2,8 +2,10 @@
 namespace Krokedil\Ledyer\Payments\Requests\Helpers;
 
 use Krokedil\Ledyer\Payments\Gateway;
+use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce\Cart\Cart as CartBase;
+use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
 
-class Cart extends \Krokedil\WooCommerce\Cart\Cart {
+class Cart extends CartBase {
 
 	private $settings = array();
 	public function __construct() {
@@ -20,7 +22,7 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 	/**
 	 * Get the Ledyer type mapping of the item.
 	 *
-	 * @param \Krokedil\WooCommerce\Cart\CartLineItem $item Item.
+	 * @param KrokedilWC\Cart\CartLineItem $item Item.
 	 * @return string
 	 */
 	private function get_type( $item ) {
@@ -39,7 +41,7 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 	/**
 	 * Get the total amount of the item incl. tax.
 	 *
-	 * @param \Krokedil\WooCommerce\OrderLineData $item Item.
+	 * @param KrokedilWC\OrderLineData $item Item.
 	 * @return float
 	 */
 	private function get_total_amount( $item ) {
@@ -50,7 +52,7 @@ class Cart extends \Krokedil\WooCommerce\Cart\Cart {
 		$order_lines = array();
 
 		/**
-		 * @var \Krokedil\WooCommerce\OrderLineData $item
+		 * @var KrokedilWC\OrderLineData $item
 		 */
 		foreach ( $this->get_line_items() as $item ) {
 			$order_lines[] = array(

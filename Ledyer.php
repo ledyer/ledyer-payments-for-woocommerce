@@ -56,16 +56,18 @@ add_action(
  * If Debug is enabled, then log to the error log as well.
  * This will be required to automatically load all the classes in the plugin, even when not using other external packages! This is the only file that should be required in the plugin normally.
  */
-$autoloader = __DIR__ . '/vendor/autoload.php';
-if ( is_readable( $autoloader ) ) {
-	require $autoloader;
-} else {
+$autoloader              = __DIR__ . '/vendor/autoload.php';
+$autoloader_dependencies = __DIR__ . '/dependencies/scoper-autoload.php';
 
+// Check if the autoloaders was read.
+$autoloader_result              = is_readable( $autoloader ) && require $autoloader;
+$autoloader_dependencies_result = is_readable( $autoloader_dependencies ) && require $autoloader_dependencies;
+if ( ! $autoloader_result || ! $autoloader_dependencies_result ) {
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		error_log( //phpcs:ignore
 			sprintf(
 				/* translators: 1: composer command. 2: plugin directory */
-				esc_html__( 'Your installation of the Modern PHP Plugin is incomplete. Please run %1$s within the %2$s directory.', 'modern-php-plugin' ),
+				esc_html__( 'Your installation of the Ledyer Payments for WooCommerce Plugin is incomplete. Please run %1$s within the %2$s directory.', 'ledyer-payments-for-woocommerce' ),
 				'`composer install`',
 				'`' . esc_html( str_replace( ABSPATH, '', __DIR__ ) ) . '`'
 			)

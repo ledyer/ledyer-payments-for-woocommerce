@@ -2,8 +2,9 @@
 namespace Krokedil\Ledyer\Payments\Requests\Helpers;
 
 use Krokedil\Ledyer\Payments\Gateway;
-
-class Order extends \Krokedil\WooCommerce\Order\Order {
+use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce\Order\Order as BaseOrder;
+use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
+class Order extends BaseOrder {
 
 	public function __construct( $order ) {
 		// TODO: Move config to the plugin's main file.
@@ -18,7 +19,7 @@ class Order extends \Krokedil\WooCommerce\Order\Order {
 	/**
 	 * Get the Ledyer type mapping of the item.
 	 *
-	 * @param \Krokedil\WooCommerce\OrderLineData $item Item.
+	 * @param KrokedilWC\OrderLineData $item Item.
 	 * @return string
 	 */
 	private function get_type( $item ) {
@@ -37,7 +38,7 @@ class Order extends \Krokedil\WooCommerce\Order\Order {
 	/**
 	 * Get the total amount of the item.
 	 *
-	 * @param \Krokedil\WooCommerce\OrderLineData $item Item.
+	 * @param KrokedilWC\OrderLineData $item Item.
 	 * @return float
 	 */
 	private function get_total_amount( $item ) {
