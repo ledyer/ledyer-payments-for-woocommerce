@@ -14,7 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AJAX {
 	public function __construct() {
 		$ajax_events = array(
-			'ledyer_payments_wc_log_js' => true,
+			Gateway::ID . '_wc_log_js'    => true,
+			Gateway::ID . '_create_order' => true,
 		);
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( $this, $ajax_event ) );

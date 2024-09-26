@@ -7,7 +7,6 @@ use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
 class Order extends BaseOrder {
 
 	public function __construct( $order ) {
-		// TODO: Move config to the plugin's main file.
 		$config = array(
 			'slug'         => Gateway::ID,
 			'price_format' => 'minor',
