@@ -71,6 +71,7 @@ class Plugin {
 
 		new AJAX();
 		new Assets();
+		new Callback();
 
 		$this->settings = get_option( 'woocommerce_' . Gateway::ID . '_settings', array() );
 	}
