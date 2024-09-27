@@ -14,8 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AJAX {
 	public function __construct() {
 		$ajax_events = array(
-			Gateway::ID . '_wc_log_js'    => true,
-			Gateway::ID . '_create_order' => true,
+			Gateway::ID . '_wc_log_js'       => true,
+			Gateway::ID . '_create_order'    => true,
+			Gateway::ID . '_pending_payment' => true,
 		);
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( $this, $ajax_event ) );
@@ -85,6 +86,32 @@ class AJAX {
 		);
 		Ledyer()->logger()->debug( 'Redirecting to ' . $redirect_to, $context );
 
+		wp_send_json_success( array( 'location' => $redirect_to ) );
+	}
+
+	public static function ledyer_payments_pending_payment() {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, Gateway::ID . '_pending_payment' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+		}
+
+		$order_key = filter_input( INPUT_POST, 'order_key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+
+		if ( empty( $order_key ) ) {
+			wp_send_json_error( 'Missing params. Received: ' . wp_json_encode( $order_key ) );
+		}
+
+		$order_id = wc_get_order_id_by_order_key( $order_key );
+		$order    = wc_get_order( $order_id );
+
+		$redirect_to = $order->get_checkout_order_received_url();
+
+		$context = array(
+			'function'  => __FUNCTION__,
+			'order_id'  => $order_id,
+			'order_key' => $order_key,
+		);
+		Ledyer()->logger()->debug( 'Redirecting to ' . $redirect_to, $context );
 		wp_send_json_success( array( 'location' => $redirect_to ) );
 	}
 }

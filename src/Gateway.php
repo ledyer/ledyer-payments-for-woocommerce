@@ -174,7 +174,21 @@ class Gateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		$order->payment_complete( $payment_id );
+		$session_id   = Ledyer()->session()->get_session_id();
+		$ledyer_order = Ledyer()->api()->get_session( $session_id );
+		if ( is_wp_error( $ledyer_order ) ) {
+			Ledyer()->logger()->error( 'Failed to get Ledyer order', $context );
+		}
+
+		$order->set_transaction_id( $payment_id );
+		if ( 'authorized' === $ledyer_order['state'] ) {
+			$order->payment_complete();
+		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
+			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation', 'ledyer-payments-for-woocommerce' ) );
+		} else {
+			Ledyer()->logger()->warning( "Unknown order state: {$ledyer_order['state']}", $context );
+		}
+
 		$order->set_payment_method( self::ID );
 		$order->save();
 

@@ -34,6 +34,13 @@ class API {
 		return $this->check_for_api_error( $response );
 	}
 
+	public function get_session( $session_id ) {
+		$request  = new Requests\GET\GetSession( $session_id );
+		$response = $request->request();
+
+		return $this->check_for_api_error( $response );
+	}
+
 	public function check_for_api_error( $response ) {
 		if ( is_wp_error( $response ) ) {
 			if ( ! is_admin() ) {
@@ -53,7 +60,7 @@ class API {
 	 * @param \WP_Error $wp_error The error object.
 	 * @return void
 	 */
-	public function print_error( $wp_error ) {
+	private function print_error( $wp_error ) {
 		if ( is_ajax() && function_exists( 'wc_add_notice' ) ) {
 			$print = 'wc_add_notice';
 		} elseif ( function_exists( 'wc_print_notice' ) ) {

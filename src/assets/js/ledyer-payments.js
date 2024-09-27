@@ -20,11 +20,14 @@ jQuery( function ( $ ) {
 
             // ... some time will pass while the user is interacting with the dialog
 
-            if ( authResponse ) {
+            if (authResponse) {
+                authResponse.state = "awaitingSignatory"
+
                 // if status is authorized, the order is ready to be created
                 if ( authResponse.state === "authorized" ) {
                     // Get the authorization token to create an order from your backend
                     const authToken = authResponse.authorizationToken
+                    const { state } = authResponse
                     const { createOrderUrl, createOrderNonce } = gatewayParams
 
                     $.ajax( {
@@ -32,6 +35,7 @@ jQuery( function ( $ ) {
                         url: createOrderUrl,
                         dataType: "json",
                         data: {
+                            state,
                             order_key: orderId,
                             auth_token: authToken,
                             nonce: createOrderNonce,
@@ -55,7 +59,31 @@ jQuery( function ( $ ) {
                 }
 
                 if ( authResponse.state === "awaitingSignatory" ) {
-                    // A signatory is required to complete the purchase
+                    const { pendingPaymentUrl, pendingPaymentNonce } = gatewayParams
+                    $.ajax( {
+                        type: "POST",
+                        url: pendingPaymentUrl,
+                        dataType: "json",
+                        data: {
+                            order_key: orderId,
+                            nonce: pendingPaymentNonce,
+                        },
+                        success: ( data ) => {
+                            const {
+                                data: { location },
+                            } = data
+                            window.location = location
+                        },
+                        error: ( jqXHR, textStatus, errorThrown ) => {
+                            console.debug( "Error:", textStatus, errorThrown )
+                            console.debug( "Response:", jqXHR.responseText )
+
+                            submitOrderFail(
+                                "createOrder",
+                                "The payment is pending payment. Failed to redirect to order received page.",
+                            )
+                        },
+                    } )
                 }
 
                 // redirect the user to a success page
@@ -190,7 +218,7 @@ jQuery( function ( $ ) {
                 } catch ( e ) {
                     logToFile( "AJAX error | Failed to parse error message.", "error" )
                 }
-                submitOrderFail( "AJAX", "Something went wrong" )
+                submitOrderFail( "AJAX", "Something went wrong, please try again." )
             },
         } )
     }
