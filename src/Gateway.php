@@ -47,6 +47,8 @@ class Gateway extends \WC_Payment_Gateway {
 		);
 
 		add_filter( 'wc_get_template', array( $this, 'payment_categories' ), 10, 3 );
+
+		add_action( 'woocommerce_thankyou', array( $this, 'redirect_from_checkout' ) );
 	}
 
 	/**
@@ -105,9 +107,10 @@ class Gateway extends \WC_Payment_Gateway {
 		$customer = $order->get_customer();
 
 		return array(
-			'customer' => $customer,
-			'redirect' => $order->order->get_checkout_order_received_url(),
-			'result'   => 'success',
+			'order_key' => $order->order->get_order_key(),
+			'customer'  => $customer,
+			'redirect'  => $order->order->get_checkout_order_received_url(),
+			'result'    => 'success',
 		);
 	}
 
@@ -141,5 +144,40 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		return untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/templates/payment-categories.php';
+	}
+
+	public function redirect_from_checkout( $order_id ) {
+		$key        = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$gateway    = filter_input( INPUT_GET, 'gateway', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$payment_id = filter_input( INPUT_GET, 'payment_id', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+
+		if ( self::ID !== $gateway ) {
+			return;
+		}
+
+		$context = array(
+			'filter'     => current_filter(),
+			'function'   => __FUNCTION__,
+			'order_id'   => $order_id,
+			'key'        => $key,
+			'payment_id' => $payment_id,
+		);
+
+		$order = wc_get_order( $order_id );
+		if ( ! hash_equals( $order->get_order_key(), $key ) ) {
+			Ledyer()->logger()->error( 'Order key mismatch', $context );
+			return;
+		}
+
+		if ( ! empty( $order->get_date_paid() ) ) {
+			Ledyer()->logger()->debug( 'Order already paid', $context );
+			return;
+		}
+
+		$order->payment_complete( $payment_id );
+		$order->set_payment_method( self::ID );
+		$order->save();
+
+		Ledyer()->session()->clear_session( $order );
 	}
 }

@@ -17,15 +17,8 @@ class Logger {
 
 	private $logger;
 
-	private $context;
-
 	public function __construct() {
-		$this->logger  = new \WC_Logger();
-		$this->context = array(
-			'source'    => Gateway::ID,
-			'timestamp' => current_time( 'mysql' ),
-			'reference' => ( new Cart() )->get_reference(),
-		);
+		$this->logger = new \WC_Logger();
 	}
 
 	/**
@@ -44,14 +37,19 @@ class Logger {
 	 * @param array  $additional_context Additional context to log.
 	 */
 	public function log( $message, $level = 'debug', $additional_context = array() ) {
+		$context = array(
+			'source'    => Gateway::ID,
+			'reference' => Ledyer()->session()->get_reference(),
+		);
+
 		if ( ! empty( $additional_context ) ) {
-			$this->context['custom_data'] = $additional_context;
+			$context = array_merge( $context, $additional_context );
 		}
 
 		if ( is_callable( array( $this->logger, $level ) ) ) {
-			$this->logger->{$level}( $message, $this->context );
+			$this->logger->{$level}( $message, $context );
 		} else {
-			$this->logger->debug( $message, $this->context );
+			$this->logger->debug( $message, $context );
 		}
 	}
 

@@ -53,13 +53,38 @@ class AJAX {
 			wp_send_json_error( 'bad_nonce' );
 		}
 
-		$order_id   = filter_input( INPUT_POST, 'order_id', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$auth_token = filter_input( INPUT_POST, 'auth_token', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		$result     = Ledyer()->api()->create_order( $order_id, $auth_token );
+		$order_key  = filter_input( INPUT_POST, 'order_key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+
+		if ( empty( $auth_token ) || empty( $order_key ) ) {
+			wp_send_json_error( 'Missing params. Received: ' . wp_json_encode( $auth_token, $order_key ) );
+		}
+
+		$order_id = wc_get_order_id_by_order_key( $order_key );
+		$order    = wc_get_order( $order_id );
+
+		$result = Ledyer()->api()->create_order( $order_id, $auth_token );
 		if ( is_wp_error( $result ) ) {
 			wp_send_json_error( $result->get_error_message() );
 		}
 
-		wp_send_json_success();
+		$redirect_to = add_query_arg(
+			array(
+				'gateway'    => Gateway::ID,
+				'key'        => $order_key,
+				'payment_id' => $result['orderId'],
+			),
+			$order->get_checkout_order_received_url()
+		);
+
+		$context = array(
+			'function'   => __FUNCTION__,
+			'order_id'   => $order_id,
+			'order_key'  => $order_key,
+			'payment_id' => $result['orderId'],
+		);
+		Ledyer()->logger()->debug( 'Redirecting to ' . $redirect_to, $context );
+
+		wp_send_json_success( array( 'location' => $redirect_to ) );
 	}
 }

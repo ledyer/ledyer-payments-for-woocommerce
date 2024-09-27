@@ -6,6 +6,13 @@ jQuery( function ( $ ) {
     const gatewayParams = LedyerPaymentsParams
     const { gatewayId, sessionId } = gatewayParams
 
+    /**
+     * Handles the process of proceeding with Ledyer payment for an order.
+     *
+     * @param {string} orderId - The key of the order.
+     * @param {Object} customerData - The customer data.
+     * @returns {void}
+     */
     const handleProceedWithLedyer = async ( orderId, customerData ) => {
         try {
             const authArgs = { customer: { ...customerData }, sessionId }
@@ -25,16 +32,24 @@ jQuery( function ( $ ) {
                         url: createOrderUrl,
                         dataType: "json",
                         data: {
-                            order_id: orderId,
+                            order_key: orderId,
                             auth_token: authToken,
                             nonce: createOrderNonce,
                         },
                         success: ( data ) => {
-                            console.debug( data )
+                            const {
+                                data: { location },
+                            } = data
+                            window.location = location
                         },
                         error: ( jqXHR, textStatus, errorThrown ) => {
                             console.debug( "Error:", textStatus, errorThrown )
                             console.debug( "Response:", jqXHR.responseText )
+
+                            submitOrderFail(
+                                "createOrder",
+                                "The payment was successful, but the order could not be created.",
+                            )
                         },
                     } )
                 }
@@ -146,7 +161,7 @@ jQuery( function ( $ ) {
             success: async ( data ) => {
                 try {
                     if ( "success" === data.result ) {
-                        const { order_id: orderId, customer } = data
+                        const { order_key: orderId, customer } = data
 
                         logToFile( `Successfully placed order ${ orderId }. Sending "shouldProceed: true".` )
 
