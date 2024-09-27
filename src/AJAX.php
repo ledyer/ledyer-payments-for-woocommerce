@@ -41,8 +41,7 @@ class AJAX {
 		$prefix  = sanitize_text_field( filter_input( INPUT_POST, 'reference', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
 		$level   = sanitize_text_field( filter_input( INPUT_POST, 'level', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) ?? 'notice';
 		if ( ! empty( $message ) ) {
-			$message = "{$prefix}: {$message}";
-			Ledyer()->logger()->log( $message, $level );
+			Ledyer()->logger()->log( $message, $level, array( 'prefix' => $prefix ) );
 		}
 
 		wp_send_json_success();

@@ -25,10 +25,10 @@ class Callback {
 		$store_id   = filter_input( INPUT_GET, 'storeId', FILTER_VALIDATE_INT );
 
 		$context = array( 'from' => 'callback_handler' );
-		Ledyer()->logger()->log( 'Received callback.', 'debug', array_merge( $context, filter_var_array( $_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) );
+		Ledyer()->logger()->debug( 'Received callback.', array_merge( $context, filter_var_array( $_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) );
 
 		if ( empty( $order_id ) ) {
-			Ledyer()->logger()->log( 'Missing order ID.', 'error', $context );
+			Ledyer()->logger()->error( 'Missing payment ID.', $context );
 		}
 
 		$order = $this->get_order_by_payment_id( $order_id );
@@ -48,7 +48,7 @@ class Callback {
 
 		$order = $this->get_order_by_payment_id( $payment_id );
 		if ( empty( $order ) ) {
-			Ledyer()->logger()->log( "Order $payment_id not found.", 'error', $context );
+			Ledyer()->logger()->error( "Order $payment_id not found.", $context );
 			return;
 		}
 
@@ -101,7 +101,7 @@ class Callback {
 		foreach ( $scheduled_actions as $action ) {
 			$action_args = $action->get_args();
 			if ( $payment_id === $action_args['payment_id'] ) {
-				Ledyer()->logger()->log( "The order $payment_id is already scheduled for processing.", 'debug', $context );
+				Ledyer()->logger()->debug( "The order $payment_id is already scheduled for processing.", $context );
 				return true;
 			}
 		}
@@ -118,7 +118,7 @@ class Callback {
 			)
 		);
 
-		Ledyer()->logger()->log(
+		Ledyer()->logger()->debug(
 			"Successfully scheduled callback for order $payment_id.",
 			'debug',
 			array_merge(
