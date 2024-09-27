@@ -18,9 +18,10 @@ class Session {
 
 	public const SESSION_KEY = '_' . Gateway::ID . '_session_data';
 
-	private $gateway_session = null;
-	private $session_hash    = null;
-	private $session_country = null;
+	private $gateway_session   = null;
+	private $session_hash      = null;
+	private $session_country   = null;
+	private $session_reference = null;
 
 	/**
 	 * Payment categories.
@@ -31,6 +32,107 @@ class Session {
 	 */
 	private $payment_categories = array();
 
+	/**
+	 * Class constructor.
+	 */
+	public function __construct() {
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'get_session' ), 999999 );
+	}
+
+	/**
+	 * Create or update an existing session.
+	 *
+	 * @param \WC_Order|numeric|null $order The order object or order ID. Pass `null` to retrieve session from WC_Session (default).
+	 * @return array|\WP_Error|null The result from the API request, a WP_Error if an error occurred or `null` if the gateway is either not available or if we're on a non-checkout page.
+	 */
+	public function get_session( $order = false ) {
+		$gateways = WC()->payment_gateways->get_available_payment_gateways();
+		if ( ! isset( $gateways[ Gateway::ID ] ) ) {
+			return;
+		}
+
+		if ( ! ( is_checkout() || is_wc_endpoint_url( 'order-pay' ) ) || is_wc_endpoint_url( 'order-received' ) ) {
+			return;
+		}
+
+		// Check if we got an order.
+		$order  = $this->get_order( $order );
+		$helper = empty( $order ) ? new Cart() : new Order( $order );
+
+		if ( is_wp_error( $order ) ) {
+			return $order;
+		}
+
+		// Update the session data if we have an existing one.
+		$this->update_session( $order );
+
+		// A country change warrants a new session. Clear the session so when we check if we have one, we get false, resulting in a new session.
+		if ( $helper->get_country() !== $this->session_country ) {
+			$this->reset();
+		}
+
+		if ( ! empty( $this->gateway_session ) && ! $this->needs_update( $order ) ) {
+			return $this->gateway_session;
+		}
+
+		// The session has been set or modified, we must update the existing session or create one if it doesn't already exist.
+		if ( $this->gateway_session ) {
+			$result = Ledyer()->api()->update_session( $this->gateway_session['id'] );
+			return $this->process_result( $result, $order );
+		}
+
+		$result = Ledyer()->api()->create_session();
+		return $this->process_result( $result, $order );
+	}
+	public function get_country( $order = null ) {
+		$helper = empty( $order ) ? new Cart() : new Order( $order );
+		return $this->session_country ?? $helper->get_country();
+	}
+
+	/**
+	 * Get the session ID.
+	 *
+	 * If the session doesn't exist, we'll try to create it. If that fails, `null` is returned.
+	 *
+	 * @return string|null The session ID.
+	 */
+	public function get_session_id() {
+		if ( empty( $this->gateway_session ) ) {
+			$this->get_session();
+		}
+
+		return $this->gateway_session['id'] ?? null;
+	}
+
+	/**
+	 * Get the payment categories.
+	 *
+	 * @return array
+	 */
+	public function get_payment_categories() {
+		return $this->payment_categories;
+	}
+
+	public function get_reference() {
+		return $this->session_reference;
+	}
+
+	/**
+	 * Clears the session data stored to WC, and optionally, to the order too if WC_Order is passed.
+	 *
+	 * @param \WC_Order|null $order A WooCommerce order or null if only session should be cleared.
+	 * @return void
+	 */
+	public function clear_session( $order = null ) {
+		if ( isset( WC()->session ) ) {
+			WC()->session->__unset( self::SESSION_KEY );
+		}
+
+		if ( ! empty( $order ) ) {
+			$order->delete_meta_data( self::SESSION_KEY );
+			$order->save();
+		}
+	}
 
 	/**
 	 * Remaps key to preserve consistent key naming.
@@ -47,39 +149,19 @@ class Session {
 	}
 
 	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-		add_action( 'woocommerce_after_calculate_totals', array( $this, 'get_session' ), 999999 );
-	}
-	/**
 	 * Clear the internal session data.
 	 *
 	 * This should only be called when we need to update the session.
 	 *
 	 * @return void
 	 */
-	private function clear_session() {
-		$this->gateway_session = null;
-		$this->session_hash    = null;
-		$this->session_country = null;
+	private function reset() {
+		$this->gateway_session   = null;
+		$this->session_hash      = null;
+		$this->session_country   = null;
+		$this->session_reference = null;
 
 		// No need to clear the $payment_categories as it is overwritten when a new session is created.
-	}
-
-	/**
-	 * Clears the session data stored to WC.
-	 *
-	 * @param \WC_Order|numeric|null $order The order object or order ID. Pass `null` to clear the session from WC_Session (default).
-	 * @return void
-	 */
-	private function wc_clear_session( $order = null ) {
-		if ( empty( $order ) ) {
-			WC()->session->__unset( self::SESSION_KEY );
-		} else {
-			$order->delete_meta_data( self::SESSION_KEY );
-			$order->save();
-		}
 	}
 
 	/**
@@ -161,7 +243,7 @@ class Session {
 	 */
 	private function process_result( $result, $order = null ) {
 		if ( is_wp_error( $result ) ) {
-			$this->wc_clear_session();
+			$this->clear_session();
 			return $result;
 		}
 
@@ -170,6 +252,11 @@ class Session {
 		$this->gateway_session = ! empty( $result ) ? $this->remap( $result ) : $this->gateway_session;
 		$this->session_hash    = $this->get_hash( $order );
 		$this->session_country = $helper->get_country();
+
+		// Generate a minimum of 23-characters unique reference.
+		if ( empty( $this->session_reference ) ) {
+			$this->session_reference = uniqid( '', true );
+		}
 
 		if ( isset( $this->gateway_session['configuration'] ) ) {
 			$this->payment_categories = $this->gateway_session['configuration'];
@@ -195,6 +282,7 @@ class Session {
 				'session_hash'       => $this->session_hash,
 				'session_country'    => $this->session_country,
 				'payment_categories' => $this->payment_categories,
+				'session_reference'  => $this->session_reference,
 			)
 		);
 
@@ -232,80 +320,7 @@ class Session {
 		$this->session_hash       = $decoded_data['session_hash'];
 		$this->session_country    = $decoded_data['session_country'];
 		$this->payment_categories = $decoded_data['payment_categories'];
+		$this->session_reference  = $decoded_data['session_reference'];
 		return true;
-	}
-
-	/**
-	 * Create or update an existing session.
-	 *
-	 * @param \WC_Order|numeric|null $order The order object or order ID. Pass `null` to retrieve session from WC_Session (default).
-	 * @return array|\WP_Error|null The result from the API request, a WP_Error if an error occurred or `null` if the gateway is either not available or if we're on a non-checkout page.
-	 */
-	public function get_session( $order = false ) {
-		$gateways = WC()->payment_gateways->get_available_payment_gateways();
-		if ( ! isset( $gateways[ Gateway::ID ] ) ) {
-			return;
-		}
-
-		if ( ! ( is_checkout() || is_wc_endpoint_url( 'order-pay' ) ) || is_wc_endpoint_url( 'order-received' ) ) {
-			return;
-		}
-
-		// Check if we got an order.
-		$order  = $this->get_order( $order );
-		$helper = empty( $order ) ? new Cart() : new Order( $order );
-
-		if ( is_wp_error( $order ) ) {
-			return $order;
-		}
-
-		// Update the session data if we have an existing one.
-		$this->update_session( $order );
-
-		// A country change warrants a new session. Clear the session so when we check if we have one, we get false, resulting in a new session.
-		if ( $helper->get_country() !== $this->session_country ) {
-			$this->clear_session();
-		}
-
-		if ( ! empty( $this->gateway_session ) && ! $this->needs_update( $order ) ) {
-			return $this->gateway_session;
-		}
-
-		// The session has been set or modified, we must update the existing session or create one if it doesn't already exist.
-		if ( $this->gateway_session ) {
-			$result = Ledyer()->api()->update_session( $this->gateway_session['id'] );
-			return $this->process_result( $result, $order );
-		}
-
-		$result = Ledyer()->api()->create_session();
-		return $this->process_result( $result, $order );
-	}
-	public function get_country( $order = null ) {
-		$helper = empty( $order ) ? new Cart() : new Order( $order );
-		return $this->session_country ?? $helper->get_country();
-	}
-
-	/**
-	 * Get the session ID.
-	 *
-	 * If the session doesn't exist, we'll try to create it. If that fails, `null` is returned.
-	 *
-	 * @return string|null The session ID.
-	 */
-	public function get_session_id() {
-		if ( empty( $this->gateway_session ) ) {
-			$this->get_session();
-		}
-
-		return $this->gateway_session['id'] ?? null;
-	}
-
-	/**
-	 * Get the payment categories.
-	 *
-	 * @return array
-	 */
-	public function get_payment_categories() {
-		return $this->payment_categories;
 	}
 }

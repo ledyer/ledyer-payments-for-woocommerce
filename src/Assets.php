@@ -36,9 +36,7 @@ class Assets {
 		}
 
 		// The reference is stored in the session.
-		$cart      = new Cart();
-		$reference = $cart->get_reference();
-
+		$reference  = Ledyer()->session()->get_reference();
 		$session_id = Ledyer()->session()->get_session_id();
 
 		$standard_woo_checkout_fields = array(

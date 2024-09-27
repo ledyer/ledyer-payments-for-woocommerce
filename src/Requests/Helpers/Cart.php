@@ -94,25 +94,6 @@ class Cart extends CartBase {
 		return apply_filters( Gateway::ID . '_country', $country );
 	}
 
-	/**
-	 * Get or create the cart reference if it doesn't already exist.
-	 *
-	 * The reference is persisted to the session as Gateway::ID . '_cart_reference'.
-	 *
-	 * @return string A minimum of 23-characters unique reference.
-	 */
-	public function get_reference() {
-		$key = Gateway::ID . '_cart_reference';
-
-		$reference = WC()->session->get( $key );
-		if ( empty( $reference ) ) {
-			$reference = uniqid( '', true );
-			WC()->session->set( $key, $reference );
-		}
-
-		return $reference;
-	}
-
 	public function get_confirmation_url() {
 		$url = add_query_arg(
 			array(

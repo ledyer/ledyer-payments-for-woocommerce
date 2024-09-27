@@ -33,7 +33,7 @@ class UpdateSession extends POST {
 			'currency'                => get_woocommerce_currency(),
 			'locale'                  => str_replace( '_', '-', get_locale() ),
 			'orderLines'              => $cart->get_order_lines(),
-			'reference'               => $cart->get_reference(),
+			'reference'               => Ledyer()->session()->get_reference(),
 			'settings'                => array(
 				'security' => array(
 					'level' => absint( $this->settings['security_level'] ),
