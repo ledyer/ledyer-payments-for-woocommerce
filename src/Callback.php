@@ -7,14 +7,19 @@
 
 namespace Krokedil\Ledyer\Payments;
 
+use Krokedil\Ledyer\Payments\Gateway;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 class Callback {
 
+	const ENDPOINT = Gateway::ID . '_callback';
+	const URL      = '/wc-api/' . self::ENDPOINT;
+
 	public function __construct() {
-		add_action( 'woocommerce_api_' . Gateway::ID, array( $this, 'callback_handler' ) );
+		add_action( 'woocommerce_api_' . self::ENDPOINT, array( $this, 'callback_handler' ) );
 		add_action( Gateway::ID . '_scheduled_callback', array( $this, 'handle_scheduled_callback' ) );
 	}
 

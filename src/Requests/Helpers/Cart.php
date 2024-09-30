@@ -2,6 +2,7 @@
 namespace Krokedil\Ledyer\Payments\Requests\Helpers;
 
 use Krokedil\Ledyer\Payments\Gateway;
+use Krokedil\Ledyer\Payments\Callback;
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce\Cart\Cart as CartBase;
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
 
@@ -107,7 +108,6 @@ class Cart extends CartBase {
 	}
 
 	public function get_notification_url() {
-		$url = add_query_arg( 'gateway', Gateway::ID, home_url() );
-		return apply_filters( Gateway::ID . '_notification_url', $url );
+		return apply_filters( Gateway::ID . '_notification_url', home_url( Callback::URL ) );
 	}
 }
