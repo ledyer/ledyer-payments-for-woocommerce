@@ -21,6 +21,6 @@ class GetSession extends GET {
 
 		parent::__construct( $args );
 		$this->log_title = 'Get session';
-		$this->endpoint  = "/v1/payment-session/{$session_id}";
+		$this->endpoint  = "/v1/payment-sessions/{$session_id}";
 	}
 }

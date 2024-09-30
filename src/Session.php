@@ -40,10 +40,21 @@ class Session {
 	}
 
 	/**
+	 * Get the gateway session.
+	 *
+	 * @return array|null The gateway session.
+	 */
+	private function get_session_from_woo() {
+		if ( isset( WC()->session ) ) {
+			return json_decode( WC()->session->get( self::SESSION_KEY ), true );
+		}
+	}
+
+	/**
 	 * Create or update an existing session.
 	 *
 	 * @param \WC_Order|numeric|null $order The order object or order ID. Pass `null` to retrieve session from WC_Session (default).
-	 * @return array|\WP_Error|null The result from the API request, a WP_Error if an error occurred or `null` if the gateway is either not available or if we're on a non-checkout page.
+	 * @return array|\WP_Error|null The result from the API request, a WP_Error if an error occurred, or `null` if the gateway is either not available or if we're on a non-checkout page.
 	 */
 	public function get_session( $order = false ) {
 		$gateways = WC()->payment_gateways->get_available_payment_gateways();
@@ -77,16 +88,32 @@ class Session {
 
 		// The session has been set or modified, we must update the existing session or create one if it doesn't already exist.
 		if ( $this->gateway_session ) {
-			$result = Ledyer()->api()->update_session( $this->gateway_session['id'] );
+			$result = Ledyer()->api()->update_session( $this->gateway_session['sessionId'] );
 			return $this->process_result( $result, $order );
 		}
 
 		$result = Ledyer()->api()->create_session();
 		return $this->process_result( $result, $order );
 	}
+
+
+	/**
+	 * Get the session country.
+	 *
+	 * @param \WC_Order|null $order The WooCommerce order or pass `null` or to default retrieving the country from the session instead.
+	 */
 	public function get_country( $order = null ) {
-		$helper = empty( $order ) ? new Cart() : new Order( $order );
-		return $this->session_country ?? $helper->get_country();
+		$session_country = $this->session_country;
+		if ( empty( $session_country ) && isset( WC()->session ) ) {
+			$session_country = $this->get_session_from_woo()['session_country'] ?? null;
+		}
+
+		if ( empty( $session_country ) ) {
+			$helper = empty( $order ) ? new Cart() : new Order( $order );
+			$helper->get_country();
+		}
+
+		return $session_country;
 	}
 
 	/**
@@ -97,11 +124,12 @@ class Session {
 	 * @return string|null The session ID.
 	 */
 	public function get_session_id() {
-		if ( empty( $this->gateway_session ) ) {
-			$this->get_session();
+		$session = $this->gateway_session;
+		if ( empty( $session ) && isset( WC()->session ) ) {
+			$session = $this->get_session_from_woo()['gateway_session'] ?? null;
 		}
 
-		return $this->gateway_session['id'] ?? null;
+		return $session['sessionId'] ?? null;
 	}
 
 	/**
@@ -110,11 +138,21 @@ class Session {
 	 * @return array
 	 */
 	public function get_payment_categories() {
-		return $this->payment_categories;
+		$payment_categories = $this->payment_categories;
+		if ( empty( $payment_categories ) && isset( WC()->session ) ) {
+			$payment_categories = $this->get_session_from_woo()['payment_categories'] ?? array();
+		}
+
+		return $payment_categories;
 	}
 
 	public function get_reference() {
-		return $this->session_reference;
+		$session_reference = $this->session_reference;
+		if ( empty( $session_reference ) && isset( WC()->session ) ) {
+			$session_reference = $this->get_session_from_woo()['session_reference'] ?? array();
+		}
+
+		return $session_reference;
 	}
 
 	/**
@@ -138,14 +176,11 @@ class Session {
 	 * Remaps key to preserve consistent key naming.
 	 *
 	 * @param array $result
-	 * @return array
+	 * @return void
 	 */
 	private function remap( $result ) {
 		// Ledyer refers to id as sessionId on create session and id on update session.
-		$id           = $result['sessionId'] ?? $result['id'];
-		$result['id'] = $id;
-
-		return $result;
+		$this->gateway_session['sessionId'] = $result['sessionId'] ?? $result['id'];
 	}
 
 	/**
@@ -249,7 +284,9 @@ class Session {
 
 		$helper = empty( $order ) ? new Cart() : new Order( $order );
 
-		$this->gateway_session = ! empty( $result ) ? $this->remap( $result ) : $this->gateway_session;
+		$this->gateway_session = ! empty( $result ) ? $result : $this->gateway_session;
+		$this->remap( $this->gateway_session );
+
 		$this->session_hash    = $this->get_hash( $order );
 		$this->session_country = $helper->get_country();
 
