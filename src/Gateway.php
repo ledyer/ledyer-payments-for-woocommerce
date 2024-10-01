@@ -47,7 +47,6 @@ class Gateway extends \WC_Payment_Gateway {
 		);
 
 		add_filter( 'wc_get_template', array( $this, 'payment_categories' ), 10, 3 );
-
 		add_action( 'woocommerce_thankyou', array( $this, 'redirect_from_checkout' ) );
 	}
 
@@ -174,7 +173,7 @@ class Gateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		$session_id   = Ledyer()->session()->get_session_id();
+		$session_id   = Ledyer()->session()->get_id();
 		$ledyer_order = Ledyer()->api()->get_session( $session_id );
 		if ( is_wp_error( $ledyer_order ) ) {
 			Ledyer()->logger()->error( 'Failed to get Ledyer order', $context );

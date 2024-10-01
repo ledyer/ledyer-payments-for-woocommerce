@@ -37,7 +37,7 @@ class Assets {
 
 		// The reference is stored in the session.
 		$reference  = Ledyer()->session()->get_reference();
-		$session_id = Ledyer()->session()->get_session_id();
+		$session_id = Ledyer()->session()->get_id();
 
 		$standard_woo_checkout_fields = array(
 			'billing_first_name',

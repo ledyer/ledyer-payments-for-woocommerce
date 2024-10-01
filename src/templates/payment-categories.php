@@ -8,9 +8,6 @@ use Krokedil\Ledyer\Payments\Gateway;
 $order_id = absint( get_query_var( 'order-pay', 0 ) );
 if ( ! empty( $order_id ) ) {
 	$order = wc_get_order( $order_id );
-
-	// Create a new session as 'woocommerce_after_calculate_totals' is only triggered on the cart (and checkout) page.
-	Ledyer()->session()->get_session( $order );
 }
 
 $payment_categories = Ledyer()->session()->get_payment_categories();

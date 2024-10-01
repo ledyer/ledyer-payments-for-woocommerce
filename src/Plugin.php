@@ -27,7 +27,7 @@ class Plugin {
 	 */
 	private $session = null;
 	public function session() {
-		return $this->session;
+		return $this->session->get_session();
 	}
 
 	/**
