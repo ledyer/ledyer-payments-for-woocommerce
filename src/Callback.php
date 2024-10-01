@@ -15,28 +15,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Callback {
 
-	const ENDPOINT = Gateway::ID . '_callback';
-	const URL      = '/wc-api/' . self::ENDPOINT;
+	public const REST_API_NAMESPACE = 'krokedil/ledyer/payments/v1';
+	public const REST_API_ENDPOINT  = '/callback';
+	public const API_ENDPOINT       = 'wp-json/' . self::REST_API_NAMESPACE . self::REST_API_ENDPOINT;
+
 
 	public function __construct() {
-		add_action( 'woocommerce_api_' . self::ENDPOINT, array( $this, 'callback_handler' ) );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_action( Gateway::ID . '_scheduled_callback', array( $this, 'handle_scheduled_callback' ) );
 	}
 
-	public function callback_handler() {
-		$event_type = filter_input( INPUT_GET, 'eventType', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		$payment_id = filter_input( INPUT_GET, 'orderId', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		$reference  = filter_input( INPUT_GET, 'reference', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		$store_id   = filter_input( INPUT_GET, 'storeId', FILTER_VALIDATE_INT );
+	/**
+	 * Register the REST API route(s).
+	 *
+	 * @return void
+	 */
+	public function register_routes() {
+		register_rest_route(
+			self::REST_API_NAMESPACE,
+			self::REST_API_ENDPOINT,
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'callback_handler' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	public function callback_handler( $request ) {
+		$params = filter_var_array( $request->get_json_params(), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+
+		$event_type = wc_get_var( $params['eventType'] );
+		$payment_id = wc_get_var( $params['orderId'] );
+		$reference  = wc_get_var( $params['reference'] );
+		$store_id   = wc_get_var( $params['storeId'] );
 
 		$context = array(
 			'filter'   => current_filter(),
 			'function' => __FUNCTION__,
+			'request'  => $params,
 		);
 
-		Ledyer()->logger()->debug( 'Received callback.', array_merge( $context, filter_var_array( $_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) );
+		Ledyer()->logger()->debug( 'Received callback.', $context );
 
-		if ( empty( $payment_id ) ) {
+		if ( empty( $payment_id ) && empty( $reference ) ) {
 			Ledyer()->logger()->error( 'Missing payment ID.', $context );
 		}
 
@@ -118,9 +140,11 @@ class Callback {
 	}
 
 	/**
-	 * Get order by payment ID.
+	 * Get order by payment ID or reference.
 	 *
-	 * @param string $payment_id Payment ID.
+	 * For orders awaiting signatory, the order reference is used as the payment ID. Otherwise, the orderId from Ledyer.
+	 *
+	 * @param string $payment_id Payment ID or reference.
 	 * @return int|bool Order ID or false if not found.
 	 */
 	private function get_order_by_payment_id( $payment_id ) {

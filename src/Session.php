@@ -39,7 +39,7 @@ class Session {
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'create_or_update_session' ), 999999 );
 	}
 
-	public function get_session( $order = false ) {
+	public function get_session() {
 		$session = isset( WC()->session ) ? json_decode( WC()->session->get( self::SESSION_KEY ), true ) : null;
 		if ( ! empty( $session ) ) {
 			$this->gateway_session    = $session['gateway_session'];

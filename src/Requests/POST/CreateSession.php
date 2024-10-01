@@ -43,6 +43,7 @@ class CreateSession extends POST {
 					'notification' => $cart->get_notification_url(),
 				),
 			),
+			'storeId'                 => $this->settings['store_id'],
 			'totalOrderAmount'        => $cart->get_total(),
 			'totalOrderAmountExclVat' => $cart->get_total() - $cart->get_total_tax(),
 			'totalOrderVatAmount'     => $cart->get_total_tax(),

@@ -108,6 +108,6 @@ class Cart extends CartBase {
 	}
 
 	public function get_notification_url() {
-		return apply_filters( Gateway::ID . '_notification_url', home_url( Callback::URL ) );
+		return apply_filters( Gateway::ID . '_notification_url', home_url( Callback::API_ENDPOINT ) );
 	}
 }
