@@ -176,12 +176,18 @@ class Gateway extends \WC_Payment_Gateway {
 		$session_id   = Ledyer()->session()->get_id();
 		$ledyer_order = Ledyer()->api()->get_session( $session_id );
 		if ( is_wp_error( $ledyer_order ) ) {
-			Ledyer()->logger()->error( 'Failed to get Ledyer order', $context );
+			Ledyer()->logger()->error( 'Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
+			return;
 		}
 
-		$order->set_transaction_id( $payment_id );
+		if ( $ledyer_order['orderId'] !== $payment_id ) {
+			Ledyer()->logger()->warning( 'The Ledyer payment ID do not match query payment ID. Defaulting to Ledyer payment ID. ', array_merge( $context, array( 'ledyer_payment_id' => $ledyer_order['orderId'] ) ) );
+
+			$payment_id = $ledyer_order['orderId'];
+		}
+
 		if ( 'authorized' === $ledyer_order['state'] ) {
-			$order->payment_complete();
+			$order->payment_complete( $payment_id );
 		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
 			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation', 'ledyer-payments-for-woocommerce' ) );
 		} else {
@@ -189,6 +195,12 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		$order->set_payment_method( self::ID );
+		$order->set_transaction_id( $payment_id );
+
+		$env = wc_string_to_bool( Ledyer()->settings( 'test_mode' ) ?? 'no' ) ? 'sandbox' : 'production';
+		$order->update_meta_data( '_wc_ledyer_environment', $env );
+		$order->update_meta_data( '_wc_ledyer_order_id', $ledyer_order['orderId'] );
+		$order->update_meta_data( '_wc_ledyer_session_id', $ledyer_order['id'] );
 		$order->save();
 
 		Ledyer()->session()->clear_session( $order );
