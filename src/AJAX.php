@@ -69,11 +69,14 @@ class AJAX {
 			wp_send_json_error( $result->get_error_message() );
 		}
 
+		$payment_id = $result['orderId'];
+		$order->update_meta_data( Gateway::ID . '_payment_id', $payment_id );
+		$order->save();
+
 		$redirect_to = add_query_arg(
 			array(
-				'gateway'    => Gateway::ID,
-				'key'        => $order_key,
-				'payment_id' => $result['orderId'],
+				'gateway' => Gateway::ID,
+				'key'     => $order_key,
 			),
 			$order->get_checkout_order_received_url()
 		);
@@ -103,8 +106,16 @@ class AJAX {
 
 		$order_id = wc_get_order_id_by_order_key( $order_key );
 		$order    = wc_get_order( $order_id );
+		$order->update_meta_data( Gateway::ID . '_payment_id', Ledyer()->session()->get_id() );
+		$order->save();
 
-		$redirect_to = $order->get_checkout_order_received_url();
+		$redirect_to = add_query_arg(
+			array(
+				'gateway' => Gateway::ID,
+				'key'     => $order_key,
+			),
+			$order->get_checkout_order_received_url()
+		);
 
 		$context = array(
 			'function'  => __FUNCTION__,
