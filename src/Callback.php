@@ -65,14 +65,14 @@ class Callback {
 		$order = $this->get_order_by_payment_id( $payment_id );
 		if ( empty( $order ) ) {
 			Ledyer()->logger()->error( "Callback: Order '{$payment_id}' not found.", $context );
-			return new \WP_REST_Response( null, 404 );
+			return new \WP_REST_Response( array(), 404 );
 		}
 
 		$status = $this->schedule_callback( $payment_id, $event_type, $reference, $store_id ) ? 200 : 500;
 		if ( $status >= 500 ) {
 			return new \WP_Error( 'scheduling-failed', __( 'Failed to schedule callback.', 'ledyer-payments-for-woocommerce' ), array( 'status' => $status ) );
 		}
-		return new \WP_REST_Response( null, $status );
+		return new \WP_REST_Response( array(), $status );
 	}
 
 	public function handle_scheduled_callback( $payment_id, $event_type, $reference, $store_id ) {
