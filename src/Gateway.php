@@ -146,21 +146,20 @@ class Gateway extends \WC_Payment_Gateway {
 	}
 
 	public function redirect_from_checkout( $order_id ) {
-		$key        = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		$gateway    = filter_input( INPUT_GET, 'gateway', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		$payment_id = filter_input( INPUT_GET, 'payment_id', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$key     = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$gateway = filter_input( INPUT_GET, 'gateway', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
 		if ( self::ID !== $gateway ) {
 			return;
 		}
 
 		$context = array(
-			'filter'     => current_filter(),
-			'function'   => __FUNCTION__,
-			'order_id'   => $order_id,
-			'key'        => $key,
-			'payment_id' => $payment_id,
+			'filter'   => current_filter(),
+			'function' => __FUNCTION__,
+			'order_id' => $order_id,
+			'key'      => $key,
 		);
+		Ledyer()->logger()->debug( 'Customer redirected to thankyou page.', $context );
 
 		$order = wc_get_order( $order_id );
 		if ( ! hash_equals( $order->get_order_key(), $key ) ) {
@@ -180,16 +179,11 @@ class Gateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		if ( $ledyer_order['orderId'] !== $payment_id ) {
-			Ledyer()->logger()->warning( 'The Ledyer payment ID do not match query payment ID. Defaulting to Ledyer payment ID. ', array_merge( $context, array( 'ledyer_payment_id' => $ledyer_order['orderId'] ) ) );
-
-			$payment_id = $ledyer_order['orderId'];
-		}
-
+		$payment_id = $ledyer_order['orderId'];
 		if ( 'authorized' === $ledyer_order['state'] ) {
 			$order->payment_complete( $payment_id );
 		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
-			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation', 'ledyer-payments-for-woocommerce' ) );
+			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
 		} else {
 			Ledyer()->logger()->warning( "Unknown order state: {$ledyer_order['state']}", $context );
 		}
@@ -197,9 +191,11 @@ class Gateway extends \WC_Payment_Gateway {
 		$order->set_payment_method( self::ID );
 		$order->set_transaction_id( $payment_id );
 
+		// orderId not available if state is awaitingSignatory.
+		isset( $ledyer_order['orderId'] ) && $order->update_meta_data( '_wc_ledyer_order_id', $ledyer_order['orderId'] );
+
 		$env = wc_string_to_bool( Ledyer()->settings( 'test_mode' ) ?? 'no' ) ? 'sandbox' : 'production';
 		$order->update_meta_data( '_wc_ledyer_environment', $env );
-		$order->update_meta_data( '_wc_ledyer_order_id', $ledyer_order['orderId'] );
 		$order->update_meta_data( '_wc_ledyer_session_id', $ledyer_order['id'] );
 		$order->save();
 
