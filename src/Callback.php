@@ -58,14 +58,21 @@ class Callback {
 
 		Ledyer()->logger()->debug( 'Received callback.', $context );
 
-		if ( empty( $payment_id ) && empty( $reference ) ) {
+		// TODO: Add support for com.ledyer.authorization.pending.
+		if ( 'com.ledyer.order.create' !== $event_type ) {
+			Ledyer()->logger()->debug( 'Unsupported event type.', $context );
+			return new \WP_REST_Response( array(), 200 );
+		}
+
+		if ( empty( $payment_id ) ) {
 			Ledyer()->logger()->error( 'Missing payment ID.', $context );
+			return new \WP_Error( 'missing-payment-id', 'Missing payment ID.', array( 'status' => 404 ) );
 		}
 
 		$order = $this->get_order_by_payment_id( $payment_id );
 		if ( empty( $order ) ) {
-			Ledyer()->logger()->error( "Callback: Order '{$payment_id}' not found.", $context );
-			return new \WP_REST_Response( array(), 404 );
+			Ledyer()->logger()->error( "Order '{$payment_id}' not found.", $context );
+			return new \WP_Error( 'order-not-found', 'Order not found.', array( 'status' => 404 ) );
 		}
 
 		$status = $this->schedule_callback( $payment_id, $event_type, $reference, $store_id ) ? 200 : 500;
