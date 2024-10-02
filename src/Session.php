@@ -69,6 +69,9 @@ class Session {
 			return;
 		}
 
+		// Resume existing session.
+		$this->get_session();
+
 		// Check if we got an order.
 		$order  = $this->get_order( $order );
 		$helper = empty( $order ) ? new Cart() : new Order( $order );

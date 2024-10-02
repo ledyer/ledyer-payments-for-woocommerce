@@ -78,7 +78,7 @@ jQuery( function ( $ ) {
                             console.debug( "Response:", jqXHR.responseText )
 
                             submitOrderFail(
-                                "createOrder",
+                                "pendingPayment",
                                 "The payment is pending payment. Failed to redirect to order received page.",
                             )
                         },

@@ -3,7 +3,7 @@
  * Plugin Name: Ledyer Payments for WooCommerce
  * Plugin URI: https://krokedil.com/
  * Description: Ledyer Payments for WooCommerce.
- * Author: krokedil
+ * Author: Krokedil
  * Author URI: https://krokedil.com/
  * Version: 1.0.0
  * Text Domain: ledyer-payments-for-woocommerce
