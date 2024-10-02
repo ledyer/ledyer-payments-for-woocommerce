@@ -31,7 +31,7 @@ class Assets {
 			return;
 		}
 
-		if ( ! ( is_checkout() || is_order_received_page() ) ) {
+		if ( ! is_checkout() ) {
 			return;
 		}
 
