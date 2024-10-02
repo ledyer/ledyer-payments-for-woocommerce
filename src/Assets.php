@@ -26,8 +26,7 @@ class Assets {
 	}
 
 	public function enqueue_scripts() {
-		$settings = get_option( 'woocommerce_' . Gateway::ID . '_settings' );
-		if ( ! wc_string_to_bool( $settings['enabled'] ) ) {
+		if ( ! wc_string_to_bool( Ledyer()->settings( 'enabled' ) ) ) {
 			return;
 		}
 
@@ -93,7 +92,7 @@ class Assets {
 
 		wp_enqueue_script( self::CHECKOUT_HANDLE );
 
-		$env = wc_string_to_bool( $settings['test_mode'] ) ? 'sandbox' : 'live';
+		$env = wc_string_to_bool( Ledyer()->settings( 'test_mode' ) ) ? 'sandbox' : 'live';
 		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), LEDYER_PAYMENTS_VERSION, true );
 	}
 
