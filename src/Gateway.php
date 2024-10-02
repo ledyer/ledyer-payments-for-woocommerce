@@ -102,13 +102,17 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return array An associative array containing the success status and redirect URl.
 	 */
 	public function process_payment( $order_id ) {
-		$order    = new Order( wc_get_order( $order_id ) );
-		$customer = $order->get_customer();
+		$helper   = new Order( wc_get_order( $order_id ) );
+		$customer = $helper->get_customer();
+
+		$order = $helper->order;
+		$order->update_meta_data( '_' . self::ID . '_session_reference', Ledyer()->session()->get_reference() );
+		$order->save();
 
 		return array(
-			'order_key' => $order->order->get_order_key(),
+			'order_key' => $order->get_order_key(),
 			'customer'  => $customer,
-			'redirect'  => $order->order->get_checkout_order_received_url(),
+			'redirect'  => $order->get_checkout_order_received_url(),
 			'result'    => 'success',
 		);
 	}
@@ -159,16 +163,16 @@ class Gateway extends \WC_Payment_Gateway {
 			'order_id' => $order_id,
 			'key'      => $key,
 		);
-		Ledyer()->logger()->debug( 'Customer redirected to thankyou page.', $context );
+		Ledyer()->logger()->debug( 'Customer refreshed or redirected to thankyou page.', $context );
 
 		$order = wc_get_order( $order_id );
 		if ( ! hash_equals( $order->get_order_key(), $key ) ) {
-			Ledyer()->logger()->error( 'Order key mismatch', $context );
+			Ledyer()->logger()->error( 'Order key mismatch.', $context );
 			return;
 		}
 
 		if ( ! empty( $order->get_date_paid() ) ) {
-			Ledyer()->logger()->debug( 'Order already paid', $context );
+			Ledyer()->logger()->debug( 'Order already paid.', $context );
 			return;
 		}
 
