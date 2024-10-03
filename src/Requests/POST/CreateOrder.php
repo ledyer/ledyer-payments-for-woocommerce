@@ -7,14 +7,15 @@ use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
 /**
  * Create order request class.
  *
- * Authorizes a checkout payment. This happens when the customer has completed the payment while still on the checkout page.
+ * Acknowledges an order.
  */
 class CreateOrder extends POST {
 
 	/**
 	 * CreateSession constructor.
 	 *
-	 * @return array Arguments that should be accessible from within the request.
+	 * @param int    $order_id   The WC order ID.
+	 * @param string $auth_token The Ledyer auth token.
 	 */
 	public function __construct( $order_id, $auth_token ) {
 		$args = get_defined_vars();

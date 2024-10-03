@@ -1,7 +1,6 @@
 <?php
 namespace Krokedil\Ledyer\Payments\Requests\Helpers;
 
-use Krokedil\Ledyer\Payments\Gateway;
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce\Order\Order as BaseOrder;
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
 class Order extends BaseOrder {
@@ -12,7 +11,7 @@ class Order extends BaseOrder {
 	 */
 	public function __construct( $order ) {
 		$config = array(
-			'slug'         => Gateway::ID,
+			'slug'         => 'ledyer_payments',
 			'price_format' => 'minor',
 		);
 

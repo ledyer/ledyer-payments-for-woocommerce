@@ -2,7 +2,6 @@
 namespace Krokedil\Ledyer\Payments\Requests\GET;
 
 use Krokedil\Ledyer\Payments\Requests\GET;
-use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
 
 /**
  * Create order request class.
@@ -14,7 +13,7 @@ class GetSession extends GET {
 	/**
 	 * CreateSession constructor.
 	 *
-	 * @return array Arguments that should be accessible from within the request.
+	 * @param string $session_id The Ledyer session ID.
 	 */
 	public function __construct( $session_id ) {
 		$args = get_defined_vars();

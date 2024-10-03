@@ -13,15 +13,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Class Gateway.
+ */
 class Gateway extends \WC_Payment_Gateway {
-
-	public const ID = 'ledyer_payments';
-
 	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
-		$this->id                 = self::ID;
+		$this->id                 = 'ledyer_payments';
 		$this->method_title       = __( 'Ledyer Payments', 'ledyer-payments-for-woocommerce' );
 		$this->method_description = __( 'Ledyer Payments', 'ledyer-payments-for-woocommerce' );
 		$this->supports           = apply_filters(
@@ -59,7 +59,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$this->form_fields = Settings::setting_fields();
 
 		// Delete the access token whenever the settings are modified.
-		add_action( 'update_option_woocommerce_' . self::ID . '_settings', array( __NAMESPACE__ . '\Settings', 'maybe_update_access_token' ) );
+		add_action( 'update_option_woocommerce_ledyer_payments_settings', array( __NAMESPACE__ . '\Settings', 'maybe_update_access_token' ) );
 	}
 
 
@@ -76,18 +76,18 @@ class Gateway extends \WC_Payment_Gateway {
 	/**
 	 * Whether the payment gateway is available.
 	 *
-	 * @filter Gateway::ID . '_is_available'
+	 * @filter ledyer_payments_is_available
 	 *
 	 * @return boolean
 	 */
 	public function is_available() {
-		return apply_filters( self::ID . '_is_available', $this->check_availability() );
+		return apply_filters( 'ledyer_payments_is_available', $this->check_availability() );
 	}
 
 	/**
 	 * Check if the gateway should be available.
 	 *
-	 * This function is extracted to create the 'Gateway::ID . _is_available' filter.
+	 * This function is extracted to create the 'ledyer_payments_is_available' filter.
 	 *
 	 * @return bool
 	 */
@@ -106,7 +106,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$customer = $helper->get_customer();
 
 		$order = $helper->order;
-		$order->update_meta_data( '_' . self::ID . '_session_reference', Ledyer()->session()->get_reference() );
+		$order->update_meta_data( '_ledyer_payments_session_reference', Ledyer()->session()->get_reference() );
 		$order->save();
 
 		return array(
@@ -142,18 +142,26 @@ class Gateway extends \WC_Payment_Gateway {
 			return $located;
 		}
 
-		if ( 'checkout/payment-method.php' !== $template_name || self::ID !== $args['gateway']->id ) {
+		if ( 'checkout/payment-method.php' !== $template_name || $this->id !== $args['gateway']->id ) {
 			return $located;
 		}
 
 		return untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/templates/payment-categories.php';
 	}
 
+	/**
+	 * Processes the payment on the thankyou page.
+	 *
+	 * @hook woocommerce_thankyou
+	 *
+	 * @param int $order_id The WC order id.
+	 * @return void
+	 */
 	public function redirect_from_checkout( $order_id ) {
 		$key     = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$gateway = filter_input( INPUT_GET, 'gateway', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
-		if ( self::ID !== $gateway ) {
+		if ( $this->id !== $gateway ) {
 			return;
 		}
 
@@ -192,7 +200,7 @@ class Gateway extends \WC_Payment_Gateway {
 			Ledyer()->logger()->warning( "Unknown order state: {$ledyer_order['state']}", $context );
 		}
 
-		$order->set_payment_method( self::ID );
+		$order->set_payment_method( $this->id );
 		$order->set_transaction_id( $payment_id );
 
 		// orderId not available if state is awaitingSignatory.

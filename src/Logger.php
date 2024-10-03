@@ -7,16 +7,25 @@
 
 namespace Krokedil\Ledyer\Payments;
 
-use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Class Logger.
+ */
 class Logger {
 
+	/**
+	 * WC logger.
+	 *
+	 * @var \WC_Logger
+	 */
 	private $logger;
 
+	/**
+	 * Logger constructor.
+	 */
 	public function __construct() {
 		$this->logger = new \WC_Logger();
 	}
@@ -38,7 +47,7 @@ class Logger {
 	 */
 	public function log( $message, $level = 'debug', $additional_context = array() ) {
 		$context = array(
-			'source'    => Gateway::ID,
+			'source'    => 'ledyer_payments',
 			'reference' => Ledyer()->session()->get_reference(),
 		);
 

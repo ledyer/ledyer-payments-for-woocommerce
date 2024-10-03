@@ -9,6 +9,8 @@
  * Text Domain: ledyer-payments-for-woocommerce
  * Domain Path: /languages
  *
+ * @package ledyer-payments-for-woocommerce
+ *
  * WC requires at least: 5.6.0
  * WC tested up to: 9.3.2
  * Requires Plugins: woocommerce
@@ -97,7 +99,7 @@ if ( ! $autoloader_result || ! $autoloader_dependencies_result ) {
 	return;
 }
 
-$plugin = Ledyer();
+$ledyer = Ledyer();
 
 // Just like we do now in our plugins we add a action for plugins_loaded to kickstart the plugins code. Here we are calling the namespace and class directly and the static method inside init.
 add_action( 'plugins_loaded', array( $plugin, 'init' ) );
@@ -109,6 +111,6 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $plugin
  *
  * @return Plugin
  */
-function Ledyer() {
+function Ledyer() {  // phpcs:ignore -- allow non-snake case function name.
 	return Plugin::get_instance();
 }

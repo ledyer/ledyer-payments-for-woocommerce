@@ -7,12 +7,13 @@
 
 namespace Krokedil\Ledyer\Payments;
 
-use Krokedil\Ledyer\Payments\Gateway;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Class Callback.
+ */
 class Callback {
 
 	public const REST_API_NAMESPACE = 'krokedil/ledyer/payments/v1';
@@ -20,9 +21,12 @@ class Callback {
 	public const API_ENDPOINT       = 'wp-json/' . self::REST_API_NAMESPACE . self::REST_API_ENDPOINT;
 
 
+	/**
+	 * Callback constructor.
+	 */
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-		add_action( Gateway::ID . '_scheduled_callback', array( $this, 'handle_scheduled_callback' ) );
+		add_action( 'ledyer_payments_scheduled_callback', array( $this, 'handle_scheduled_callback' ) );
 	}
 
 	/**
@@ -42,6 +46,12 @@ class Callback {
 		);
 	}
 
+	/**
+	 * Handles a callback ("notification") from Ledyer.
+	 *
+	 * @param \WP_REST_Request $request The REST request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
 	public function callback_handler( $request ) {
 		$params = filter_var_array( $request->get_json_params(), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
@@ -82,6 +92,15 @@ class Callback {
 		return new \WP_REST_Response( array(), $status );
 	}
 
+	/**
+	 * Handles a scheduled callback.
+	 *
+	 * @param string $payment_id The payment ID.
+	 * @param string $event_type The event type.
+	 * @param string $reference The reference.
+	 * @param string $store_id The store ID.
+	 * @return void
+	 */
 	public function handle_scheduled_callback( $payment_id, $event_type, $reference, $store_id ) {
 		$context = array(
 			'filter'   => current_filter(),
@@ -98,13 +117,23 @@ class Callback {
 			// TODO
 		}
 	}
+
+	/**
+	 * Schedule a callback for later processing.
+	 *
+	 * @param string $payment_id The payment ID.
+	 * @param string $event_type The event type.
+	 * @param string $reference The reference.
+	 * @param string $store_id The store ID.
+	 * @return bool True if the callback was scheduled, false otherwise.
+	 */
 	private function schedule_callback( $payment_id, $event_type, $reference, $store_id ) {
 		$context = array(
 			'filter'   => current_filter(),
 			'function' => __FUNCTION__,
 		);
 
-		$hook              = Gateway::ID . '_scheduled_callback';
+		$hook              = 'ledyer_payments_scheduled_callback';
 		$as_args           = array(
 			'hook'   => $hook,
 			'status' => \ActionScheduler_Store::STATUS_PENDING,
@@ -144,7 +173,7 @@ class Callback {
 			)
 		);
 
-		return $did_schedule !== 0;
+		return 0 !== $did_schedule;
 	}
 
 	/**
@@ -156,15 +185,19 @@ class Callback {
 	 * @return int|bool Order ID or false if not found.
 	 */
 	private function get_order_by_payment_id( $payment_id ) {
-		$key    = '_' . Gateway::ID . '_payment_id';
+		$key    = '_ledyer_payments_payment_id';
 		$orders = wc_get_orders(
 			array(
-				'meta_key'     => $key,
-				'meta_value'   => $payment_id,
-				'limit'        => '1',
-				'orderby'      => 'date',
-				'order'        => 'DESC',
-				'meta_compare' => '=',
+				'meta_query' => array(
+					array(
+						'key'     => $key,
+						'value'   => $payment_id,
+						'compare' => '=',
+					),
+				),
+				'limit'      => '1',
+				'orderby'    => 'date',
+				'order'      => 'DESC',
 			)
 		);
 

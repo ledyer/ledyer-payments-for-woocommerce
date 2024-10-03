@@ -7,17 +7,21 @@
 
 namespace Krokedil\Ledyer\Payments;
 
-use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Class Assets.
+ */
 class Assets {
 
 	const SDK_HANDLE      = 'ledyer-payments-bootstrap';
 	const CHECKOUT_HANDLE = 'ledyer-payments-for-woocommerce';
 
+	/**
+	 * Class constructor.
+	 */
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
@@ -25,6 +29,11 @@ class Assets {
 		add_action( 'script_loader_tag', array( $this, 'script_loader_tag' ), 10, 2 );
 	}
 
+	/**
+	 * Enqueues the scripts.
+	 *
+	 * @return void
+	 */
 	public function enqueue_scripts() {
 		if ( ! wc_string_to_bool( Ledyer()->settings( 'enabled' ) ) ) {
 			return;
@@ -74,18 +83,18 @@ class Assets {
 			'LedyerPaymentsParams',
 			array(
 				'sessionId'                 => $session_id,
-				'changePaymentMethodNonce'  => wp_create_nonce( Gateway::ID . '_change_payment_method' ),
-				'changePaymentMethodUrl'    => \WC_AJAX::get_endpoint( Gateway::ID . '_change_payment_method' ),
-				'logToFileNonce'            => wp_create_nonce( Gateway::ID . '_wc_log_js' ),
-				'logToFileUrl'              => \WC_AJAX::get_endpoint( Gateway::ID . '_wc_log_js' ),
-				'createOrderNonce'          => wp_create_nonce( Gateway::ID . '_create_order' ),
-				'createOrderUrl'            => \WC_AJAX::get_endpoint( Gateway::ID . '_create_order' ),
-				'pendingPaymentNonce'       => wp_create_nonce( Gateway::ID . '_pending_payment' ),
-				'pendingPaymentUrl'         => \WC_AJAX::get_endpoint( Gateway::ID . '_pending_payment' ),
+				'changePaymentMethodNonce'  => wp_create_nonce( 'ledyer_payments_change_payment_method' ),
+				'changePaymentMethodUrl'    => \WC_AJAX::get_endpoint( 'ledyer_payments_change_payment_method' ),
+				'logToFileNonce'            => wp_create_nonce( 'ledyer_payments_wc_log_js' ),
+				'logToFileUrl'              => \WC_AJAX::get_endpoint( 'ledyer_payments_wc_log_js' ),
+				'createOrderNonce'          => wp_create_nonce( 'ledyer_payments_create_order' ),
+				'createOrderUrl'            => \WC_AJAX::get_endpoint( 'ledyer_payments_create_order' ),
+				'pendingPaymentNonce'       => wp_create_nonce( 'ledyer_payments_pending_payment' ),
+				'pendingPaymentUrl'         => \WC_AJAX::get_endpoint( 'ledyer_payments_pending_payment' ),
 				'payForOrder'               => $pay_for_order,
 				'standardWooCheckoutFields' => $standard_woo_checkout_fields,
 				'submitOrderUrl'            => \WC_AJAX::get_endpoint( 'checkout' ),
-				'gatewayId'                 => Gateway::ID,
+				'gatewayId'                 => 'ledyer_payments',
 				'reference'                 => $reference,
 			)
 		);

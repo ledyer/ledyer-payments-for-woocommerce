@@ -2,14 +2,14 @@
 namespace Krokedil\Ledyer\Payments\Requests;
 
 /**
- * POST request class.
+ * GET request class.
  */
 abstract class GET extends BaseRequest {
 
 	/**
 	 * GET constructor.
 	 *
-	 * @return array Arguments that should be accessible from within the request.
+	 * @param array $args Arguments that should be accessible from within the request.
 	 */
 	public function __construct( $args = array() ) {
 		parent::__construct( $args );

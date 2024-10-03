@@ -11,8 +11,6 @@ class CreateSession extends POST {
 
 	/**
 	 * CreateSession constructor.
-	 *
-	 * @return array Arguments that should be accessible from within the request.
 	 */
 	public function __construct() {
 		parent::__construct();
@@ -36,7 +34,7 @@ class CreateSession extends POST {
 			'reference'               => Ledyer()->session()->get_reference(),
 			'settings'                => array(
 				'security' => array(
-					'level' => absint( $this->settings['security_level'] ),
+					'level' => absint( Ledyer()->settings( 'security_level' ) ),
 				),
 				'urls'     => array(
 					'confirmation' => $cart->get_confirmation_url(),

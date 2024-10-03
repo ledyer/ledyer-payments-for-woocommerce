@@ -14,13 +14,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Class Session.
+ */
 class Session {
 
-	public const SESSION_KEY = '_' . Gateway::ID . '_session_data';
+	public const SESSION_KEY = '_ledyer_payments_session_data';
 
-	private $gateway_session   = null;
-	private $session_hash      = null;
-	private $session_country   = null;
+	/**
+	 * The gateway session.
+	 *
+	 * @var array|null
+	 */
+	private $gateway_session = null;
+
+	/**
+	 * The session hash.
+	 *
+	 * @var string|null
+	 */
+	private $session_hash = null;
+
+	/**
+	 * The session country.
+	 *
+	 * @var string|null
+	 */
+	private $session_country = null;
+
+	/**
+	 * The session reference.
+	 *
+	 * @var string|null
+	 */
 	private $session_reference = null;
 
 	/**
@@ -39,6 +65,11 @@ class Session {
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'create_or_update_session' ), 999999 );
 	}
 
+	/**
+	 * Get a reference to the session handler.
+	 *
+	 * @return $this
+	 */
 	public function get_session() {
 		$session = isset( WC()->session ) ? json_decode( WC()->session->get( self::SESSION_KEY ), true ) : null;
 		if ( ! empty( $session ) ) {
@@ -61,7 +92,7 @@ class Session {
 	 */
 	public function create_or_update_session( $order = false ) {
 		$gateways = WC()->payment_gateways->get_available_payment_gateways();
-		if ( ! isset( $gateways[ Gateway::ID ] ) ) {
+		if ( ! isset( $gateways['ledyer_payments'] ) ) {
 			return;
 		}
 
@@ -138,6 +169,11 @@ class Session {
 		return $this->payment_categories;
 	}
 
+	/**
+	 * Get the session reference.
+	 *
+	 * @return string
+	 */
 	public function get_reference() {
 		return $this->session_reference;
 	}
@@ -205,7 +241,7 @@ class Session {
 		}
 
 		$order = wc_get_order( $order );
-		return empty( $order ) ? new \WP_Error( Gateway::ID . '_order_not_found', __( 'Order not found', 'ledyer-payments-for-woocommerce' ) ) : $order;
+		return empty( $order ) ? new \WP_Error( 'ledyer_payments_order_not_found', __( 'Order not found', 'ledyer-payments-for-woocommerce' ) ) : $order;
 	}
 
 	/**

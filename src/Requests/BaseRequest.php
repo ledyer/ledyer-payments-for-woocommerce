@@ -2,8 +2,12 @@
 namespace Krokedil\Ledyer\Payments\Requests;
 
 use KrokedilLedyerPaymentsDeps\Krokedil\WpApi\Request;
-use Krokedil\Ledyer\Payments\Gateway;
 
+/**
+ * Class BaseRequest
+ *
+ * Base request class.
+ */
 abstract class BaseRequest extends Request {
 	/**
 	 * BaseRequest constructor.
@@ -11,9 +15,9 @@ abstract class BaseRequest extends Request {
 	 * @param array $args The request args.
 	 */
 	public function __construct( $args = array() ) {
-		$settings = get_option( 'woocommerce_' . Gateway::ID . '_settings', array() );
+		$settings = get_option( 'woocommerce_ledyer_payments_settings', array() );
 		$config   = array(
-			'slug'               => Gateway::ID,
+			'slug'               => 'ledyer_payments',
 			'plugin_version'     => LEDYER_PAYMENTS_VERSION,
 			'plugin_short_name'  => 'LP',
 			'logging_enabled'    => wc_string_to_bool( $settings['logging'] ),
@@ -39,13 +43,13 @@ abstract class BaseRequest extends Request {
 	 * @return string
 	 */
 	protected function get_access_token() {
-		$key          = Gateway::ID . '_access_token';
+		$key          = 'ledyer_payments_access_token';
 		$access_token = get_transient( $key );
 		if ( $access_token ) {
 			return $access_token;
 		}
 
-		$token        = base64_encode( "{$this->settings['client_id']}:{$this->settings['client_secret']}" );
+		$token        = base64_encode( "{$this->settings['client_id']}:{$this->settings['client_secret']}" ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		$base_url     = 'https://auth.sandbox.ledyer.com/oauth/token';
 		$request_args = array(
 			'headers' => array(

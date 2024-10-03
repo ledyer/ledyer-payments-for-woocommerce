@@ -12,7 +12,7 @@ class UpdateSession extends POST {
 	/**
 	 * UpdateSession constructor.
 	 *
-	 * @return array Arguments that should be accessible from within the request.
+	 * @param string $session_id The Ledyer session ID.
 	 */
 	public function __construct( $session_id ) {
 		parent::__construct();
@@ -36,7 +36,7 @@ class UpdateSession extends POST {
 			'reference'               => Ledyer()->session()->get_reference(),
 			'settings'                => array(
 				'security' => array(
-					'level' => absint( $this->settings['security_level'] ),
+					'level' => absint( Ledyer()->settings( 'security_level' ) ),
 				),
 			),
 			'totalOrderAmount'        => $cart->get_total(),

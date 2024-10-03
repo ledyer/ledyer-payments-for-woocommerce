@@ -1,7 +1,6 @@
 <?php
 namespace Krokedil\Ledyer\Payments\Requests\Helpers;
 
-use Krokedil\Ledyer\Payments\Gateway;
 use Krokedil\Ledyer\Payments\Callback;
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce\Cart\Cart as CartBase;
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
@@ -10,7 +9,7 @@ class Cart extends CartBase {
 
 	public function __construct() {
 		$config = array(
-			'slug'         => Gateway::ID,
+			'slug'         => 'ledyer_payments',
 			'price_format' => 'minor',
 		);
 
@@ -85,14 +84,14 @@ class Cart extends CartBase {
 		if ( method_exists( 'WC_Customer', 'get_billing_country' ) && ! empty( WC()->customer ) ) {
 			$country = WC()->customer->get_billing_country();
 			if ( ! empty( $country ) ) {
-				return apply_filters( Gateway::ID . '_country', $country );
+				return apply_filters( 'ledyer_payments_country', $country );
 			}
 		}
 
 		/* Ignores whatever country the customer selects on the checkout page, and always uses the store's base location. Only used as fallback. */
 		$base_location = wc_get_base_location();
 		$country       = $base_location['country'];
-		return apply_filters( Gateway::ID . '_country', $country );
+		return apply_filters( 'ledyer_payments_country', $country );
 	}
 
 	public function get_confirmation_url() {
@@ -104,10 +103,10 @@ class Cart extends CartBase {
 			wc_get_checkout_url()
 		);
 
-		return apply_filters( Gateway::ID . '_confirmation_url', $url );
+		return apply_filters( 'ledyer_payments_confirmation_url', $url );
 	}
 
 	public function get_notification_url() {
-		return apply_filters( Gateway::ID . '_notification_url', home_url( Callback::API_ENDPOINT ) );
+		return apply_filters( 'ledyer_payments_notification_url', home_url( Callback::API_ENDPOINT ) );
 	}
 }

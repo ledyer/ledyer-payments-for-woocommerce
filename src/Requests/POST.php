@@ -9,7 +9,7 @@ abstract class POST extends BaseRequest {
 	/**
 	 * POST constructor.
 	 *
-	 * @return array Arguments that should be accessible from within the request.
+	 * @param array $args Arguments that should be accessible from within the request.
 	 */
 	public function __construct( $args = array() ) {
 		parent::__construct( $args );

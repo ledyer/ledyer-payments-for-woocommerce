@@ -20,8 +20,7 @@ jQuery( function ( $ ) {
 
             // ... some time will pass while the user is interacting with the dialog
 
-            if (authResponse) {
-                
+            if ( authResponse ) {
                 // if status is authorized, the order is ready to be created
                 if ( authResponse.state === "authorized" ) {
                     // Get the authorization token to create an order from your backend

@@ -1,11 +1,11 @@
 <?php
-namespace Krokedil\Ledyer\Payments;
-
 /**
  * Class Settings
  *
  * Defines the plugin's settings.
  */
+
+namespace Krokedil\Ledyer\Payments;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -122,7 +122,7 @@ class Settings {
 			),
 		);
 
-		return apply_filters( Gateway::ID . '_settings', $settings );
+		return apply_filters( 'ledyer_payments_settings', $settings );
 	}
 
 	/**
@@ -134,6 +134,6 @@ class Settings {
 	 */
 	public static function maybe_update_access_token() {
 		// Always renew the access token when the settings is updated.
-		delete_transient( Gateway::ID . '_access_token' );
+		delete_transient( 'ledyer_payments_access_token' );
 	}
 }
