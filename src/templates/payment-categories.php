@@ -4,7 +4,7 @@
  */
 
 $order_id = absint( get_query_var( 'order-pay', 0 ) );
-if ( ! empty( $order_id ) ) {
+if ( ! empty( $order_id ) && ! isset( $order ) ) {
 	$order = wc_get_order( $order_id );
 }
 
@@ -17,7 +17,6 @@ if ( ! empty( $payment_categories ) && is_array( $payment_categories ) ) {
 	foreach ( apply_filters( 'ledyer_payments_available_payment_categories', $payment_categories ) as $payment_category ) {
 		$gateway = $available_gateways['ledyer_payments'];
 
-		// Refer to the note about gateway ID in the Plugin.php file, for the 'woocommerce_checkout_posted_data' hook.
 		$gateway->id           = 'ledyer_payments' . "_{$payment_category['type']}";
 		$gateway->title        = $payment_category['name'];
 		$gateway->description  = $payment_category['description'];
