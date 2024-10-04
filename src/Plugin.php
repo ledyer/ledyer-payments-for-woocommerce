@@ -78,7 +78,6 @@ class Plugin {
 	 */
 	private function setup_hooks() {
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateways' ) );
-		add_action( 'before_woocommerce_init', array( $this, 'declare_wc_compatibility' ) );
 
 		/**
 		 * Override the payment categories ID.
@@ -98,21 +97,6 @@ class Plugin {
 
 		// Ledyer Payments is intended for B2B customers, and therefore we require the company number to be filled in.
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'checkout_field' ) );
-	}
-
-	/**
-	 * Declare compatibility with WooCommerce features.
-	 *
-	 * @return void
-	 */
-	public function declare_wc_compatibility() {
-		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
-			// Declare HPOS compatibility.
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
-
-			// Declare Checkout Blocks incompatibility.
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, false );
-		}
 	}
 
 	/**
