@@ -142,7 +142,7 @@ class Gateway extends \WC_Payment_Gateway {
 			return $located;
 		}
 
-		if ( 'checkout/payment-method.php' !== $template_name || $this->id !== $args['gateway']->id ) {
+		if ( ( 'checkout/payment-method.php' !== $template_name ) || ( 'ledyer_payments' !== $args['gateway']->id ) ) {
 			return $located;
 		}
 
