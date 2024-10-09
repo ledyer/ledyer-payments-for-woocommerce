@@ -114,7 +114,7 @@ class Plugin {
 	 * @return Session
 	 */
 	public function session() {
-		return $this->session->get_session();
+		return $this->session;
 	}
 
 	/**

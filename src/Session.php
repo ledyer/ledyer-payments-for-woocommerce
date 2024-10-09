@@ -62,26 +62,7 @@ class Session {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_after_calculate_totals', array( $this, 'create_or_update_session' ), 999999 );
-	}
-
-	/**
-	 * Get a reference to the session handler.
-	 *
-	 * @return $this
-	 */
-	public function get_session() {
-		$session = isset( WC()->session ) ? json_decode( WC()->session->get( self::SESSION_KEY ), true ) : null;
-		if ( ! empty( $session ) ) {
-			$this->gateway_session    = $session['gateway_session'];
-			$this->session_hash       = $session['session_hash'];
-			$this->session_country    = $session['session_country'];
-			$this->payment_categories = $session['payment_categories'];
-			$this->session_reference  = $session['session_reference'];
-
-		}
-
-		return $this;
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'get_session' ), 999999 );
 	}
 
 	/**
@@ -90,18 +71,18 @@ class Session {
 	 * @param \WC_Order|numeric|null $order The order object or order ID. Pass `null` to retrieve session from WC_Session (default).
 	 * @return array|\WP_Error|null The result from the API request, a WP_Error if an error occurred, or `null` if the gateway is either not available or if we're on a non-checkout page.
 	 */
-	public function create_or_update_session( $order = false ) {
+	public function get_session( $order = false ) {
 		$gateways = WC()->payment_gateways->get_available_payment_gateways();
 		if ( ! isset( $gateways['ledyer_payments'] ) ) {
 			return;
 		}
 
-		if ( ! ( is_checkout() || is_wc_endpoint_url( 'order-pay' ) ) || is_wc_endpoint_url( 'order-received' ) ) {
+		if ( ! is_checkout() && ! is_checkout_pay_page() ) {
 			return;
 		}
 
 		// Resume existing session.
-		$this->get_session();
+		$this->resume_session();
 
 		// Check if we got an order.
 		$order  = $this->get_order( $order );
@@ -193,6 +174,24 @@ class Session {
 			$order->delete_meta_data( self::SESSION_KEY );
 			$order->save();
 		}
+	}
+
+	/**
+	 * Resumes the session from the WooCommerce session, if available.
+	 *
+	 * @return bool Whether there was a session to resume.
+	 */
+	private function resume_session() {
+		$session = isset( WC()->session ) ? json_decode( WC()->session->get( self::SESSION_KEY ), true ) : null;
+		if ( ! empty( $session ) ) {
+			$this->gateway_session    = $session['gateway_session'];
+			$this->session_hash       = $session['session_hash'];
+			$this->session_country    = $session['session_country'];
+			$this->payment_categories = $session['payment_categories'];
+			$this->session_reference  = $session['session_reference'];
+		}
+
+		return ! empty( $session );
 	}
 
 	/**
@@ -302,7 +301,7 @@ class Session {
 
 		// Generate a minimum of 23-characters unique reference.
 		if ( empty( $this->session_reference ) ) {
-			$this->session_reference = uniqid( '', true );
+			$this->session_reference = wp_generate_uuid4();
 		}
 
 		if ( isset( $this->gateway_session['configuration'] ) ) {
