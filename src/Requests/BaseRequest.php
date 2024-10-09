@@ -49,8 +49,10 @@ abstract class BaseRequest extends Request {
 			return $access_token;
 		}
 
-		$token        = base64_encode( "{$this->settings['client_id']}:{$this->settings['client_secret']}" ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-		$base_url     = 'https://auth.sandbox.ledyer.com/oauth/token';
+		$token = base64_encode( "{$this->settings['client_id']}:{$this->settings['client_secret']}" ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+
+		$env          = $this->settings['test_mode'] ? 'sandbox' : 'live';
+		$base_url     = "https://auth.{$env}.ledyer.com/oauth/token";
 		$request_args = array(
 			'headers' => array(
 				'Authorization' => "Basic $token",
