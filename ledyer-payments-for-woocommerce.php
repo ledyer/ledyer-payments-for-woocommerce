@@ -103,7 +103,7 @@ if ( ! $autoloader_result || ! $autoloader_dependencies_result ) {
 	return;
 }
 
-$ledyer = Ledyer();
+$ledyer = Ledyer_Payments();
 
 // Just like we do now in our plugins we add a action for plugins_loaded to kickstart the plugins code. Here we are calling the namespace and class directly and the static method inside init.
 add_action( 'plugins_loaded', array( $ledyer, 'init' ) );
@@ -115,6 +115,6 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $ledyer
  *
  * @return Plugin
  */
-function Ledyer() {  // phpcs:ignore -- allow non-snake case function name.
+function Ledyer_Payments() {  // phpcs:ignore -- allow non-snake case function name.
 	return Plugin::get_instance();
 }

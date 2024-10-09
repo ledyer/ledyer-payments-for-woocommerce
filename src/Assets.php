@@ -35,7 +35,7 @@ class Assets {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
-		if ( ! wc_string_to_bool( Ledyer()->settings( 'enabled' ) ) ) {
+		if ( ! wc_string_to_bool( Ledyer_Payments()->settings( 'enabled' ) ) ) {
 			return;
 		}
 
@@ -44,8 +44,8 @@ class Assets {
 		}
 
 		// The reference is stored in the session.
-		$reference  = Ledyer()->session()->get_reference();
-		$session_id = Ledyer()->session()->get_id();
+		$reference  = Ledyer_Payments()->session()->get_reference();
+		$session_id = Ledyer_Payments()->session()->get_id();
 
 		$standard_woo_checkout_fields = array(
 			'billing_first_name',
@@ -101,7 +101,7 @@ class Assets {
 
 		wp_enqueue_script( self::CHECKOUT_HANDLE );
 
-		$env = wc_string_to_bool( Ledyer()->settings( 'test_mode' ) ) ? 'sandbox' : 'live';
+		$env = wc_string_to_bool( Ledyer_Payments()->settings( 'test_mode' ) ) ? 'sandbox' : 'live';
 		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), LEDYER_PAYMENTS_VERSION, true );
 	}
 

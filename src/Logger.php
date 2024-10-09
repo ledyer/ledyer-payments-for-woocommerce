@@ -48,7 +48,7 @@ class Logger {
 	public function log( $message, $level = 'debug', $additional_context = array() ) {
 		$context = array(
 			'source'    => 'ledyer_payments',
-			'reference' => Ledyer()->session()->get_reference(),
+			'reference' => Ledyer_Payments()->session()->get_reference(),
 		);
 
 		if ( ! empty( $additional_context ) ) {

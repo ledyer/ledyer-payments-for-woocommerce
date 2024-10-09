@@ -49,7 +49,7 @@ class AJAX {
 		$prefix  = sanitize_text_field( filter_input( INPUT_POST, 'reference', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
 		$level   = sanitize_text_field( filter_input( INPUT_POST, 'level', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) ?? 'notice';
 		if ( ! empty( $message ) ) {
-			Ledyer()->logger()->log( $message, $level, array( 'prefix' => $prefix ) );
+			Ledyer_Payments()->logger()->log( $message, $level, array( 'prefix' => $prefix ) );
 		}
 
 		wp_send_json_success();
@@ -76,7 +76,7 @@ class AJAX {
 		$order_id = wc_get_order_id_by_order_key( $order_key );
 		$order    = wc_get_order( $order_id );
 
-		$result = Ledyer()->api()->create_order( $order_id, $auth_token );
+		$result = Ledyer_Payments()->api()->create_order( $order_id, $auth_token );
 		if ( is_wp_error( $result ) ) {
 			wp_send_json_error( $result->get_error_message() );
 		}
@@ -99,7 +99,7 @@ class AJAX {
 			'order_key'  => $order_key,
 			'payment_id' => $result['orderId'],
 		);
-		Ledyer()->logger()->debug( 'Redirecting to ' . $redirect_to, $context );
+		Ledyer_Payments()->logger()->debug( 'Redirecting to ' . $redirect_to, $context );
 
 		wp_send_json_success( array( 'location' => $redirect_to ) );
 	}
@@ -123,7 +123,7 @@ class AJAX {
 
 		$order_id = wc_get_order_id_by_order_key( $order_key );
 		$order    = wc_get_order( $order_id );
-		$order->update_meta_data( 'ledyer_payments_payment_id', Ledyer()->session()->get_id() );
+		$order->update_meta_data( 'ledyer_payments_payment_id', Ledyer_Payments()->session()->get_id() );
 		$order->save();
 
 		$redirect_to = add_query_arg(
@@ -139,7 +139,7 @@ class AJAX {
 			'order_id'  => $order_id,
 			'order_key' => $order_key,
 		);
-		Ledyer()->logger()->debug( 'Redirecting to ' . $redirect_to, $context );
+		Ledyer_Payments()->logger()->debug( 'Redirecting to ' . $redirect_to, $context );
 		wp_send_json_success( array( 'location' => $redirect_to ) );
 	}
 }

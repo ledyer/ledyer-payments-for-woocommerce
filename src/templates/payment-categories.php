@@ -8,7 +8,7 @@ if ( ! empty( $order_id ) && ! isset( $order ) ) {
 	$order = wc_get_order( $order_id );
 }
 
-$payment_categories = Ledyer()->session()->get_payment_categories();
+$payment_categories = Ledyer_Payments()->session()->get_payment_categories();
 if ( ! empty( $payment_categories ) && is_array( $payment_categories ) ) {
 	$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 	$gateway            = $available_gateways['ledyer_payments'];

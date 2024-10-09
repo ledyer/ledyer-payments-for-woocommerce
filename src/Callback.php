@@ -66,22 +66,22 @@ class Callback {
 			'request'  => $params,
 		);
 
-		Ledyer()->logger()->debug( 'Received callback.', $context );
+		Ledyer_Payments()->logger()->debug( 'Received callback.', $context );
 
 		// TODO: Add support for com.ledyer.authorization.pending.
 		if ( 'com.ledyer.order.create' !== $event_type ) {
-			Ledyer()->logger()->debug( 'Unsupported event type.', $context );
+			Ledyer_Payments()->logger()->debug( 'Unsupported event type.', $context );
 			return new \WP_REST_Response( array(), 200 );
 		}
 
 		if ( empty( $payment_id ) ) {
-			Ledyer()->logger()->error( 'Missing payment ID.', $context );
+			Ledyer_Payments()->logger()->error( 'Missing payment ID.', $context );
 			return new \WP_Error( 'missing-payment-id', 'Missing payment ID.', array( 'status' => 404 ) );
 		}
 
 		$order = $this->get_order_by_payment_id( $payment_id );
 		if ( empty( $order ) ) {
-			Ledyer()->logger()->error( "Order '{$payment_id}' not found.", $context );
+			Ledyer_Payments()->logger()->error( "Order '{$payment_id}' not found.", $context );
 			return new \WP_Error( 'order-not-found', 'Order not found.', array( 'status' => 404 ) );
 		}
 
@@ -109,7 +109,7 @@ class Callback {
 
 		$order = $this->get_order_by_payment_id( $payment_id );
 		if ( empty( $order ) ) {
-			Ledyer()->logger()->error( "Order $payment_id not found.", $context );
+			Ledyer_Payments()->logger()->error( "Order $payment_id not found.", $context );
 			return;
 		}
 
@@ -148,7 +148,7 @@ class Callback {
 		foreach ( $scheduled_actions as $action ) {
 			$action_args = $action->get_args();
 			if ( $payment_id === $action_args['payment_id'] ) {
-				Ledyer()->logger()->debug( "The order $payment_id is already scheduled for processing.", $context );
+				Ledyer_Payments()->logger()->debug( "The order $payment_id is already scheduled for processing.", $context );
 				return true;
 			}
 		}
@@ -165,7 +165,7 @@ class Callback {
 			)
 		);
 
-		Ledyer()->logger()->debug(
+		Ledyer_Payments()->logger()->debug(
 			"Successfully scheduled callback for order $payment_id.",
 			array_merge(
 				$context,

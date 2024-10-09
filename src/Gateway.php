@@ -106,7 +106,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$customer = $helper->get_customer();
 
 		$order = $helper->order;
-		$order->update_meta_data( '_ledyer_payments_session_reference', Ledyer()->session()->get_reference() );
+		$order->update_meta_data( '_ledyer_payments_session_reference', Ledyer_Payments()->session()->get_reference() );
 		$order->save();
 
 		return array(
@@ -171,23 +171,23 @@ class Gateway extends \WC_Payment_Gateway {
 			'order_id' => $order_id,
 			'key'      => $key,
 		);
-		Ledyer()->logger()->debug( 'Customer refreshed or redirected to thankyou page.', $context );
+		Ledyer_Payments()->logger()->debug( 'Customer refreshed or redirected to thankyou page.', $context );
 
 		$order = wc_get_order( $order_id );
 		if ( ! hash_equals( $order->get_order_key(), $key ) ) {
-			Ledyer()->logger()->error( 'Order key mismatch.', $context );
+			Ledyer_Payments()->logger()->error( 'Order key mismatch.', $context );
 			return;
 		}
 
 		if ( ! empty( $order->get_date_paid() ) ) {
-			Ledyer()->logger()->debug( 'Order already paid.', $context );
+			Ledyer_Payments()->logger()->debug( 'Order already paid.', $context );
 			return;
 		}
 
-		$session_id   = Ledyer()->session()->get_id();
-		$ledyer_order = Ledyer()->api()->get_session( $session_id );
+		$session_id   = Ledyer_Payments()->session()->get_id();
+		$ledyer_order = Ledyer_Payments()->api()->get_session( $session_id );
 		if ( is_wp_error( $ledyer_order ) ) {
-			Ledyer()->logger()->error( 'Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
+			Ledyer_Payments()->logger()->error( 'Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
 			return;
 		}
 
@@ -197,7 +197,7 @@ class Gateway extends \WC_Payment_Gateway {
 		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
 			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
 		} else {
-			Ledyer()->logger()->warning( "Unknown order state: {$ledyer_order['state']}", $context );
+			Ledyer_Payments()->logger()->warning( "Unknown order state: {$ledyer_order['state']}", $context );
 		}
 
 		$order->set_payment_method( $this->id );
@@ -206,11 +206,11 @@ class Gateway extends \WC_Payment_Gateway {
 		// orderId not available if state is awaitingSignatory.
 		isset( $ledyer_order['orderId'] ) && $order->update_meta_data( '_wc_ledyer_order_id', $ledyer_order['orderId'] );
 
-		$env = wc_string_to_bool( Ledyer()->settings( 'test_mode' ) ?? 'no' ) ? 'sandbox' : 'production';
+		$env = wc_string_to_bool( Ledyer_Payments()->settings( 'test_mode' ) ?? 'no' ) ? 'sandbox' : 'production';
 		$order->update_meta_data( '_wc_ledyer_environment', $env );
 		$order->update_meta_data( '_wc_ledyer_session_id', $ledyer_order['id'] );
 		$order->save();
 
-		Ledyer()->session()->clear_session( $order );
+		Ledyer_Payments()->session()->clear_session( $order );
 	}
 }

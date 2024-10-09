@@ -31,10 +31,10 @@ class CreateSession extends POST {
 			'currency'                => get_woocommerce_currency(),
 			'locale'                  => str_replace( '_', '-', get_locale() ),
 			'orderLines'              => $cart->get_order_lines(),
-			'reference'               => Ledyer()->session()->get_reference(),
+			'reference'               => Ledyer_Payments()->session()->get_reference(),
 			'settings'                => array(
 				'security' => array(
-					'level' => absint( Ledyer()->settings( 'security_level' ) ),
+					'level' => absint( Ledyer_Payments()->settings( 'security_level' ) ),
 				),
 				'urls'     => array(
 					'confirmation' => $cart->get_confirmation_url(),
