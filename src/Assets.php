@@ -43,7 +43,8 @@ class Assets {
 			return;
 		}
 
-		// The reference is stored in the session.
+		// The reference is stored in the session. Create the session if necessary.
+		Ledyer_Payments()->session()->get_session();
 		$reference  = Ledyer_Payments()->session()->get_reference();
 		$session_id = Ledyer_Payments()->session()->get_id();
 

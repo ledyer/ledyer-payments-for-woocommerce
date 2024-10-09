@@ -66,7 +66,7 @@ class Session {
 	}
 
 	/**
-	 * Create or update an existing session.
+	 * Create or update an existing session if necessary.
 	 *
 	 * @param \WC_Order|numeric|null $order The order object or order ID. Pass `null` to retrieve session from WC_Session (default).
 	 * @return array|\WP_Error|null The result from the API request, a WP_Error if an error occurred, or `null` if the gateway is either not available or if we're on a non-checkout page.

@@ -4,9 +4,11 @@
  */
 
 $order_id = absint( get_query_var( 'order-pay', 0 ) );
-if ( ! empty( $order_id ) && ! isset( $order ) ) {
-	$order = wc_get_order( $order_id );
+if ( ! empty( $order_id ) ) {
+	$_order = wc_get_order( $order_id );
 }
+
+Ledyer_Payments()->session()->get_session( isset( $order ) && ! empty( $order ) ? $order : null );
 
 $payment_categories = Ledyer_Payments()->session()->get_payment_categories();
 if ( ! empty( $payment_categories ) && is_array( $payment_categories ) ) {
