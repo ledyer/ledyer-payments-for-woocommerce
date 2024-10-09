@@ -15,17 +15,18 @@ if ( ! empty( $payment_categories ) && is_array( $payment_categories ) ) {
 	$chosen_gateway     = $available_gateways[ array_key_first( $available_gateways ) ];
 
 	foreach ( apply_filters( 'ledyer_payments_available_payment_categories', $payment_categories ) as $payment_category ) {
-		$gateway = $available_gateways['ledyer_payments'];
+		$category_id = "ledyer_payments_{$payment_category['type']}";
 
-		$gateway->id           = 'ledyer_payments' . "_{$payment_category['type']}";
-		$gateway->title        = $payment_category['name'];
-		$gateway->description  = $payment_category['description'];
-		$payment_category_icon = $payment_category['assets']['urls']['logo'] ?? null;
+		$gateway              = $available_gateways['ledyer_payments'] ?? $available_gateways[ $category_id ];
+		$gateway->id          = $category_id;
+		$gateway->icon        = $payment_category['assets']['urls']['logo'] ?? null;
+		$gateway->title       = $payment_category['name'];
+		$gateway->description = $payment_category['description'];
 
 		// Make sure the first payment category is chosen by default.
 		if ( false !== strpos( $chosen_gateway->id, 'ledyer_payments' ) || $gateway->chosen ) {
 			$gateway->chosen = false;
-			if ( $gateway->title === $payment_categories[ array_key_first( $payment_categories ) ]['name'] ) {
+			if ( $gateway->title === $payment_categories[ array_key_first( $payment_categories ) ]['type'] ) {
 				$gateway->chosen = true;
 			}
 		}
