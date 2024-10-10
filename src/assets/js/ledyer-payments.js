@@ -13,7 +13,8 @@ jQuery( function ( $ ) {
      * @param {Object} customerData - The customer data.
      * @returns {void}
      */
-    const handleProceedWithLedyer = async ( orderId, customerData ) => {
+    const handleProceedWithLedyer = async (orderId, customerData) => {
+        blockUI()
         try {
             const authArgs = { customer: { ...customerData }, sessionId }
             const authResponse = await window.ledyer.payments.api.authorize( authArgs )
@@ -54,9 +55,7 @@ jQuery( function ( $ ) {
                             )
                         },
                     } )
-                }
-
-                if ( authResponse.state === "awaitingSignatory" ) {
+                } else if ( authResponse.state === "awaitingSignatory" ) {
                     const { pendingPaymentUrl, pendingPaymentNonce } = gatewayParams
                     $.ajax( {
                         type: "POST",
@@ -87,11 +86,9 @@ jQuery( function ( $ ) {
                 // redirect the user to a success page
             }
         } catch ( error ) {
-            // Handle error
-            console.debug( "error: %s", error )
+            unblockUI()
         }
 
-        unblockUI()
     }
 
     const printNotice = ( message ) => {
