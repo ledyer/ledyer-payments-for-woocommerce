@@ -77,7 +77,7 @@ class Session {
 			return;
 		}
 
-		if ( ! is_checkout() && ! is_checkout_pay_page() ) {
+		if ( ( ! is_checkout() && ! is_checkout_pay_page() ) || is_order_received_page() ) {
 			return;
 		}
 

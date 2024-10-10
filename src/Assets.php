@@ -39,7 +39,8 @@ class Assets {
 			return;
 		}
 
-		if ( ! is_checkout() ) {
+		// Since order received is simply considered a checkout page but with additional query variables, we must explicitly exclude it to prevent a new session from being created.
+		if ( ! is_checkout() || is_order_received_page() ) {
 			return;
 		}
 
