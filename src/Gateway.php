@@ -106,7 +106,8 @@ class Gateway extends \WC_Payment_Gateway {
 		$customer = $helper->get_customer();
 
 		$order = $helper->order;
-		$order->update_meta_data( '_ledyer_payments_session_reference', Ledyer_Payments()->session()->get_reference() );
+		$order->update_meta_data( '_wc_ledyer_reference', Ledyer_Payments()->session()->get_reference() );
+		$order->update_meta_data( '_wc_ledyer_session_id', Ledyer_Payments()->session()->get_id() );
 		$order->save();
 
 		return array(
@@ -184,9 +185,10 @@ class Gateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		$session_id   = Ledyer_Payments()->session()->get_id();
+		$session_id   = $order->get_meta( '_wc_ledyer_session_id' );
 		$ledyer_order = Ledyer_Payments()->api()->get_session( $session_id );
 		if ( is_wp_error( $ledyer_order ) ) {
+			$context['sessionId'] = $session_id;
 			Ledyer_Payments()->logger()->error( 'Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
 			return;
 		}

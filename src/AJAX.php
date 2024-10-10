@@ -116,16 +116,12 @@ class AJAX {
 		}
 
 		$order_key = filter_input( INPUT_POST, 'order_key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-
 		if ( empty( $order_key ) ) {
 			wp_send_json_error( 'Missing params. Received: ' . wp_json_encode( $order_key ) );
 		}
 
-		$order_id = wc_get_order_id_by_order_key( $order_key );
-		$order    = wc_get_order( $order_id );
-		$order->update_meta_data( 'ledyer_payments_payment_id', Ledyer_Payments()->session()->get_id() );
-		$order->save();
-
+		$order_id    = wc_get_order_id_by_order_key( $order_key );
+		$order       = wc_get_order( $order_id );
 		$redirect_to = add_query_arg(
 			array(
 				'gateway' => 'ledyer_payments',
