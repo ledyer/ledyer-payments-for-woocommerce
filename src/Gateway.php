@@ -181,7 +181,7 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		if ( ! empty( $order->get_date_paid() ) ) {
-			Ledyer_Payments()->logger()->debug( 'Order already paid.', $context );
+			Ledyer_Payments()->logger()->debug( 'Order already paid. Customer probably refreshed thankyou page.', $context );
 			return;
 		}
 
@@ -193,7 +193,8 @@ class Gateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		$payment_id = $ledyer_order['orderId'];
+		// The orderId is not available when the purchase is awaiting signatory.
+		$payment_id = wc_get_var( $ledyer_order['orderId'] );
 		if ( 'authorized' === $ledyer_order['state'] ) {
 			$order->payment_complete( $payment_id );
 		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
