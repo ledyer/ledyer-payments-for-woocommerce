@@ -323,7 +323,7 @@ class Session {
 	 */
 	private function process_error( $error ) {
 		// 40061 mean "Session is completed". If we're here, it means the customer wasn't redirected to confirmation page as intended. Let's try redirecting them again.
-		if ( strpos( $error->get_error_message(), '40061' ) !== false ) {
+		if ( strpos( $error->get_error_message(), '40061' ) !== false && ! is_order_received_page() ) {
 			$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 			$order_id = wc_get_order_id_by_order_key( $key );
 			$order    = wc_get_order( $order_id );
