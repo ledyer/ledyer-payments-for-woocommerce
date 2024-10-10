@@ -289,6 +289,7 @@ class Session {
 	 */
 	private function process_result( $result, $order = null ) {
 		if ( is_wp_error( $result ) ) {
+			$this->process_error( $result );
 			$this->clear_session();
 			return $result;
 		}
@@ -314,6 +315,36 @@ class Session {
 		return $result;
 	}
 
+	/**
+	 * Processes an error from the API request.
+	 *
+	 * @param \WP_Error $error The error object.
+	 * @return void
+	 */
+	private function process_error( $error ) {
+		// 40061 mean "Session is completed". If we're here, it means the customer wasn't redirected to confirmation page as intended. Let's try redirecting them again.
+		if ( strpos( $error->get_error_message(), '40061' ) !== false ) {
+			$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+			$order_id = wc_get_order_id_by_order_key( $key );
+			$order    = wc_get_order( $order_id );
+
+			if ( ! empty( $order ) ) {
+				$redirect_to = add_query_arg(
+					array(
+						'gateway' => 'ledyer_payments',
+						'key'     => $key,
+					),
+					$order->get_checkout_order_received_url()
+				);
+
+				$did_redirect = wp_safe_redirect( $redirect_to );
+				if ( $did_redirect ) {
+					function_exists( 'wc_clear_notices' ) && wc_clear_notices();
+				}
+				exit;
+			}
+		}
+	}
 
 	/**
 	 * Updates the session data in WooCommerce.
