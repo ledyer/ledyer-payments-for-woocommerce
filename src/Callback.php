@@ -55,39 +55,38 @@ class Callback {
 	public function callback_handler( $request ) {
 		$params = filter_var_array( $request->get_json_params(), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
+		$session_id = wc_get_var( $params['sessionId'] );
 		$event_type = wc_get_var( $params['eventType'] );
-		$payment_id = wc_get_var( $params['orderId'] );
-		$reference  = wc_get_var( $params['reference'] );
-		$store_id   = wc_get_var( $params['storeId'] );
 
 		$context = array(
 			'filter'   => current_filter(),
 			'function' => __FUNCTION__,
 			'request'  => $params,
 		);
-
 		Ledyer_Payments()->logger()->debug( 'Received callback.', $context );
 
-		// TODO: Add support for com.ledyer.authorization.pending.
 		if ( 'com.ledyer.order.create' !== $event_type ) {
 			Ledyer_Payments()->logger()->debug( 'Unsupported event type.', $context );
 			return new \WP_REST_Response( array(), 200 );
 		}
 
-		if ( empty( $payment_id ) ) {
+		if ( empty( $session_id ) ) {
 			Ledyer_Payments()->logger()->error( 'Missing payment ID.', $context );
-			return new \WP_Error( 'missing-payment-id', 'Missing payment ID.', array( 'status' => 404 ) );
+			return new \WP_REST_Response( array(), 400 );
+			// return new \WP_Error( 'missing_session_id', 'Missing session ID.', array( 'status' => 404 ) );
 		}
 
-		$order = $this->get_order_by_payment_id( $payment_id );
+		$order = $this->get_order_by_session_id( $session_id );
 		if ( empty( $order ) ) {
-			Ledyer_Payments()->logger()->error( "Order '{$payment_id}' not found.", $context );
-			return new \WP_Error( 'order-not-found', 'Order not found.', array( 'status' => 404 ) );
+			Ledyer_Payments()->logger()->error( "Order '{$session_id}' not found.", $context );
+			return new \WP_REST_Response( array(), 404 );
+			// return new \WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
 		}
 
-		$status = $this->schedule_callback( $payment_id, $event_type, $reference, $store_id ) ? 200 : 500;
+		$status = $this->schedule_callback( $session_id, $event_type ) ? 200 : 500;
 		if ( $status >= 500 ) {
-			return new \WP_Error( 'scheduling-failed', __( 'Failed to schedule callback.', 'ledyer-payments-for-woocommerce' ), array( 'status' => $status ) );
+			return new \WP_REST_Response( array(), $status );
+			// return new \WP_Error( 'scheduling_failed', __( 'Failed to schedule callback.', 'ledyer-payments-for-woocommerce' ), array( 'status' => $status ) );
 		}
 		return new \WP_REST_Response( array(), $status );
 	}
@@ -95,42 +94,38 @@ class Callback {
 	/**
 	 * Handles a scheduled callback.
 	 *
-	 * @param string $payment_id The payment ID.
-	 * @param string $event_type The event type.
-	 * @param string $reference The reference.
-	 * @param string $store_id The store ID.
+	 * @param \WC_Order $order The WC order.
+	 * @param string    $session_id The session ID.
+	 * @param string    $event_type The event type.
 	 * @return void
 	 */
-	public function handle_scheduled_callback( $payment_id, $event_type, $reference, $store_id ) {
+	public function handle_scheduled_callback( $order, $session_id ) {
 		$context = array(
-			'filter'   => current_filter(),
-			'function' => __FUNCTION__,
+			'filter'     => current_filter(),
+			'function'   => __FUNCTION__,
+			'session_id' => $session_id,
 		);
 
-		$order = $this->get_order_by_payment_id( $payment_id );
+		$order = $this->get_order_by_session_id( $session_id );
 		if ( empty( $order ) ) {
-			Ledyer_Payments()->logger()->error( "Order $payment_id not found.", $context );
+			Ledyer_Payments()->logger()->error( 'Order not found.', $context );
 			return;
-		}
-
-		if ( 'com.ledyer.order.create' === $event_type ) {
-			// TODO
 		}
 	}
 
 	/**
 	 * Schedule a callback for later processing.
 	 *
-	 * @param string $payment_id The payment ID.
+	 * @param string $session_id The session ID.
 	 * @param string $event_type The event type.
-	 * @param string $reference The reference.
-	 * @param string $store_id The store ID.
 	 * @return bool True if the callback was scheduled, false otherwise.
 	 */
-	private function schedule_callback( $payment_id, $event_type, $reference, $store_id ) {
+	private function schedule_callback( $session_id, $event_type ) {
 		$context = array(
-			'filter'   => current_filter(),
-			'function' => __FUNCTION__,
+			'filter'     => current_filter(),
+			'function'   => __FUNCTION__,
+			'session_id' => $session_id,
+			'event_type' => $event_type,
 		);
 
 		$hook              = 'ledyer_payments_scheduled_callback';
@@ -147,8 +142,8 @@ class Callback {
 		 */
 		foreach ( $scheduled_actions as $action ) {
 			$action_args = $action->get_args();
-			if ( $payment_id === $action_args['payment_id'] ) {
-				Ledyer_Payments()->logger()->debug( "The order $payment_id is already scheduled for processing.", $context );
+			if ( $session_id === $action_args['session_id'] ) {
+				Ledyer_Payments()->logger()->debug( 'The order is already scheduled for processing.', $context );
 				return true;
 			}
 		}
@@ -158,20 +153,12 @@ class Callback {
 			time() + 60,
 			$hook,
 			array(
-				'payment_id' => $payment_id,
-				'event_type' => $event_type,
-				'reference'  => $reference,
-				'store_id'   => $store_id,
+				'session_id' => $session_id,
 			)
 		);
 
-		Ledyer_Payments()->logger()->debug(
-			"Successfully scheduled callback for order $payment_id.",
-			array_merge(
-				$context,
-				array( 'id' => $did_schedule ),
-			)
-		);
+		$context['id'] = $did_schedule;
+		Ledyer_Payments()->logger()->debug( 'Successfully scheduled callback.', $context );
 
 		return 0 !== $did_schedule;
 	}
@@ -181,17 +168,17 @@ class Callback {
 	 *
 	 * For orders awaiting signatory, the order reference is used as the payment ID. Otherwise, the orderId from Ledyer.
 	 *
-	 * @param string $payment_id Payment ID or reference.
+	 * @param string $session_id Payment ID or reference.
 	 * @return int|bool Order ID or false if not found.
 	 */
-	private function get_order_by_payment_id( $payment_id ) {
-		$key    = '_ledyer_payments_payment_id';
+	private function get_order_by_session_id( $session_id ) {
+		$key    = '_wc_ledyer_session_id';
 		$orders = wc_get_orders(
 			array(
 				'meta_query' => array(
 					array(
 						'key'     => $key,
-						'value'   => $payment_id,
+						'value'   => $session_id,
 						'compare' => '=',
 					),
 				),
@@ -202,7 +189,7 @@ class Callback {
 		);
 
 		$order = reset( $orders );
-		if ( empty( $order ) || $payment_id !== $order->get_meta( $key ) ) {
+		if ( empty( $order ) || $session_id !== $order->get_meta( $key ) ) {
 			return false;
 		}
 
