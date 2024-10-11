@@ -53,40 +53,44 @@ class Callback {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function callback_handler( $request ) {
-		$params = filter_var_array( $request->get_json_params(), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$context = array(
+			'filter'   => current_filter(),
+			'function' => __FUNCTION__,
+		);
+
+		$params = $request->get_json_params();
+		if ( empty( $params ) ) {
+			Ledyer_Payments()->logger()->debug( 'Received callback without parameters.', $context );
+			return new \WP_Error( 'missing_params', 'Missing parameters.', array( 'status' => 400 ) );
+		}
+
+		$params             = filter_var_array( $params, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$context['request'] = $params;
 
 		$session_id = wc_get_var( $params['sessionId'] );
 		$event_type = wc_get_var( $params['eventType'] );
 
-		$context = array(
-			'filter'   => current_filter(),
-			'function' => __FUNCTION__,
-			'request'  => $params,
-		);
 		Ledyer_Payments()->logger()->debug( 'Received callback.', $context );
 
-		if ( 'com.ledyer.order.create' !== $event_type ) {
+		if ( 'com.ledyer.authorization.create' !== $event_type ) {
 			Ledyer_Payments()->logger()->debug( 'Unsupported event type.', $context );
 			return new \WP_REST_Response( array(), 200 );
 		}
 
 		if ( empty( $session_id ) ) {
 			Ledyer_Payments()->logger()->error( 'Missing payment ID.', $context );
-			return new \WP_REST_Response( array(), 400 );
-			// return new \WP_Error( 'missing_session_id', 'Missing session ID.', array( 'status' => 404 ) );
+			return new \WP_Error( 'missing_session_id', 'Missing session ID.', array( 'status' => 404 ) );
 		}
 
 		$order = $this->get_order_by_session_id( $session_id );
 		if ( empty( $order ) ) {
 			Ledyer_Payments()->logger()->error( "Order '{$session_id}' not found.", $context );
-			return new \WP_REST_Response( array(), 404 );
-			// return new \WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
+			return new \WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
 		}
 
-		$status = $this->schedule_callback( $session_id, $event_type ) ? 200 : 500;
+		$status = $this->schedule_callback( $session_id ) ? 200 : 500;
 		if ( $status >= 500 ) {
-			return new \WP_REST_Response( array(), $status );
-			// return new \WP_Error( 'scheduling_failed', __( 'Failed to schedule callback.', 'ledyer-payments-for-woocommerce' ), array( 'status' => $status ) );
+			return new \WP_Error( 'scheduling_failed', __( 'Failed to schedule callback.', 'ledyer-payments-for-woocommerce' ), array( 'status' => $status ) );
 		}
 		return new \WP_REST_Response( array(), $status );
 	}
@@ -94,12 +98,10 @@ class Callback {
 	/**
 	 * Handles a scheduled callback.
 	 *
-	 * @param \WC_Order $order The WC order.
-	 * @param string    $session_id The session ID.
-	 * @param string    $event_type The event type.
+	 * @param string $session_id The session ID.
 	 * @return void
 	 */
-	public function handle_scheduled_callback( $order, $session_id ) {
+	public function handle_scheduled_callback( $session_id ) {
 		$context = array(
 			'filter'     => current_filter(),
 			'function'   => __FUNCTION__,
@@ -111,21 +113,21 @@ class Callback {
 			Ledyer_Payments()->logger()->error( 'Order not found.', $context );
 			return;
 		}
+
+		// TODO: Handle scheduled action.
 	}
 
 	/**
 	 * Schedule a callback for later processing.
 	 *
 	 * @param string $session_id The session ID.
-	 * @param string $event_type The event type.
 	 * @return bool True if the callback was scheduled, false otherwise.
 	 */
-	private function schedule_callback( $session_id, $event_type ) {
+	private function schedule_callback( $session_id ) {
 		$context = array(
 			'filter'     => current_filter(),
 			'function'   => __FUNCTION__,
 			'session_id' => $session_id,
-			'event_type' => $event_type,
 		);
 
 		$hook              = 'ledyer_payments_scheduled_callback';
@@ -157,7 +159,7 @@ class Callback {
 			)
 		);
 
-		$context['id'] = $did_schedule;
+		$context['schedule_id'] = $did_schedule;
 		Ledyer_Payments()->logger()->debug( 'Successfully scheduled callback.', $context );
 
 		return 0 !== $did_schedule;
