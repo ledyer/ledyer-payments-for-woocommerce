@@ -39,6 +39,13 @@ class Plugin {
 	 */
 	private $settings = array();
 
+	/**
+	 * The gateway.
+	 *
+	 * @var Gateway
+	 */
+	private $gateway = null;
+
 
 	/**
 	 * Plugin constructor.
@@ -52,6 +59,8 @@ class Plugin {
 
 		$this->load_dependencies();
 		$this->setup_hooks();
+
+		$this->gateway = WC()->payment_gateways->payment_gateways()['ledyer_payments'];
 	}
 
 	/**
@@ -134,6 +143,15 @@ class Plugin {
 	 */
 	public function settings( $key ) {
 		return $this->settings[ $key ] ?? null;
+	}
+
+	/**
+	 * Get the gateway.
+	 *
+	 * @return Gateway
+	 */
+	public function gateway() {
+		return $this->gateway;
 	}
 
 	/**

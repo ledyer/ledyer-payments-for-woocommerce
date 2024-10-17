@@ -82,7 +82,7 @@ class Callback {
 			return new \WP_Error( 'missing_session_id', 'Missing session ID.', array( 'status' => 404 ) );
 		}
 
-		$order = $this->get_order_by_session_id( $session_id );
+		$order = Ledyer_Payments()->gateway()->get_order_by_session_id( $session_id );
 		if ( empty( $order ) ) {
 			Ledyer_Payments()->logger()->error( "Order '{$session_id}' not found.", $context );
 			return new \WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
@@ -108,14 +108,13 @@ class Callback {
 			'session_id' => $session_id,
 		);
 
-		$order = $this->get_order_by_session_id( $session_id );
+		$order = Ledyer_Payments()->gateway()->get_order_by_session_id( $session_id );
 		if ( empty( $order ) ) {
 			Ledyer_Payments()->logger()->error( 'Order not found.', $context );
 			return;
 		}
 
-		// TODO: Handle scheduled action.
-		$order->payment_complete();
+		Ledyer_Payments()->gateway()->confirm_order( $order, $context );
 	}
 
 	/**
@@ -164,38 +163,5 @@ class Callback {
 		Ledyer_Payments()->logger()->debug( 'Successfully scheduled callback.', $context );
 
 		return 0 !== $did_schedule;
-	}
-
-	/**
-	 * Get order by payment ID or reference.
-	 *
-	 * For orders awaiting signatory, the order reference is used as the payment ID. Otherwise, the orderId from Ledyer.
-	 *
-	 * @param string $session_id Payment ID or reference.
-	 * @return \WC_Order|bool The WC_Order or false if not found.
-	 */
-	private function get_order_by_session_id( $session_id ) {
-		$key    = '_wc_ledyer_session_id';
-		$orders = wc_get_orders(
-			array(
-				'meta_query' => array(
-					array(
-						'key'     => $key,
-						'value'   => $session_id,
-						'compare' => '=',
-					),
-				),
-				'limit'      => '1',
-				'orderby'    => 'date',
-				'order'      => 'DESC',
-			)
-		);
-
-		$order = reset( $orders );
-		if ( empty( $order ) || $session_id !== $order->get_meta( $key ) ) {
-			return false;
-		}
-
-		return $order ?? false;
 	}
 }

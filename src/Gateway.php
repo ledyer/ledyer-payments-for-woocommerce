@@ -151,6 +151,84 @@ class Gateway extends \WC_Payment_Gateway {
 	}
 
 	/**
+	 * Confirm the order.
+	 *
+	 * @param \WC_Order $order The WooCommerce order.
+	 * @param array     $context The logging context. Optional.
+	 * @return void
+	 */
+	public function confirm_order( $order, $context = array() ) {
+		if ( empty( $context ) ) {
+			$context = array(
+				'filter'   => current_filter(),
+				'function' => __FUNCTION__,
+			);
+		}
+
+		$session_id   = $order->get_meta( '_wc_ledyer_session_id' );
+		$ledyer_order = Ledyer_Payments()->api()->get_session( $session_id );
+		if ( is_wp_error( $ledyer_order ) ) {
+			$context['sessionId'] = $session_id;
+			Ledyer_Payments()->logger()->error( 'Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
+			return;
+		}
+
+		// The orderId is not available when the purchase is awaiting signatory.
+		$payment_id = wc_get_var( $ledyer_order['orderId'] );
+		if ( 'authorized' === $ledyer_order['state'] ) {
+			$order->payment_complete( $payment_id );
+		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
+			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
+		} else {
+			Ledyer_Payments()->logger()->warning( "Unknown order state: {$ledyer_order['state']}", $context );
+		}
+
+		$order->set_payment_method( $this->id );
+		$order->set_transaction_id( $payment_id );
+
+		// orderId not available if state is awaitingSignatory.
+		isset( $ledyer_order['orderId'] ) && $order->update_meta_data( '_wc_ledyer_order_id', $ledyer_order['orderId'] );
+
+		$env = wc_string_to_bool( Ledyer_Payments()->settings( 'test_mode' ) ?? 'no' ) ? 'sandbox' : 'production';
+		$order->update_meta_data( '_wc_ledyer_environment', $env );
+		$order->update_meta_data( '_wc_ledyer_session_id', $ledyer_order['id'] );
+		$order->save();
+	}
+
+	/**
+	 * Get order by payment ID or reference.
+	 *
+	 * For orders awaiting signatory, the order reference is used as the payment ID. Otherwise, the orderId from Ledyer.
+	 *
+	 * @param string $session_id Payment ID or reference.
+	 * @return \WC_Order|bool The WC_Order or false if not found.
+	 */
+	public function get_order_by_session_id( $session_id ) {
+		$key    = '_wc_ledyer_session_id';
+		$orders = wc_get_orders(
+			array(
+				'meta_query' => array(
+					array(
+						'key'     => $key,
+						'value'   => $session_id,
+						'compare' => '=',
+					),
+				),
+				'limit'      => '1',
+				'orderby'    => 'date',
+				'order'      => 'DESC',
+			)
+		);
+
+		$order = reset( $orders );
+		if ( empty( $order ) || $session_id !== $order->get_meta( $key ) ) {
+			return false;
+		}
+
+		return $order ?? false;
+	}
+
+	/**
 	 * Processes the payment on the thankyou page.
 	 *
 	 * @hook woocommerce_thankyou
@@ -185,35 +263,7 @@ class Gateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		$session_id   = $order->get_meta( '_wc_ledyer_session_id' );
-		$ledyer_order = Ledyer_Payments()->api()->get_session( $session_id );
-		if ( is_wp_error( $ledyer_order ) ) {
-			$context['sessionId'] = $session_id;
-			Ledyer_Payments()->logger()->error( 'Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
-			return;
-		}
-
-		// The orderId is not available when the purchase is awaiting signatory.
-		$payment_id = wc_get_var( $ledyer_order['orderId'] );
-		if ( 'authorized' === $ledyer_order['state'] ) {
-			$order->payment_complete( $payment_id );
-		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
-			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
-		} else {
-			Ledyer_Payments()->logger()->warning( "Unknown order state: {$ledyer_order['state']}", $context );
-		}
-
-		$order->set_payment_method( $this->id );
-		$order->set_transaction_id( $payment_id );
-
-		// orderId not available if state is awaitingSignatory.
-		isset( $ledyer_order['orderId'] ) && $order->update_meta_data( '_wc_ledyer_order_id', $ledyer_order['orderId'] );
-
-		$env = wc_string_to_bool( Ledyer_Payments()->settings( 'test_mode' ) ?? 'no' ) ? 'sandbox' : 'production';
-		$order->update_meta_data( '_wc_ledyer_environment', $env );
-		$order->update_meta_data( '_wc_ledyer_session_id', $ledyer_order['id'] );
-		$order->save();
-
+		$this->confirm_order( $order, $context );
 		Ledyer_Payments()->session()->clear_session( $order );
 	}
 }
