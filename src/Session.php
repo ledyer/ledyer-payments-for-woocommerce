@@ -289,8 +289,7 @@ class Session {
 	 */
 	private function process_result( $result, $order = null ) {
 		if ( is_wp_error( $result ) ) {
-			$this->process_error( $result );
-			$this->clear_session();
+			$this->process_error();
 			return $result;
 		}
 
@@ -318,17 +317,25 @@ class Session {
 	/**
 	 * Processes an error from the API request.
 	 *
-	 * @param \WP_Error $error The error object.
 	 * @return void
 	 */
-	private function process_error( $error ) {
-		// 40061 mean "Session is completed". If we're here, it means the customer wasn't redirected to confirmation page as intended. Let's try redirecting them again.
-		if ( strpos( $error->get_error_message(), '40061' ) !== false && ! is_order_received_page() ) {
-			$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-			$order_id = wc_get_order_id_by_order_key( $key );
-			$order    = wc_get_order( $order_id );
+	private function process_error() {
+		$session = Ledyer_Payments()->api()->get_session( $this->get_id() );
+		if ( is_wp_error( $session ) ) {
+			$this->clear_session();
+			return;
+		}
 
-			if ( ! empty( $order ) ) {
+		if ( is_checkout() && ! is_order_received_page() ) {
+			if ( 'authorized' === $session['state'] ) {
+				$order = Ledyer_Payments()->gateway()->get_order_by_session_id( $this->get_id() );
+				$key   = $order->get_order_key();
+				if ( empty( $order ) ) {
+					$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+					$order_id = wc_get_order_id_by_order_key( $key );
+					$order    = wc_get_order( $order_id );
+				}
+
 				$redirect_to = add_query_arg(
 					array(
 						'gateway' => 'ledyer_payments',
@@ -342,6 +349,14 @@ class Session {
 					function_exists( 'wc_clear_notices' ) && wc_clear_notices();
 				}
 				exit;
+			}
+
+			if ( 'expired' === $session['state'] ) {
+				$this->clear_session();
+
+				if ( isset( WC()->session ) ) {
+					WC()->session->reload_checkout = true;
+				}
 			}
 		}
 	}
