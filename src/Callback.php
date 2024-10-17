@@ -115,6 +115,7 @@ class Callback {
 		}
 
 		// TODO: Handle scheduled action.
+		$order->payment_complete();
 	}
 
 	/**
@@ -171,7 +172,7 @@ class Callback {
 	 * For orders awaiting signatory, the order reference is used as the payment ID. Otherwise, the orderId from Ledyer.
 	 *
 	 * @param string $session_id Payment ID or reference.
-	 * @return int|bool Order ID or false if not found.
+	 * @return \WC_Order|bool The WC_Order or false if not found.
 	 */
 	private function get_order_by_session_id( $session_id ) {
 		$key    = '_wc_ledyer_session_id';
@@ -195,6 +196,6 @@ class Callback {
 			return false;
 		}
 
-		return $order->get_id() ?? false;
+		return $order ?? false;
 	}
 }
