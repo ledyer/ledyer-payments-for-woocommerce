@@ -37,6 +37,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$this->title       = $this->get_option( 'title' );
 		$this->description = $this->get_option( 'description' );
 		$this->enabled     = $this->get_option( 'enabled' );
+		$this->has_fields  = true;
 
 		add_action(
 			'woocommerce_update_options_payment_gateways_' . $this->id,
@@ -60,6 +61,31 @@ class Gateway extends \WC_Payment_Gateway {
 
 		// Delete the access token whenever the settings are modified.
 		add_action( 'update_option_woocommerce_ledyer_payments_settings', array( __NAMESPACE__ . '\Settings', 'maybe_update_access_token' ) );
+	}
+
+	/**
+	 * Summary of payment_fields
+	 *
+	 * @return void
+	 */
+	public function payment_fields() {
+		parent::payment_fields();
+
+		woocommerce_form_field(
+			'billing_company_number',
+			array(
+				'type'              => 'text',
+				'class'             => array(
+					'form-row-wide',
+				),
+				'label'             => __( 'Company number', 'ledyer-payments-for-woocommerce' ),
+				'required'          => true,
+				'placeholder'       => __( 'Enter your organization number', 'ledyer-payments-for-woocommerce' ),
+				'custom_attributes' => array(
+					'required' => 'true',
+				),
+			)
+		);
 	}
 
 

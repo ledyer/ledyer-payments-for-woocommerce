@@ -13,7 +13,7 @@ jQuery( function ( $ ) {
      * @param {Object} customerData - The customer data.
      * @returns {void}
      */
-    const handleProceedWithLedyer = async (orderId, customerData) => {
+    const handleProceedWithLedyer = async ( orderId, customerData ) => {
         blockUI()
         try {
             const authArgs = { customer: { ...customerData }, sessionId }
@@ -88,7 +88,6 @@ jQuery( function ( $ ) {
         } catch ( error ) {
             unblockUI()
         }
-
     }
 
     const printNotice = ( message ) => {
@@ -220,5 +219,21 @@ jQuery( function ( $ ) {
 
     $( "body" ).on( "click", "input#place_order, button#place_order", ( e ) => {
         submitOrder( e )
+    } )
+
+    $( document ).ready( () => {
+        if ( isActiveGateway() ) {
+            $( "#billing_company_number_field" ).detach().insertAfter( "#billing_company_field" )
+        }
+
+        let field = $( "#billing_company_number_field" ).detach()
+        $( "body" ).on( "change", 'input[name="payment_method"]', function () {
+            if ( isActiveGateway() ) {
+                $( "#billing_company_number_field" ).remove()
+                field.insertAfter( "#billing_company_field" )
+            } else {
+                field = $( "#billing_company_number_field" ).detach()
+            }
+        } )
     } )
 } )
