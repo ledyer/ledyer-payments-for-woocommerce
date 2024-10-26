@@ -49,6 +49,9 @@ class Gateway extends \WC_Payment_Gateway {
 
 		add_filter( 'wc_get_template', array( $this, 'payment_categories' ), 10, 3 );
 		add_action( 'woocommerce_thankyou', array( $this, 'redirect_from_checkout' ) );
+
+		// Process the checkout before the payment is processed.
+		add_action( 'woocommerce_checkout_process', array( $this, 'process_checkout' ) );
 	}
 
 	/**
@@ -119,6 +122,23 @@ class Gateway extends \WC_Payment_Gateway {
 	 */
 	private function check_availability() {
 		return wc_string_to_bool( $this->enabled );
+	}
+
+	/**
+	 * Process the checkout before the payment is processed.
+	 *
+	 * @return void
+	 */
+	public function process_checkout() {
+		$chosen_gateway = WC()->session->get( 'chosen_payment_method' );
+		if ( $this->id !== $chosen_gateway ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( isset( $_POST['billing_company_number'] ) && empty( $_POST['billing_company_number'] ) ) {
+			wc_add_notice( __( 'Please enter your company number.', 'ledyer-payments-for-woocommerce' ), 'error' );
+		}
 	}
 
 	/**
