@@ -24,18 +24,18 @@ class Settings {
 	 */
 	public static function setting_fields() {
 		$settings = array(
-			'enabled'              => array(
+			'enabled'                       => array(
 				'title'       => __( 'Enable', 'ledyer-payments-for-woocommerce' ),
 				'label'       => __( 'Enable payment gateway', 'ledyer-payments-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'yes',
 			),
-			'account_settings'     => array(
+			'account_settings'              => array(
 				'title' => __( 'Account settings', 'ledyer-payments-for-woocommerce' ),
 				'type'  => 'title',
 			),
-			'client_id'            => array(
+			'client_id'                     => array(
 				'title'             => __( 'Client ID', 'ledyer-payments-for-woocommerce' ),
 				'type'              => 'text',
 				'default'           => '',
@@ -44,7 +44,7 @@ class Settings {
 					'autocomplete' => 'off',
 				),
 			),
-			'client_secret'        => array(
+			'client_secret'                 => array(
 				'title'             => __( 'Client secret', 'ledyer-payments-for-woocommerce' ),
 				'type'              => 'password',
 				'default'           => '',
@@ -53,7 +53,7 @@ class Settings {
 					'autocomplete' => 'off new-password',
 				),
 			),
-			'store_id'             => array(
+			'store_id'                      => array(
 				'title'             => __( 'Store ID', 'ledyer-payments-for-woocommerce' ),
 				'type'              => 'text',
 				'default'           => '',
@@ -62,24 +62,24 @@ class Settings {
 					'autocomplete' => 'new-password',
 				),
 			),
-			'test_mode'            => array(
+			'test_mode'                     => array(
 				'title'       => __( 'Test mode', 'ledyer-payments-for-woocommerce' ),
 				'label'       => 'Enable',
 				'type'        => 'checkbox',
 				'description' => __( 'While in test mode, the customer will NOT be charged. Test mode is useful for testing and debugging purposes.', 'ledyer-payments-for-woocommerce' ),
 				'default'     => 'no',
 			),
-			'checkout_settings'    => array(
+			'checkout_settings'             => array(
 				'title' => __( 'Checkout settings', 'ledyer-payments-for-woocommerce' ),
 				'type'  => 'title',
 			),
-			'title'                => array(
+			'title'                         => array(
 				'title'       => __( 'Title', 'ledyer-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'The payment gateway title (appears on checkout page if more than one payment method is available).', 'ledyer-payments-for-woocommerce' ),
 				'default'     => 'Ledyer Payments',
 			),
-			'redirect_description' => array(
+			'redirect_description'          => array(
 				'title'       => __( 'Description', 'ledyer-payments-for-woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'The payment gateway method description (appears on checkout page if more than one payment method is available).', 'ledyer-payments-for-woocommerce' ),
@@ -87,7 +87,17 @@ class Settings {
 				'placeholder' => __( 'Choose your payment method in our checkout.', 'ledyer-payments-for-woocommerce' ),
 				'class'       => 'redirect-only',
 			),
-			'security_level'       => array(
+			'organization_number_placement' => array(
+				'title'       => __( 'Organization number field', 'ledyer-payments-for-woocommerce' ),
+				'type'        => 'select',
+				'default'     => 'payment_form',
+				'description' => __( 'Where to display the required organization number field.', 'ledyer-payments-for-woocommerce' ),
+				'options'     => array(
+					'payment_form' => __( 'Payment form', 'ledyer-payments-for-woocommerce' ),
+					'billing_form' => __( 'Billing form', 'ledyer-payments-for-woocommerce' ),
+				),
+			),
+			'security_level'                => array(
 				'title'       => __( 'Security level', 'ledyer-payments-for-woocommerce' ),
 				'type'        => 'select',
 				'default'     => '200',
@@ -102,18 +112,18 @@ class Settings {
 					'300' => '300',
 				),
 			),
-			'troubleshooting'      => array(
+			'troubleshooting'               => array(
 				'title' => __( 'Troubleshooting', 'ledyer-payments-for-woocommerce' ),
 				'type'  => 'title',
 			),
-			'logging'              => array(
+			'logging'                       => array(
 				'title'       => __( 'Logging', 'ledyer-payments-for-woocommerce' ),
 				'label'       => 'Enable',
 				'type'        => 'checkbox',
 				'description' => __( 'Logging is required for troubleshooting any issues related to the plugin. It is recommended that you always have it enabled.', 'ledyer-payments-for-woocommerce' ),
 				'default'     => 'yes',
 			),
-			'extended_logging'     => array(
+			'extended_logging'              => array(
 				'title'       => __( 'Detailed logging', 'ledyer-payments-for-woocommerce' ),
 				'label'       => __( 'Enable', 'ledyer-payments-for-woocommerce' ),
 				'type'        => 'checkbox',
