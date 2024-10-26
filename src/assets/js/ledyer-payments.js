@@ -163,10 +163,6 @@ jQuery( function ( $ ) {
     }
 
     const submitOrder = ( e ) => {
-        if ( ! isActiveGateway() ) {
-            return false
-        }
-
         if ( $( "form.checkout" ).is( ".processing" ) ) {
             return false
         }
@@ -218,6 +214,16 @@ jQuery( function ( $ ) {
     }
 
     $( "body" ).on( "click", "input#place_order, button#place_order", ( e ) => {
+        if ( ! isActiveGateway() ) {
+            return
+        }
+
+        const organizationNumber = $( "#billing_company_number_field" ).val().trim()
+        if ( organizationNumber.length === 0 ) {
+            printNotice( gatewayParams.i18n.organizationNumberMissing )
+            return false
+        }
+
         submitOrder( e )
     } )
 

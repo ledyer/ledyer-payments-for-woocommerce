@@ -99,6 +99,9 @@ class Assets {
 				'gatewayId'                   => 'ledyer_payments',
 				'reference'                   => $reference,
 				'organizationNumberPlacement' => Ledyer_Payments()->settings( 'organization_number_placement' ),
+				'i18n'                        => array(
+					'organizationNumberMissing' => __( 'Please enter the organization number.', 'ledyer-payments-for-woocommerce' ),
+				),
 			)
 		);
 
