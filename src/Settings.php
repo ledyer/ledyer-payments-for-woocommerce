@@ -50,7 +50,7 @@ class Settings {
 				'default'           => '',
 				'description'       => __( 'Can be found or generated in the merchant portal (Settings → API credentials).', 'ledyer-payments-for-woocommerce' ),
 				'custom_attributes' => array(
-					'autocomplete' => 'webauthn',
+					'autocomplete' => 'off new-password',
 				),
 			),
 			'store_id'             => array(
