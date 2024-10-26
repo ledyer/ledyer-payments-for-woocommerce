@@ -153,6 +153,21 @@ jQuery( function ( $ ) {
         return false
     }
 
+    /**
+     * Update the nonce values.
+     *
+     * This is required when a guest user is logged in and the nonce values are updated since the nonce is associated with the user ID (0 for guests).
+     *
+     * @param {object} nonce An object containing the new nonce values.
+     */
+    const updateNonce = ( nonce ) => {
+        for ( const key in nonce ) {
+            if ( key in gatewayParams ) {
+                gatewayParams[ key ] = nonce[ key ]
+            }
+        }
+    }
+
     const submitOrderFail = ( error, message ) => {
         console.debug( "[%s] Woo failed to create the order. Reason: %s", error, message )
 
@@ -178,6 +193,10 @@ jQuery( function ( $ ) {
             dataType: "json",
             success: async ( data ) => {
                 try {
+                    if ( data.nonce ) {
+                        updateNonce( data.nonce )
+                    }
+
                     if ( "success" === data.result ) {
                         const { order_key: orderId, customer } = data
 
@@ -218,7 +237,7 @@ jQuery( function ( $ ) {
             return
         }
 
-        const organizationNumber = $( "#billing_company_number_field" ).val().trim()
+        const organizationNumber = $( "#billing_company_number" ).val().trim()
         if ( organizationNumber.length === 0 ) {
             printNotice( gatewayParams.i18n.organizationNumberMissing )
             return false

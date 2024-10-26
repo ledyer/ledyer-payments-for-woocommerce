@@ -136,10 +136,19 @@ class Gateway extends \WC_Payment_Gateway {
 		$order->update_meta_data( '_wc_ledyer_session_id', Ledyer_Payments()->session()->get_id() );
 		$order->save();
 
+		// Update the nonce only if WordPress determines it necessary, such as when a guest becomes signed in.
+		$nonce = array(
+			'changePaymentMethodNonce' => wp_create_nonce( 'ledyer_payments_change_payment_method' ),
+			'logToFileNonce'           => wp_create_nonce( 'ledyer_payments_wc_log_js' ),
+			'createOrderNonce'         => wp_create_nonce( 'ledyer_payments_create_order' ),
+			'pendingPaymentNonce'      => wp_create_nonce( 'ledyer_payments_pending_payment' ),
+		);
+
 		return array(
 			'order_key' => $order->get_order_key(),
 			'customer'  => $customer,
 			'redirect'  => $order->get_checkout_order_received_url(),
+			'nonce'     => $nonce,
 			'result'    => 'success',
 		);
 	}
