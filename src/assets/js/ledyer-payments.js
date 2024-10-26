@@ -239,7 +239,7 @@ jQuery( function ( $ ) {
 
         const organizationNumber = $( "#billing_company_number" ).val().trim()
         if ( organizationNumber.length === 0 ) {
-            printNotice( gatewayParams.i18n.organizationNumberMissing )
+            printNotice( gatewayParams.i18n.companyNumberMissing )
             return false
         }
 
@@ -254,7 +254,7 @@ jQuery( function ( $ ) {
         let field = $( "#billing_company_number_field" ).detach()
         $( "body" ).on( "change", 'input[name="payment_method"]', function () {
             // If "billing_form", remove the field from the payment_form and insert it after the company name field. Otherwise, if it is "payment_form", leave as-is.
-            if ( gatewayParams.organizationNumberPlacement === "billing_form" ) {
+            if ( gatewayParams.companyNumberPlacement === "billing_form" ) {
                 if ( isActiveGateway() ) {
                     $( "#billing_company_number_field" ).remove()
                     field.insertAfter( "#billing_company_field" )
