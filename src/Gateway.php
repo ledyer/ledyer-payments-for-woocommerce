@@ -204,10 +204,18 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @param int    $order_id The WooCommerce order id.
 	 * @param float  $amount The amount to refund.
 	 * @param string $reason The reason for the refund.
-	 * @return array|\WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
-		return array();
+		if ( function_exists( 'lom_refund_ledyer_order' ) ) {
+			return lom_refund_ledyer_order( $order_id, $amount, ledyerOm()->api );
+		}
+
+		$order = wc_get_order( $order_id );
+		$order->add_order_note( __( 'The Ledyer order management plugin is missing. No refund issued.', 'ledyer-payments-for-woocommerce' ) );
+		$order->save();
+
+		return false;
 	}
 
 	/**
