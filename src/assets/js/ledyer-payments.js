@@ -232,6 +232,18 @@ jQuery( function ( $ ) {
         } )
     }
 
+    let field = $( "#billing_company_number_field" ).detach()
+    const moveCompanyNumberField = () => {
+        if ( gatewayParams.companyNumberPlacement === "billing_form" ) {
+            if ( isActiveGateway() ) {
+                $( "#billing_company_number_field" ).detach()
+                field.insertAfter( "#billing_company_field" )
+            } else {
+                field = $( "#billing_company_number_field" ).detach()
+            }
+        }
+    }
+
     $( "body" ).on( "click", "input#place_order, button#place_order", ( e ) => {
         if ( ! isActiveGateway() ) {
             return
@@ -247,21 +259,16 @@ jQuery( function ( $ ) {
     } )
 
     $( document ).ready( () => {
-        if ( isActiveGateway() ) {
-            $( "#billing_company_number_field" ).detach().insertAfter( "#billing_company_field" )
-        }
-
-        let field = $( "#billing_company_number_field" ).detach()
-        $( "body" ).on( "change", 'input[name="payment_method"]', function () {
-            // If "billing_form", remove the field from the payment_form and insert it after the company name field. Otherwise, if it is "payment_form", leave as-is.
-            if ( gatewayParams.companyNumberPlacement === "billing_form" ) {
-                if ( isActiveGateway() ) {
-                    $( "#billing_company_number_field" ).remove()
-                    field.insertAfter( "#billing_company_field" )
-                } else {
-                    field = $( "#billing_company_number_field" ).detach()
-                }
+        // If "billing_form", remove the field from the payment_form and insert it after the company name field. Otherwise, if it is "payment_form", leave as-is.
+        if ( gatewayParams.companyNumberPlacement === "billing_form" ) {
+            if ( isActiveGateway() ) {
+                $( "#billing_company_number_field" ).detach().insertAfter( "#billing_company_field" )
             }
-        } )
+
+            // Required whenever the customer changes payment method.
+            $( "body" ).on( "change", 'input[name="payment_method"]', moveCompanyNumberField )
+            // Required when the checkout is initially loaded, and Ledyer is the chosen gateway.
+            $( "body" ).on( "updated_checkout", moveCompanyNumberField )
+        }
     } )
 } )

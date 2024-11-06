@@ -86,7 +86,7 @@ class Gateway extends \WC_Payment_Gateway {
 				),
 				'label'             => __( 'Company number', 'ledyer-payments-for-woocommerce' ),
 				'required'          => true,
-				'placeholder'       => __( 'Organization number', 'ledyer-payments-for-woocommerce' ),
+				'placeholder'       => __( 'Company number', 'ledyer-payments-for-woocommerce' ),
 				'custom_attributes' => array(
 					'required' => 'true',
 				),
