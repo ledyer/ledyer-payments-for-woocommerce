@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Class Gateway.
  */
 class Gateway extends \WC_Payment_Gateway {
+
 	/**
 	 * Class constructor.
 	 */

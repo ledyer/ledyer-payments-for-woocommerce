@@ -3,6 +3,11 @@ namespace Krokedil\Ledyer\Payments\Requests\Helpers;
 
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce\Order\Order as BaseOrder;
 use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
+/**
+ * Class Order
+ *
+ * @package Krokedil\Ledyer\Payments\Requests\Helpers
+ */
 class Order extends BaseOrder {
 	/**
 	 * Order constructor.
@@ -51,6 +56,11 @@ class Order extends BaseOrder {
 		return $item->get_total_amount() + $item->get_total_tax_amount();
 	}
 
+	/**
+	 * Get the order lines.
+	 *
+	 * @return array
+	 */
 	public function get_order_lines() {
 		$order_lines = array();
 
@@ -82,10 +92,20 @@ class Order extends BaseOrder {
 		return $order_lines;
 	}
 
+	/**
+	 * Get the country.
+	 *
+	 * @return string
+	 */
 	public function get_country() {
 		return $this->order->get_billing_country();
 	}
 
+	/**
+	 * Get the currency code.
+	 *
+	 * @return string The currency code.
+	 */
 	public function get_currency() {
 		return $this->order->get_currency();
 	}
