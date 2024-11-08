@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e76fbcd4efce60e13e6fdcc9ccf9e3dc",
+    "content-hash": "28eb9d0f9b41f72536a7b62145d957ac",
     "packages": [
         {
             "name": "krokedil/woocommerce",
-            "version": "1.7.0",
+            "version": "dev-develop-sku",
             "source": {
                 "type": "git",
                 "url": "https://github.com/krokedil/woocommerce.git",
-                "reference": "aec179c982067431582c4a9c199ee9c6fd986d91"
+                "reference": "8d9c3897e4928fcb33655120706508aa6c1c9680"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/aec179c982067431582c4a9c199ee9c6fd986d91",
-                "reference": "aec179c982067431582c4a9c199ee9c6fd986d91",
+                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/8d9c3897e4928fcb33655120706508aa6c1c9680",
+                "reference": "8d9c3897e4928fcb33655120706508aa6c1c9680",
                 "shasum": ""
             },
             "require-dev": {
@@ -48,10 +48,10 @@
             ],
             "description": "A library package for Krokedils plugins that contains helper methods when working with WooCommerce.",
             "support": {
-                "source": "https://github.com/krokedil/woocommerce/tree/1.7.0",
+                "source": "https://github.com/krokedil/woocommerce/tree/develop-sku",
                 "issues": "https://github.com/krokedil/woocommerce/issues"
             },
-            "time": "2024-09-11T09:02:40+00:00"
+            "time": "2024-11-08T01:08:46+00:00"
         },
         {
             "name": "krokedil/wp-api",
@@ -98,7 +98,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "krokedil/woocommerce": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
