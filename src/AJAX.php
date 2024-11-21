@@ -104,7 +104,7 @@ class AJAX {
 			'order_key'  => $order_key,
 			'payment_id' => $result['orderId'],
 		);
-		Ledyer_Payments()->logger()->debug( 'Redirecting to ' . $redirect_to, $context );
+		Ledyer_Payments()->logger()->debug( 'Successfully placed order with Ledyer, sending redirect URL to: ' . $redirect_to, $context );
 
 		wp_send_json_success( array( 'location' => $redirect_to ) );
 	}
@@ -137,7 +137,8 @@ class AJAX {
 			'order_id'  => $order_id,
 			'order_key' => $order_key,
 		);
-		Ledyer_Payments()->logger()->debug( 'Redirecting to ' . $redirect_to, $context );
+		Ledyer_Payments()->logger()->debug( 'Successfully placed order with Ledyer, sending redirect URL to: ' . $redirect_to, $context );
+
 		wp_send_json_success( array( 'location' => $redirect_to ) );
 	}
 }
