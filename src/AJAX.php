@@ -40,10 +40,7 @@ class AJAX {
 	 * @return void
 	 */
 	public static function ledyer_payments_wc_log_js() {
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
-		if ( ! wp_verify_nonce( $nonce, 'ledyer_payments_wc_log_js' ) ) {
-			wp_send_json_error( 'bad_nonce' );
-		}
+		check_ajax_referer( 'ledyer_payments_wc_log_js', 'nonce' );
 
 		$message = sanitize_text_field( filter_input( INPUT_POST, 'message', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
 		$prefix  = sanitize_text_field( filter_input( INPUT_POST, 'reference', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
@@ -61,10 +58,7 @@ class AJAX {
 	 * @return void
 	 */
 	public static function ledyer_payments_create_order() {
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
-		if ( ! wp_verify_nonce( $nonce, 'ledyer_payments_create_order' ) ) {
-			wp_send_json_error( 'bad_nonce' );
-		}
+		check_ajax_referer( 'ledyer_payments_create_order', 'nonce' );
 
 		$auth_token = filter_input( INPUT_POST, 'auth_token', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$order_key  = filter_input( INPUT_POST, 'order_key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
@@ -110,10 +104,7 @@ class AJAX {
 	 * @return void
 	 */
 	public static function ledyer_payments_pending_payment() {
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
-		if ( ! wp_verify_nonce( $nonce, 'ledyer_payments_pending_payment' ) ) {
-			wp_send_json_error( 'bad_nonce' );
-		}
+		check_ajax_referer( 'ledyer_payments_pending_payment', 'nonce' );
 
 		$order_key = filter_input( INPUT_POST, 'order_key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		if ( empty( $order_key ) ) {
