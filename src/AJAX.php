@@ -68,10 +68,21 @@ class AJAX {
 		}
 
 		$order_id = wc_get_order_id_by_order_key( $order_key );
-		$order    = wc_get_order( $order_id );
+		$context  = array(
+			'function'  => __FUNCTION__,
+			'order_id'  => $order_id,
+			'order_key' => $order_key,
+		);
+
+		$order = wc_get_order( $order_id );
+		if ( empty( $order ) ) {
+			Ledyer_Payments()->logger()->error( 'Order not found', $context );
+			wp_send_json_error( 'Order not found' );
+		}
 
 		$result = Ledyer_Payments()->api()->create_order( $order_id, $auth_token );
 		if ( is_wp_error( $result ) ) {
+			Ledyer_Payments()->logger()->error( "Create order failed: {$result->get_error_message()}", $context );
 			wp_send_json_error( $result->get_error_message() );
 		}
 
