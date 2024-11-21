@@ -9,9 +9,10 @@ function customize_php_scoper_config( array $config ): array {
 	$config['exclude-constants'][] = 'LEDYER_PAYMENTS_PLUGIN_URL';
 	$config['exclude-classes'][] = 'WooCommerce';
 	$config['exclude-classes'][] = 'WC_Product';
+	$config['exclude-classes'][] = 'WP_Error';
 
 	$functions = array(
-		'Ledyer',
+		'Ledyer_Payments',
 	);
 
 	$config['exclude-functions'] = array_merge( $config['exclude-functions'] ?? array(), $functions );
