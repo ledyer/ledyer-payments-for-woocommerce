@@ -122,8 +122,19 @@ class AJAX {
 			wp_send_json_error( 'Missing params. Received: ' . wp_json_encode( $order_key ) );
 		}
 
-		$order_id    = wc_get_order_id_by_order_key( $order_key );
-		$order       = wc_get_order( $order_id );
+		$order_id = wc_get_order_id_by_order_key( $order_key );
+		$context  = array(
+			'function'  => __FUNCTION__,
+			'order_id'  => $order_id,
+			'order_key' => $order_key,
+		);
+
+		$order = wc_get_order( $order_id );
+		if ( empty( $order ) ) {
+			Ledyer_Payments()->logger()->error( 'Order not found', $context );
+			wp_send_json_error( 'Order not found' );
+		}
+
 		$redirect_to = add_query_arg(
 			array(
 				'gateway' => 'ledyer_payments',
