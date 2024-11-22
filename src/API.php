@@ -110,11 +110,13 @@ class API {
 			foreach ( $wp_error->get_error_messages() as $error ) {
 				$message = $error;
 				if ( is_array( $error ) ) {
-					$error   = array_filter( $error );
-					$message = implode( ' ', $error );
+					$error = array_filter( $error );
+					foreach ( $error as $message ) {
+						$print( $message, 'error' );
+					}
+				} else {
+					$print( $message, 'error' );
 				}
-
-				$print( $message, 'error' );
 			}
 		}
 	}
