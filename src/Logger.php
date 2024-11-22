@@ -91,4 +91,54 @@ class Logger {
 	public function debug( $message, $additional_context = array() ) {
 		$this->log( $message, 'debug', $additional_context );
 	}
+
+	/**
+	 * Log an emergency message.
+	 *
+	 * @param string $message Emergency message.
+	 * @param array  $additional_context Additional context to log.
+	 */
+	public function emergency( $message, $additional_context = array() ) {
+		$this->log( $message, 'emergency', $additional_context );
+	}
+
+	/**
+	 * Log an alert message.
+	 *
+	 * @param string $message Alert message.
+	 * @param array  $additional_context Additional context to log.
+	 */
+	public function alert( $message, $additional_context = array() ) {
+		$this->log( $message, 'alert', $additional_context );
+	}
+
+	/**
+	 * Log a critical message.
+	 *
+	 * @param string $message Critical message.
+	 * @param array  $additional_context Additional context to log.
+	 */
+	public function critical( $message, $additional_context = array() ) {
+		$this->log( $message, 'critical', $additional_context );
+	}
+
+	/**
+	 * Log a notice message.
+	 *
+	 * @param string $message Notice message.
+	 * @param array  $additional_context Additional context to log.
+	 */
+	public function notice( $message, $additional_context = array() ) {
+		$this->log( $message, 'notice', $additional_context );
+	}
+
+	/**
+	 * Log an info message.
+	 *
+	 * @param string $message Info message.
+	 * @param array  $additional_context Additional context to log.
+	 */
+	public function info( $message, $additional_context = array() ) {
+		$this->log( $message, 'info', $additional_context );
+	}
 }
