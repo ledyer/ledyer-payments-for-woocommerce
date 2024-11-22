@@ -1,7 +1,7 @@
 <?php
 namespace Krokedil\Ledyer\Payments\Requests\POST;
 
-use Krokedil\Ledyer\Payments\Requests\POST;
+use Krokedil\Ledyer\Payments\Requests\POSTRequest;
 use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
 
 /**

@@ -1,7 +1,7 @@
 <?php
 namespace Krokedil\Ledyer\Payments\Requests\GET;
 
-use Krokedil\Ledyer\Payments\Requests\GET;
+use Krokedil\Ledyer\Payments\Requests\GETRequest;
 
 /**
  * Create order request class.
