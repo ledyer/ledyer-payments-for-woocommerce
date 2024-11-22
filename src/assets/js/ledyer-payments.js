@@ -240,10 +240,12 @@ jQuery( function ( $ ) {
         submitOrderFail: ( error, message ) => {
             console.debug( "[%s] Woo failed to create the order. Reason: %s", error, message )
 
-            LedyerPayments.printNotice( message )
             LedyerPayments.unblockUI()
             $( document.body ).trigger( "checkout_error" )
             $( document.body ).trigger( "update_checkout" )
+            
+            // update_checkout clears notice.
+            LedyerPayments.printNotice(message)
         },
 
         /**
