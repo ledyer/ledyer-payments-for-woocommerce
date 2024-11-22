@@ -9,7 +9,7 @@ use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
  *
  * Acknowledges an order.
  */
-class CreateOrder extends POST {
+class CreateOrder extends POSTRequest {
 
 	/**
 	 * CreateSession constructor.
