@@ -66,7 +66,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$this->form_fields = Settings::setting_fields();
 
 		// Delete the access token whenever the settings are modified.
-		add_action( 'update_option_woocommerce_ledyer_payments_settings', array( __NAMESPACE__ . '\Settings', 'maybe_update_access_token' ) );
+		add_action( 'update_option_woocommerce_ledyer_payments_settings', array( Settings::class, 'maybe_update_access_token' ) );
 	}
 
 	/**
