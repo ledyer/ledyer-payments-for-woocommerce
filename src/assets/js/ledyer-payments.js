@@ -63,10 +63,7 @@ jQuery( function ( $ ) {
                 const authArgs = { customer: { ...customerData }, sessionId: LedyerPayments.sessionId }
                 const authResponse = await window.ledyer.payments.api.authorize( authArgs )
 
-                if ( authResponse ) {
-                    // if status is authorized, the order is ready to be created
                     if ( authResponse.state === "authorized" ) {
-                        // Get the authorization token to create an order from your backend
                         const authToken = authResponse.authorizationToken
                         const { state } = authResponse
                         const { createOrderUrl, createOrderNonce } = LedyerPayments.params
@@ -125,8 +122,6 @@ jQuery( function ( $ ) {
                         } )
                     }
 
-                    // redirect the user to a success page
-                }
             } catch ( error ) {
                 LedyerPayments.unblockUI()
             }
