@@ -269,7 +269,7 @@ class Session {
 			$hash = md5( wp_json_encode( array( $total, $billing_address, $shipping_address, $shipping_method ) ) );
 		} else {
 			// Get values to use for the combined hash calculation.
-			$total            = $order->get_total( 'kp_total' );
+			$total            = $order->get_total( 'edit' );
 			$billing_address  = $order->get_address( 'billing' );
 			$shipping_address = $order->get_address( 'shipping' );
 
