@@ -60,8 +60,8 @@ class Plugin {
 		$this->load_dependencies();
 		$this->setup_hooks();
 
-		// No need to check if isset. Always available as long as the plugin is active.
-		$this->gateway = WC()->payment_gateways->payment_gateways()['ledyer_payments'];
+		$gateways      = WC()->payment_gateways->payment_gateways();
+		$this->gateway = $gateways['ledyer_payments'] ?? null;
 	}
 
 	/**
