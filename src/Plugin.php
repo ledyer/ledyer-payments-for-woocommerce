@@ -195,7 +195,7 @@ class Plugin {
 	 * @return array.
 	 */
 	public function add_gateways( $methods ) {
-		$methods[] = __NAMESPACE__ . '\Gateway';
+		$methods[] = Gateway::class;
 		return $methods;
 	}
 }
