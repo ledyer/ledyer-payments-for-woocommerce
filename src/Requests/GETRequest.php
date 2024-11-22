@@ -7,14 +7,11 @@ namespace Krokedil\Ledyer\Payments\Requests;
 abstract class GETRequest extends BaseRequest {
 
 	/**
-	 * GET constructor.
+	 * The request method.
 	 *
-	 * @param array $args Arguments that should be accessible from within the request.
+	 * @var string
 	 */
-	public function __construct( $args = array() ) {
-		parent::__construct( $args );
-		$this->method = 'GET';
-	}
+	public $method = 'GET';
 
 	/**
 	 * The args second parameter in wp_remote_request.
