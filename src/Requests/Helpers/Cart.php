@@ -93,6 +93,24 @@ class Cart extends CartBase {
 	}
 
 	/**
+	 * Get the locale.
+	 *
+	 * @return string
+	 */
+	public function get_locale() {
+		$locale = get_locale();
+		switch ( $locale ) {
+			case 'fi':
+				$locale = 'fi_fi';
+				break;
+			default:
+				break;
+		}
+
+		return str_replace( '_', '-', $locale );
+	}
+
+	/**
 	 * Get the country.
 	 *
 	 * @return string

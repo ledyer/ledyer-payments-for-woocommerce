@@ -31,7 +31,7 @@ class UpdateSession extends POSTRequest {
 		return array(
 			'country'                 => WC()->customer->get_billing_country(),
 			'currency'                => get_woocommerce_currency(),
-			'locale'                  => str_replace( '_', '-', get_locale() ),
+			'locale'                  => $cart->get_locale(),
 			'orderLines'              => $cart->get_order_lines(),
 			'reference'               => Ledyer_Payments()->session()->get_reference(),
 			'settings'                => array(

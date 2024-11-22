@@ -37,7 +37,7 @@ class CreateOrder extends POSTRequest {
 			'country'                 => WC()->customer->get_billing_country(),
 			'currency'                => $order->get_currency(),
 			'customer'                => $order->get_customer(),
-			'locale'                  => str_replace( '_', '-', get_locale() ),
+			'locale'                  => $order->get_locale(),
 			'orderLines'              => $order->get_order_lines(),
 			'reference'               => $order->get_reference(),
 			'storeId'                 => Ledyer_Payments()->settings( 'store_id' ),
