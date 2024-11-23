@@ -58,75 +58,22 @@ jQuery( function ( $ ) {
          * @returns {void}
          */
         handleProceedWithLedyer: async ( orderId, customerData ) => {
-            LedyerPayments.blockUI()
             try {
+                LedyerPayments.blockUI()
+
                 const authArgs = { customer: { ...customerData }, sessionId: LedyerPayments.sessionId }
                 const authResponse = await window.ledyer.payments.api.authorize( authArgs )
 
-                    if ( authResponse.state === "authorized" ) {
-                        const authToken = authResponse.authorizationToken
-                        const { state } = authResponse
-                        const { createOrderUrl, createOrderNonce } = LedyerPayments.params
-
-                        $.ajax( {
-                            type: "POST",
-                            url: createOrderUrl,
-                            dataType: "json",
-                            data: {
-                                state,
-                                order_key: orderId,
-                                auth_token: authToken,
-                                nonce: createOrderNonce,
-                            },
-                            success: ( data ) => {
-                                const {
-                                    data: { location },
-                                } = data
-                                window.location = location
-                            },
-                            error: ( jqXHR, textStatus, errorThrown ) => {
-                                console.debug( "Error:", textStatus, errorThrown )
-                                console.debug( "Response:", jqXHR.responseText )
-
-                                submitOrderFail(
-                                    "createOrder",
-                                    "The payment was successful, but the order could not be created.",
-                                )
-                            },
-                        } )
-                    } else if ( authResponse.state === "awaitingSignatory" ) {
-                        const { pendingPaymentUrl, pendingPaymentNonce } = LedyerPayments.params
-                        $.ajax( {
-                            type: "POST",
-                            url: pendingPaymentUrl,
-                            dataType: "json",
-                            data: {
-                                order_key: orderId,
-                                nonce: pendingPaymentNonce,
-                            },
-                            success: ( data ) => {
-                                const {
-                                    data: { location },
-                                } = data
-                                window.location = location
-                            },
-                            error: ( jqXHR, textStatus, errorThrown ) => {
-                                console.debug( "Error:", textStatus, errorThrown )
-                                console.debug( "Response:", jqXHR.responseText )
-
-                                LedyerPayments.submitOrderFail(
-                                    "pendingPayment",
-                                    "The payment is pending payment. Failed to redirect to order received page.",
-                                )
-                            },
-                        } )
-                    }
-
+                if ( authResponse.state === "authorized" ) {
+                    LedyerPayments.createOrder( authResponse, orderId )
+                } else if ( authResponse.state === "awaitingSignatory" ) {
+                    LedyerPayments.createPendingOrder( authResponse, orderId )
+                }
             } catch ( error ) {
+                console.error( error )
+            } finally {
                 LedyerPayments.unblockUI()
             }
-
-            LedyerPayments.unblockUI()
         },
 
         /**
@@ -221,6 +168,7 @@ jQuery( function ( $ ) {
          * This is required when a guest user is logged in and the nonce values are updated since the nonce is associated with the user ID (0 for guests).
          *
          * @param {object} nonce An object containing the new nonce values.
+         * @returns {void}
          */
         updateNonce: ( nonce ) => {
             for ( const key in nonce ) {
@@ -243,9 +191,9 @@ jQuery( function ( $ ) {
             LedyerPayments.unblockUI()
             $( document.body ).trigger( "checkout_error" )
             $( document.body ).trigger( "update_checkout" )
-            
+
             // update_checkout clears notice.
-            LedyerPayments.printNotice(message)
+            LedyerPayments.printNotice( message )
         },
 
         /**
@@ -307,6 +255,98 @@ jQuery( function ( $ ) {
                         LedyerPayments.logToFile( "AJAX error | Failed to parse error message.", "error" )
                     }
                     LedyerPayments.submitOrderFail( "AJAX", "Something went wrong, please try again." )
+                },
+            } )
+        },
+
+        /**
+         * Informs Ledyer to proceed with creating the order in their system.
+         *
+         * This is done after the payment has been authorized, and we've verified that the order was created in WooCommerce.
+         *
+         * @throws {Error} If the authResponse state is not "authorized".
+         *
+         * @param {object} authResponse The response from the authorization request.
+         * @param {string} orderId The WC order ID.
+         * @returns {void}
+         */
+        createOrder: ( authResponse, orderId ) => {
+            if ( authResponse.state !== "authorized" ) {
+                throw new Error(
+                    `createOrder was called with an invalid state. Received ${ authResponse.state }, expected 'authorized'.`,
+                )
+            }
+
+            const authToken = authResponse.authorizationToken
+            const { state } = authResponse
+            const { createOrderUrl, createOrderNonce } = LedyerPayments.params
+
+            $.ajax( {
+                type: "POST",
+                url: createOrderUrl,
+                dataType: "json",
+                data: {
+                    state,
+                    order_key: orderId,
+                    auth_token: authToken,
+                    nonce: createOrderNonce,
+                },
+                success: ( data ) => {
+                    const {
+                        data: { location },
+                    } = data
+                    window.location = location
+                },
+                error: ( jqXHR, textStatus, errorThrown ) => {
+                    console.debug( "Error:", textStatus, errorThrown )
+                    console.debug( "Response:", jqXHR.responseText )
+
+                    submitOrderFail( "createOrder", "The payment was successful, but the order could not be created." )
+                },
+            } )
+        },
+
+        /**
+         * Informs Ledyer to proceed with creating the pending payment order in their system.
+         *
+         * This is done after the payment has been authorized, and we've verified that the order was created in WooCommerce.
+         *
+         * @throws {Error} If the authResponse state is not "awaitingSignatory".
+         *
+         * @param {string} orderId The WC order ID.
+         * @returns {void}
+         */
+        createPendingOrder: ( authResponse, orderId ) => {
+            if ( authResponse.state !== "awaitingSignatory" ) {
+                throw new Error(
+                    `createPendingOrder was called with an invalid state. Received ${ authResponse.state }, expected 'awaitingSignatory'.`,
+                )
+            }
+
+            const { pendingPaymentUrl, pendingPaymentNonce } = LedyerPayments.params
+
+            $.ajax( {
+                type: "POST",
+                url: pendingPaymentUrl,
+                dataType: "json",
+                data: {
+                    order_key: orderId,
+                    nonce: pendingPaymentNonce,
+                },
+                success: ( data ) => {
+                    const {
+                        data: { location },
+                    } = data
+                    window.location = location
+                },
+                error: ( jqXHR, textStatus, errorThrown ) => {
+                    console.debug( "Error:", textStatus, errorThrown )
+                    console.debug( "Response:", jqXHR.responseText )
+
+                    LedyerPayments.submitOrderFail(
+                        "pendingPayment",
+                        "The payment is pending payment. Failed to redirect to order received page.",
+                    )
                 },
             } )
         },
