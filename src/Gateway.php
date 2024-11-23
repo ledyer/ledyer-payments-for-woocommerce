@@ -250,7 +250,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$ledyer_order = Ledyer_Payments()->api()->get_session( $session_id );
 		if ( is_wp_error( $ledyer_order ) ) {
 			$context['sessionId'] = $session_id;
-			Ledyer_Payments()->logger()->error( 'Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
+			Ledyer_Payments()->logger()->error( '[CONFIRM]: Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
 			return;
 		}
 
@@ -261,7 +261,7 @@ class Gateway extends \WC_Payment_Gateway {
 		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
 			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
 		} else {
-			Ledyer_Payments()->logger()->warning( "Unknown order state: {$ledyer_order['state']}", $context );
+			Ledyer_Payments()->logger()->warning( "[CONFIRM: Unknown order state: {$ledyer_order['state']}", $context );
 		}
 
 		$order->set_payment_method( $this->id );
@@ -334,16 +334,16 @@ class Gateway extends \WC_Payment_Gateway {
 			'order_id' => $order_id,
 			'key'      => $key,
 		);
-		Ledyer_Payments()->logger()->debug( 'Customer refreshed or redirected to thankyou page.', $context );
+		Ledyer_Payments()->logger()->debug( '[MAYBE_CONFIRM]: Customer refreshed or redirected to thankyou page.', $context );
 
 		$order = wc_get_order( $order_id );
 		if ( ! hash_equals( $order->get_order_key(), $key ) ) {
-			Ledyer_Payments()->logger()->error( 'Order key mismatch.', $context );
+			Ledyer_Payments()->logger()->error( '[MAYBE_CONFIRM]: Order key mismatch.', $context );
 			return;
 		}
 
 		if ( ! empty( $order->get_date_paid() ) ) {
-			Ledyer_Payments()->logger()->debug( 'Order already paid. Customer probably refreshed thankyou page.', $context );
+			Ledyer_Payments()->logger()->debug( '[MAYBE_CONFIRM]: Order already paid. Customer probably refreshed thankyou page.', $context );
 			return;
 		}
 

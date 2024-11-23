@@ -60,7 +60,7 @@ class Callback {
 
 		$params = $request->get_json_params();
 		if ( empty( $params ) ) {
-			Ledyer_Payments()->logger()->debug( 'Received callback without parameters.', $context );
+			Ledyer_Payments()->logger()->debug( '[CALLBACK]: Received callback without parameters.', $context );
 			return new \WP_Error( 'missing_params', 'Missing parameters.', array( 'status' => 400 ) );
 		}
 
@@ -70,21 +70,21 @@ class Callback {
 		$session_id = wc_get_var( $params['sessionId'] );
 		$event_type = wc_get_var( $params['eventType'] );
 
-		Ledyer_Payments()->logger()->debug( 'Received callback.', $context );
+		Ledyer_Payments()->logger()->debug( '[CALLBACK]: Received callback.', $context );
 
 		if ( 'com.ledyer.authorization.create' !== $event_type ) {
-			Ledyer_Payments()->logger()->debug( 'Unsupported event type.', $context );
+			Ledyer_Payments()->logger()->debug( '[CALLBACK]: Unsupported event type.', $context );
 			return new \WP_REST_Response( array(), 200 );
 		}
 
 		if ( empty( $session_id ) ) {
-			Ledyer_Payments()->logger()->error( 'Missing payment ID.', $context );
+			Ledyer_Payments()->logger()->error( '[CALLBACK]: Missing payment ID.', $context );
 			return new \WP_Error( 'missing_session_id', 'Missing session ID.', array( 'status' => 404 ) );
 		}
 
 		$order = Ledyer_Payments()->gateway()->get_order_by_session_id( $session_id );
 		if ( empty( $order ) ) {
-			Ledyer_Payments()->logger()->error( "Order '{$session_id}' not found.", $context );
+			Ledyer_Payments()->logger()->error( "[CALLBACK]: Order '{$session_id}' not found.", $context );
 			return new \WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
 		}
 
@@ -110,7 +110,7 @@ class Callback {
 
 		$order = Ledyer_Payments()->gateway()->get_order_by_session_id( $session_id );
 		if ( empty( $order ) ) {
-			Ledyer_Payments()->logger()->error( 'Order not found.', $context );
+			Ledyer_Payments()->logger()->error( '[CALLBACK]: Order not found.', $context );
 			return;
 		}
 
@@ -145,7 +145,7 @@ class Callback {
 		foreach ( $scheduled_actions as $action ) {
 			$action_args = $action->get_args();
 			if ( $session_id === $action_args['session_id'] ) {
-				Ledyer_Payments()->logger()->debug( 'The order is already scheduled for processing.', $context );
+				Ledyer_Payments()->logger()->debug( '[CALLBACK]: The order is already scheduled for processing.', $context );
 				return true;
 			}
 		}
@@ -160,7 +160,7 @@ class Callback {
 		);
 
 		$context['schedule_id'] = $did_schedule;
-		Ledyer_Payments()->logger()->debug( 'Successfully scheduled callback.', $context );
+		Ledyer_Payments()->logger()->debug( '[CALLBACK]: Successfully scheduled callback.', $context );
 
 		return 0 !== $did_schedule;
 	}

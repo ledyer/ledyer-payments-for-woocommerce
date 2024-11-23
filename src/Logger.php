@@ -46,10 +46,7 @@ class Logger {
 	 * @param array  $additional_context Additional context to log.
 	 */
 	public function log( $message, $level = 'info', $additional_context = array() ) {
-		$context = array(
-			'source'    => 'ledyer_payments',
-			'reference' => Ledyer_Payments()->session()->get_reference(),
-		);
+		$context = array( 'source' => 'ledyer_payments' );
 
 		if ( ! empty( $additional_context ) ) {
 			$context = array_merge( $context, $additional_context );

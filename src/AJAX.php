@@ -42,7 +42,7 @@ class AJAX {
 	public static function ledyer_payments_wc_log_js() {
 		check_ajax_referer( 'ledyer_payments_wc_log_js', 'nonce' );
 
-		$message = sanitize_text_field( filter_input( INPUT_POST, 'message', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
+		$message = '[AJAX]: ' . sanitize_text_field( filter_input( INPUT_POST, 'message', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
 		$prefix  = sanitize_text_field( filter_input( INPUT_POST, 'reference', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
 		$level   = sanitize_text_field( filter_input( INPUT_POST, 'level', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) ?? 'notice';
 		if ( ! empty( $message ) ) {
@@ -76,13 +76,13 @@ class AJAX {
 
 		$order = wc_get_order( $order_id );
 		if ( empty( $order ) ) {
-			Ledyer_Payments()->logger()->error( 'Order not found', $context );
+			Ledyer_Payments()->logger()->error( '[AJAX]: Order not found', $context );
 			wp_send_json_error( 'Order not found' );
 		}
 
 		$result = Ledyer_Payments()->api()->create_order( $order_id, $auth_token );
 		if ( is_wp_error( $result ) ) {
-			Ledyer_Payments()->logger()->error( "Create order failed: {$result->get_error_message()}", $context );
+			Ledyer_Payments()->logger()->error( "[AJAX]: Create order failed: {$result->get_error_message()}", $context );
 			wp_send_json_error( $result->get_error_message() );
 		}
 
@@ -104,7 +104,7 @@ class AJAX {
 			'order_key'  => $order_key,
 			'payment_id' => $result['orderId'],
 		);
-		Ledyer_Payments()->logger()->debug( 'Successfully placed order with Ledyer, sending redirect URL to: ' . $redirect_to, $context );
+		Ledyer_Payments()->logger()->debug( '[AJAX]: Successfully placed order with Ledyer, sending redirect URL to: ' . $redirect_to, $context );
 
 		wp_send_json_success( array( 'location' => $redirect_to ) );
 	}
@@ -131,7 +131,7 @@ class AJAX {
 
 		$order = wc_get_order( $order_id );
 		if ( empty( $order ) ) {
-			Ledyer_Payments()->logger()->error( 'Order not found', $context );
+			Ledyer_Payments()->logger()->error( '[AJAX]: Order not found', $context );
 			wp_send_json_error( 'Order not found' );
 		}
 
@@ -148,7 +148,7 @@ class AJAX {
 			'order_id'  => $order_id,
 			'order_key' => $order_key,
 		);
-		Ledyer_Payments()->logger()->debug( 'Successfully placed order with Ledyer, sending redirect URL to: ' . $redirect_to, $context );
+		Ledyer_Payments()->logger()->debug( '[AJAX]: Successfully placed order with Ledyer, sending redirect URL to: ' . $redirect_to, $context );
 
 		wp_send_json_success( array( 'location' => $redirect_to ) );
 	}
