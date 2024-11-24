@@ -16,13 +16,14 @@ abstract class BaseRequest extends Request {
 	 */
 	public function __construct( $args = array() ) {
 		$settings = get_option( 'woocommerce_ledyer_payments_settings', array() );
+		$env      = $this->settings['test_mode'] ? 'sandbox' : 'live';
 		$config   = array(
 			'slug'               => 'ledyer_payments',
 			'plugin_version'     => LEDYER_PAYMENTS_VERSION,
 			'plugin_short_name'  => 'LP',
 			'logging_enabled'    => wc_string_to_bool( $settings['logging'] ),
 			'extended_debugging' => wc_string_to_bool( $settings['extended_logging'] ),
-			'base_url'           => 'https://api.sandbox.ledyer.com',
+			'base_url'           => "https://api.{$env}.ledyer.com",
 		);
 
 		parent::__construct( $config, $settings, $args );
