@@ -58,6 +58,27 @@ class Gateway extends \WC_Payment_Gateway {
 	}
 
 	/**
+	 * Check if the gateway is the chosen payment method.
+	 *
+	 * Due to inconsistencies in the gateway name (e.g., ledyer_payments vs. ledyer_payments_invoice), we need to check for the presence of 'ledyer_payments'.
+	 *
+	 * @param int|null|\WC_Order $order_id The WooCommerce order or its id.
+	 * @return bool
+	 */
+	private function is_chosen_gateway( $order_id = null ) {
+		if ( $order_id instanceof \WC_Order ) {
+			$chosen_gateway = $order_id->get_payment_method();
+		} elseif ( ! empty( $order_id ) ) {
+			$order          = wc_get_order( $order_id );
+			$chosen_gateway = $order->get_payment_method();
+		} else {
+			$chosen_gateway = WC()->session->get( 'chosen_payment_method' );
+		}
+
+		return strpos( $chosen_gateway, 'ledyer_payments' ) !== false;
+	}
+
+	/**
 	 * Initialize settings fields.
 	 *
 	 * @return void
@@ -134,8 +155,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function process_checkout() {
-		$chosen_gateway = WC()->session->get( 'chosen_payment_method' );
-		if ( $this->id !== $chosen_gateway ) {
+		if ( ! $this->is_chosen_gateway() ) {
 			return;
 		}
 
@@ -154,7 +174,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 */
 	public function process_custom_checkout_fields( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( $order->get_payment_method() !== $this->id ) {
+		if ( ! $this->is_chosen_gateway( $order ) ) {
 			return;
 		}
 
