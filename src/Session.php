@@ -82,7 +82,7 @@ class Session {
 		}
 
 		// Resume existing session.
-		$this->resume_session();
+		$this->resume();
 
 		// Check if we got an order.
 		$order  = $this->get_order( $order );
@@ -181,7 +181,7 @@ class Session {
 	 *
 	 * @return bool Whether there was a session to resume.
 	 */
-	private function resume_session() {
+	public function resume() {
 		$session = isset( WC()->session ) ? json_decode( WC()->session->get( self::SESSION_KEY ), true ) : null;
 		if ( ! empty( $session ) ) {
 			$this->gateway_session    = $session['gateway_session'];

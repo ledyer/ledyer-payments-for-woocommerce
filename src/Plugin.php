@@ -121,6 +121,7 @@ class Plugin {
 	 * @return Session
 	 */
 	public function session() {
+		$this->session->resume();
 		return $this->session;
 	}
 
