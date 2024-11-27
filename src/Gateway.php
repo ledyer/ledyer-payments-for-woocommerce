@@ -163,6 +163,11 @@ class Gateway extends \WC_Payment_Gateway {
 		if ( isset( $_POST['billing_company_number'] ) && empty( $_POST['billing_company_number'] ) ) {
 			wc_add_notice( __( 'Please enter your company number.', 'ledyer-payments-for-woocommerce' ), 'error' );
 		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( isset( $_POST['billing_company'] ) && empty( $_POST['billing_company'] ) ) {
+			wc_add_notice( __( 'Please enter your company name.', 'ledyer-payments-for-woocommerce' ), 'error' );
+		}
 	}
 
 	/**
