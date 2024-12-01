@@ -50,13 +50,13 @@ jQuery( function ( $ ) {
          * @returns {void}
          */
         moveCompanyNumberField: () => {
-            let field = $( "#billing_company_number_field" ).detach()
             if ( LedyerPayments.params.companyNumberPlacement === "billing_form" ) {
                 if ( LedyerPayments.isActiveGateway() ) {
-                    $( "#billing_company_number_field" ).detach()
+                    let field = $( "#billing_company_number_field" ).detach()
                     field.insertAfter( "#billing_company_field" )
+                    field.show()
                 } else {
-                    field = $( "#billing_company_number_field" ).detach()
+                    $( "#billing_company_number_field" ).hide()
                 }
             }
         },
