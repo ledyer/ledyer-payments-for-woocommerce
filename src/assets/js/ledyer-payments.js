@@ -7,11 +7,8 @@ jQuery( function ( $ ) {
         params: LedyerPaymentsParams,
         gatewayId: LedyerPaymentsParams.gatewayId,
         sessionId: LedyerPaymentsParams.sessionId,
-        i18n: {
-            required: "*",
-            optional: "(optional)",
-        },
-
+        i18n: {},
+        
         init: () => {
             $( "body" ).on( "click", "input#place_order, button#place_order", ( e ) => {
                 // Do not allow a purchase to go through if ANY error occurs.
@@ -86,10 +83,13 @@ jQuery( function ( $ ) {
          * @returns {void}
          */
         makeCheckoutFieldRequired: ( id ) => {
-            const i18n = $( ".required" ).first().text() ?? LedyerPayments.i18n.required
+            const i18n = LedyerPayments.i18n.required ?? $( ".required" ).first().text()
             if ( i18n.length === 0 ) {
                 // None of the fields are optional, there is nothing to do.
                 return false
+            } else {
+                // Save the i18n for later use.
+                LedyerPayments.i18n.required = i18n
             }
 
             const field = $( `#${ id }` )
@@ -129,10 +129,13 @@ jQuery( function ( $ ) {
          * @returns {void}
          */
         makeCheckoutFieldOptional: ( id, restore = true ) => {
-            const i18n = $( ".optional" ).first().text() ?? LedyerPayments.i18n.optional
+            const i18n = LedyerPayments.i18n.optional ?? $( ".optional" ).first().text()
             if ( i18n.length === 0 ) {
                 // None of the fields are required, there is nothing to do.
                 return false
+            } else {
+                // Save the i18n for later use.
+                LedyerPayments.i18n.optional = i18n
             }
 
             const field = $( `#${ id }` )
