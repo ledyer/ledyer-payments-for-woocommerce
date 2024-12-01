@@ -101,6 +101,7 @@ class Assets {
 				'companyNumberPlacement'    => Ledyer_Payments()->settings( 'company_number_placement' ),
 				'i18n'                      => array(
 					'companyNumberMissing' => __( 'Please enter a company number.', 'ledyer-payments-for-woocommerce' ),
+					'genericError'         => __( 'Something went wrong. Please try again or contact the store.', 'ledyer-payments-for-woocommerce' ),
 				),
 			)
 		);

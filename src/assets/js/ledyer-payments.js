@@ -8,21 +8,26 @@ jQuery( function ( $ ) {
         gatewayId: LedyerPaymentsParams.gatewayId,
         sessionId: LedyerPaymentsParams.sessionId,
 
-
-
         init: () => {
             $( "body" ).on( "click", "input#place_order, button#place_order", ( e ) => {
-                if ( ! LedyerPayments.isActiveGateway() ) {
-                    return
-                }
+                // Do not allow a purchase to go through if ANY error occurs.
+                try {
+                    if ( ! LedyerPayments.isActiveGateway() ) {
+                        return
+                    }
 
-                const organizationNumber = $( "#billing_company_number" ).val().trim()
-                if ( organizationNumber.length === 0 ) {
-                    LedyerPayments.printNotice( LedyerPayments.params.i18n.companyNumberMissing )
+                    const organizationNumber = $( "#billing_company_number" ).val().trim()
+                    if ( organizationNumber.length === 0 ) {
+                        LedyerPayments.printNotice( LedyerPayments.params.i18n.companyNumberMissing )
+                        return false
+                    }
+
+                    LedyerPayments.submitOrder( e )
+                } catch ( error ) {
+                    LedyerPayments.printNotice( LedyerPayments.params.i18n.genericError )
+                    console.error( error )
                     return false
                 }
-
-                LedyerPayments.submitOrder( e )
             } )
 
             $( document ).ready( () => {
