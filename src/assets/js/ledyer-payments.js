@@ -38,7 +38,7 @@ jQuery( function ( $ ) {
                 // If "billing_form", remove the field from the payment_form and insert it after the company name field. Otherwise, if it is "payment_form", leave as-is.
                 if ( LedyerPayments.params.companyNumberPlacement === "billing_form" ) {
                     if ( LedyerPayments.isActiveGateway() ) {
-                        $( "#billing_company_number_field" ).detach().insertAfter( "#billing_company_field" )
+                        $( "#billing_company_number_field" ).remove()
                     }
 
                     // Required whenever the customer changes payment method.
@@ -48,6 +48,7 @@ jQuery( function ( $ ) {
                 }
 
                 // Make the company name field required if Ledyer is the chosen gateway.
+                LedyerPayments.toggleCheckoutField()
                 $( "body" ).on( "change", 'input[name="payment_method"]', LedyerPayments.toggleCheckoutField )
                 $( "body" ).on( "updated_checkout", LedyerPayments.toggleCheckoutField )
             } )
@@ -60,9 +61,7 @@ jQuery( function ( $ ) {
         moveCompanyNumberField: () => {
             if ( LedyerPayments.params.companyNumberPlacement === "billing_form" ) {
                 if ( LedyerPayments.isActiveGateway() ) {
-                    let field = $( "#billing_company_number_field" ).detach()
-                    field.insertAfter( "#billing_company_field" )
-                    field.show()
+                    $( "#billing_company_number_field" ).detach().insertAfter( "#billing_company_field" ).show()
                 } else {
                     $( "#billing_company_number_field" ).hide()
                 }
