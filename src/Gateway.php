@@ -282,6 +282,8 @@ class Gateway extends \WC_Payment_Gateway {
 		// The orderId is not available when the purchase is awaiting signatory.
 		$payment_id = wc_get_var( $ledyer_order['orderId'] );
 		if ( 'authorized' === $ledyer_order['state'] ) {
+			// orderId not available if state is awaitingSignatory.
+			$order->update_meta_data( '_wc_ledyer_order_id', $payment_id );
 			$order->payment_complete( $payment_id );
 		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
 			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
@@ -291,9 +293,6 @@ class Gateway extends \WC_Payment_Gateway {
 
 		$order->set_payment_method( $this->id );
 		$order->set_transaction_id( $payment_id );
-
-		// orderId not available if state is awaitingSignatory.
-		isset( $ledyer_order['orderId'] ) && $order->update_meta_data( '_wc_ledyer_order_id', $ledyer_order['orderId'] );
 
 		$env = wc_string_to_bool( Ledyer_Payments()->settings( 'test_mode' ) ?? 'no' ) ? 'sandbox' : 'production';
 		$order->update_meta_data( '_wc_ledyer_environment', $env );

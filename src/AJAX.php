@@ -86,7 +86,7 @@ class AJAX {
 			wp_send_json_error( $result->get_error_message() );
 		}
 
-		$payment_id = $result['orderId'];
+		$payment_id = $result['orderId'] ?? null;
 		$order->update_meta_data( 'ledyer_payments_payment_id', $payment_id );
 		$order->save();
 
@@ -102,7 +102,7 @@ class AJAX {
 			'function'   => __FUNCTION__,
 			'order_id'   => $order_id,
 			'order_key'  => $order_key,
-			'payment_id' => $result['orderId'],
+			'payment_id' => $payment_id,
 		);
 		Ledyer_Payments()->logger()->debug( '[AJAX]: Successfully placed order with Ledyer, sending redirect URL to: ' . $redirect_to, $context );
 
