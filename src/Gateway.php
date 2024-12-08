@@ -70,9 +70,9 @@ class Gateway extends \WC_Payment_Gateway {
 			$chosen_gateway = $order_id->get_payment_method();
 		} elseif ( ! empty( $order_id ) ) {
 			$order          = wc_get_order( $order_id );
-			$chosen_gateway = $order->get_payment_method();
+			$chosen_gateway = empty( $order ) ? '' : $order->get_payment_method();
 		} else {
-			$chosen_gateway = WC()->session->get( 'chosen_payment_method' );
+			$chosen_gateway = ! isset( WC()->session ) ? '' : WC()->session->get( 'chosen_payment_method' );
 		}
 
 		return strpos( $chosen_gateway, 'ledyer_payments' ) !== false;
