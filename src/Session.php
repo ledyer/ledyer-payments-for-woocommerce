@@ -182,6 +182,10 @@ class Session {
 	 * @return bool Whether there was a session to resume.
 	 */
 	public function resume() {
+		if ( ! empty( $this->gateway_session ) ) {
+			return true;
+		}
+
 		$session = isset( WC()->session ) ? json_decode( WC()->session->get( self::SESSION_KEY ), true ) : null;
 		if ( ! empty( $session ) ) {
 			$this->gateway_session    = $session['gateway_session'];
