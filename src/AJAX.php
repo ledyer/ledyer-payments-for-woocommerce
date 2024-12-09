@@ -83,7 +83,7 @@ class AJAX {
 		$result = Ledyer_Payments()->api()->create_order( $order_id, $auth_token );
 		if ( is_wp_error( $result ) ) {
 			Ledyer_Payments()->logger()->error( "[AJAX]: Create order failed: {$result->get_error_message()}", $context );
-			wp_send_json_error( $result->get_error_message() );
+			wp_send_json_error( $result );
 		}
 
 		$payment_id = $result['orderId'] ?? null;

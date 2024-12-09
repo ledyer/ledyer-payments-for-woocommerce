@@ -8,7 +8,7 @@ jQuery( function ( $ ) {
         gatewayId: LedyerPaymentsParams.gatewayId,
         sessionId: LedyerPaymentsParams.sessionId,
         i18n: {},
-        
+
         init: () => {
             $( "body" ).on( "click", "input#place_order, button#place_order", ( e ) => {
                 // Do not allow a purchase to go through if ANY error occurs.
@@ -410,7 +410,17 @@ jQuery( function ( $ ) {
                     auth_token: authToken,
                     nonce: createOrderNonce,
                 },
+                async: false,
                 success: ( data ) => {
+                    if ( ! data.success ) {
+                        LedyerPayments.submitOrderFail(
+                            "createOrder",
+                            "The payment was successful, but the order could not be created.",
+                        )
+
+                        return
+                    }
+
                     const {
                         data: { location },
                     } = data
@@ -420,7 +430,11 @@ jQuery( function ( $ ) {
                     console.debug( "Error:", textStatus, errorThrown )
                     console.debug( "Response:", jqXHR.responseText )
 
-                    submitOrderFail( "createOrder", "The payment was successful, but the order could not be created." )
+                    console.error( errorThrown )
+                    LedyerPayments.submitOrderFail(
+                        "createOrder",
+                        "The payment was successful, but the order could not be created.",
+                    )
                 },
             } )
         },
@@ -452,7 +466,17 @@ jQuery( function ( $ ) {
                     order_key: orderId,
                     nonce: pendingPaymentNonce,
                 },
+                async: false,
                 success: ( data ) => {
+                    if ( ! data.success ) {
+                        LedyerPayments.submitOrderFail(
+                            "pendingPayment",
+                            "The payment is pending payment. Failed to redirect to order received page.",
+                        )
+
+                        return
+                    }
+
                     const {
                         data: { location },
                     } = data
