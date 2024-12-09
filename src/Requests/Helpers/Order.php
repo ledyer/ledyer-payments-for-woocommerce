@@ -177,6 +177,12 @@ class Order extends BaseOrder {
 			),
 		);
 
+		// Ledyer specifically requires that the company number is formatted with a dash.
+		$company_id = $customer['companyId'];
+		if ( ! empty( $company_id ) && false === strpos( $company_id, '-', 0 ) ) {
+			$customer['companyId'] = substr_replace( $customer['companyId'], '-', -4, 0 );
+		}
+
 		return $customer;
 	}
 }
