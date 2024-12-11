@@ -191,7 +191,8 @@ class Session {
 			return true;
 		}
 
-		$session = isset( WC()->session ) ? json_decode( WC()->session->get( self::SESSION_KEY ), true ) : null;
+		$session_data = isset( WC()->session ) ? WC()->session->get( self::SESSION_KEY ) : null;
+		$session      = ! empty( $session_data ) ? json_decode( $session_data, true ) : null;
 		if ( ! empty( $session ) ) {
 			$this->gateway_session    = $session['gateway_session'];
 			$this->session_hash       = $session['session_hash'];
