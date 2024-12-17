@@ -16,9 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Callback {
 
-	public const REST_API_NAMESPACE = 'krokedil/ledyer/payments/v1';
-	public const REST_API_ENDPOINT  = '/callback';
-	public const API_ENDPOINT       = 'wp-json/' . self::REST_API_NAMESPACE . self::REST_API_ENDPOINT;
+	public const REST_API_NAMESPACE              = 'krokedil/ledyer/payments/v1';
+	public const REST_API_ENDPOINT               = '/callback';
+	public const REST_API_NOTIFICATIONS_ENDPOINT = '/notifications/';
+	public const API_ENDPOINT                    = 'wp-json/' . self::REST_API_NAMESPACE . self::REST_API_ENDPOINT;
 
 
 	/**
@@ -27,6 +28,7 @@ class Callback {
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_action( 'ledyer_payments_scheduled_callback', array( $this, 'handle_scheduled_callback' ) );
+		add_action( 'schedule_process_notification', array( $this, 'process_notification' ), 10, 2 );
 	}
 
 	/**
@@ -41,6 +43,16 @@ class Callback {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'callback_handler' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			self::REST_API_NAMESPACE,
+			self::REST_API_NOTIFICATIONS_ENDPOINT,
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'handle_notification' ),
 				'permission_callback' => '__return_true',
 			)
 		);
@@ -163,5 +175,78 @@ class Callback {
 		Ledyer_Payments()->logger()->debug( '[CALLBACK]: Successfully scheduled callback.', $context );
 
 		return 0 !== $did_schedule;
+	}
+
+	/**
+	 * Handles notification callbacks
+	 *
+	 * @param $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function handle_notification( $request ) {
+		$context = array(
+			'filter'   => current_filter(),
+			'function' => __FUNCTION__,
+		);
+
+		$request_body = json_decode( $request->get_body() );
+		$response     = new \WP_REST_Response();
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			Ledyer_Payments()->logger()->debug( '[NOTIFICATION]: Request body isn\'t valid JSON string.', $context );
+			$response->set_status( 400 );
+			return $response;
+		}
+
+		$ledyer_event_type = $request_body->{'eventType'};
+		$ledyer_order_id   = $request_body->{'orderId'};
+
+		if ( $ledyer_event_type === null || $ledyer_order_id === null ) {
+			Ledyer_Payments()->logger()->debug( '[NOTIFICATION]: Request body doesn\'t hold orderId and eventType data.', $context );
+			$response->set_status( 400 );
+			return $response;
+		}
+
+		$schedule_id = as_schedule_single_action( time() + 120, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
+		Ledyer_Payments()->logger()->debug( '[NOTIFICATION]: Enqueued notification: ' . $ledyer_event_type . ', schedule id:' . $schedule_id, $context );
+		$response->set_status( 200 );
+		return $response;
+	}
+
+	public function process_notification( $ledyer_order_id, $ledyer_event_type ) {
+		$context = array(
+			'filter'   => current_filter(),
+			'function' => __FUNCTION__,
+		);
+
+		Ledyer_Payments()->logger()->debug( '[NOTIFICATION]: process notification: ' . $ledyer_order_id, $context );
+
+		$orders = wc_get_orders(
+			array(
+				'meta_query'   => array(
+					array(
+						'key'     => '_wc_ledyer_order_id',
+						'value'   => $ledyer_order_id,
+						'compare' => '=',
+					),
+				),
+				'date_created' => '>' . ( time() - MONTH_IN_SECONDS ),
+			)
+		);
+
+		$order_id = isset( $orders[0] ) ? $orders[0]->get_id() : null;
+		$order    = wc_get_order( $order_id );
+
+		if ( ! is_object( $order ) ) {
+			Ledyer_Payments()->logger()->debug( '[NOTIFICATION]: Could not find woo order with ledyer id: ' . $ledyer_order_id, $context );
+			return;
+		}
+
+		if ( 'com.ledyer.order.ready_for_capture' === $ledyer_event_type ) {
+			$order->update_meta_data( '_ledyer_ready_for_capture', true );
+			$order->save();
+			return;
+		}
 	}
 }
