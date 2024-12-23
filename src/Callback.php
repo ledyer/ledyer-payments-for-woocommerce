@@ -28,7 +28,7 @@ class Callback {
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_action( 'ledyer_payments_scheduled_callback', array( $this, 'handle_scheduled_callback' ) );
-		add_action( 'schedule_process_notification', array( $this, 'process_notification' ), 10, 2 );
+		add_action( 'ledyer_payments_schedule_process_notification', array( $this, 'process_notification' ), 10, 2 );
 	}
 
 	/**
@@ -180,7 +180,7 @@ class Callback {
 	/**
 	 * Handles notification callbacks
 	 *
-	 * @param $request
+	 * @param \WP_REST_Request $request The REST request.
 	 *
 	 * @return \WP_REST_Response
 	 */
@@ -190,7 +190,7 @@ class Callback {
 			'function' => __FUNCTION__,
 		);
 
-		$request_body = json_decode( $request->get_body() );
+		$request_body = json_decode( $request->get_body(), true );
 		$response     = new \WP_REST_Response();
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
@@ -199,8 +199,8 @@ class Callback {
 			return $response;
 		}
 
-		$ledyer_event_type = $request_body->{'eventType'};
-		$ledyer_order_id   = $request_body->{'orderId'};
+		$ledyer_event_type = $request_body['eventType'] ?? null;
+		$ledyer_order_id   = $request_body['orderId'] ?? null;
 
 		if ( $ledyer_event_type === null || $ledyer_order_id === null ) {
 			Ledyer_Payments()->logger()->debug( '[NOTIFICATION]: Request body doesn\'t hold orderId and eventType data.', $context );
