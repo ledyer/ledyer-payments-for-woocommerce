@@ -188,7 +188,6 @@ class Callback {
 	 * @return void
 	 */
 	public function handle_order_ready_for_capture_callback( $ledyer_order_id, $ledyer_event_type ) {
-		error_log( 'handle_order_ready_for_capture_callback' );
 		$context = array(
 			'filter'   => current_filter(),
 			'function' => __FUNCTION__,
@@ -233,7 +232,6 @@ class Callback {
 	 * @return bool True if the callback was scheduled, false otherwise.
 	 */
 	public function schedule_order_ready_for_capture_callback( $ledyer_order_id, $event_type ) {
-		error_log( 'schedule_order_ready_for_capture_callback' );
 		$context = array(
 			'filter'          => current_filter(),
 			'function'        => __FUNCTION__,
