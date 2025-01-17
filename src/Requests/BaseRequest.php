@@ -52,7 +52,7 @@ abstract class BaseRequest extends Request {
 
 		$token = base64_encode( "{$this->settings['client_id']}:{$this->settings['client_secret']}" ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
-		$env          = $this->settings['test_mode'] ? 'sandbox' : 'live';
+		$env          = wc_string_to_bool( $this->settings['test_mode'] ) ? 'sandbox' : 'live';
 		$base_url     = "https://auth.{$env}.ledyer.com/oauth/token";
 		$request_args = array(
 			'headers' => array(
