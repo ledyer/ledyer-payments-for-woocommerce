@@ -57,7 +57,9 @@ class Gateway extends \WC_Payment_Gateway {
 		add_action( 'woocommerce_checkout_update_order_meta', array( $this, 'process_custom_checkout_fields' ) );
 
 		// Add the custom fields to the billing fields.
-		add_action( 'woocommerce_billing_fields', array( $this, 'additional_billing_fields' ) );
+		if ( $this->is_available() ) {
+			add_action( 'woocommerce_billing_fields', array( $this, 'additional_billing_fields' ) );
+		}
 
 		// Add the custom fields to the admin billing fields.
 		add_action( 'woocommerce_admin_billing_fields', array( $this, 'additional_admin_billing_fields' ) );
