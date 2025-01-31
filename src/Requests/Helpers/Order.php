@@ -151,8 +151,8 @@ class Order extends BaseOrder {
 			'firstName'       => $customer_data->get_billing_first_name(),
 			'lastName'        => $customer_data->get_billing_last_name(),
 			'phone'           => $customer_data->get_billing_phone(),
-			'reference1'      => $this->get_reference(),
-			'reference2'      => '',
+			'reference1'      => $this->order->get_meta( '_billing_customer_reference1' ),
+			'reference2'      => $this->order->get_meta( '_billing_customer_reference2' ),
 			'billingAddress'  => array(
 				'attentionName' => $customer_data->get_billing_first_name(),
 				'city'          => $customer_data->get_billing_city(),
