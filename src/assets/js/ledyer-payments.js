@@ -72,8 +72,12 @@ jQuery( function ( $ ) {
         toggleCheckoutField: () => {
             if ( LedyerPayments.isActiveGateway() ) {
                 LedyerPayments.makeCheckoutFieldRequired( "billing_company_field" )
+                $( "#billing_customer_reference1_field" ).show()
+                $( "#billing_customer_reference2_field" ).show()
             } else {
                 LedyerPayments.makeCheckoutFieldOptional( "billing_company_field", false )
+                $( "#billing_customer_reference1_field" ).hide()
+                $( "#billing_customer_reference2_field" ).hide()
             }
         },
 
