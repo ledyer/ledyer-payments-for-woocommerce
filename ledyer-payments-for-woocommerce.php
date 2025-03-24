@@ -8,6 +8,8 @@
  * Version: 1.0.0
  * Text Domain: ledyer-payments-for-woocommerce
  * Domain Path: /languages
+ * License: GPL-3.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  *
  * @package ledyer-payments-for-woocommerce
  *

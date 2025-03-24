@@ -123,7 +123,16 @@ class Gateway extends \WC_Payment_Gateway {
 	 */
 	public function get_icon() {
 		$image_path = plugin_dir_url( __FILE__ ) . 'assets/img/ledyer-darkgray.svg';
-		return "<img src='{$image_path}' style='max-width:120px;max-height:25px' alt='Ledyer Payments logo' />";
+		$image_id   = attachment_url_to_postid( $image_path );
+		return wp_get_attachment_image(
+			$image_id,
+			'full',
+			false,
+			array(
+				'style' => 'max-width:120px;max-height:25px',
+				'alt'   => 'Ledyer Payments logo',
+			)
+		);
 	}
 
 	/**
