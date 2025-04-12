@@ -5,23 +5,18 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "lint": "pnpx wp-prettier src/assets/js --paren-spacing --tab-width 4 --print-width 120 --no-semi --write",
-    "makepot": "grunt makepot",
-    "cssmin": "grunt cssmin",
-    "jsmin": "webpack --config webpack.config.js",
-    "build": "pnpm makepot && pnpm cssmin && pnpm lint && pnpm jsmin"
+    "makepot": "wp-pot --src='**/*.php' --dest-file='languages/ledyer-payments-for-woocommerce.pot' --domain='ledyer-payments-for-woocommerce' --package='Ledyer Payments for WooCommerce'",
+    "dev": "vite",
+    "build": "pnpm makepot && pnpm lint && vite build"
   },
   "keywords": [],
   "author": "Krokedil",
   "license": "ISC",
   "devDependencies": {
     "@wordpress/eslint-plugin": "^20.1.0",
-    "grunt": "^1.6.1",
-    "grunt-contrib-cssmin": "^5.0.0",
-    "grunt-contrib-uglify": "^5.2.2",
-    "grunt-wp-i18n": "^1.0.3",
     "prettier": "npm:wp-prettier@^3.0.3",
-    "webpack": "^5.93.0",
-    "webpack-cli": "^5.1.4",
+    "vite": "^5.2.6",
+    "wp-pot-cli": "^1.5.0",
     "wp-prettier": "^3.0.3"
   }
 }
