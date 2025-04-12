@@ -27,19 +27,23 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-composer-
 
-    - name: Cache npm dependencies
-      uses: actions/cache@v4
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
       with:
-        path: ~/.npm
-        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-npm-
+        version: 8
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'pnpm'
 
     - name: Install dependencies and build project
       run: |
         mkdir -p ~/.composer/cache
         composer install --prefer-dist --no-progress
-        npm ci && npm run build
+        pnpm install
+        pnpm run build
 
     - name: Get branch name and commit hash
       id: vars
