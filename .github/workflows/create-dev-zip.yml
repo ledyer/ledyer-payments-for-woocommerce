@@ -1,24 +1,18 @@
 name: Create Dev Zip
-
 on:
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     env:
       PLUGIN_SLUG: ledyer-payments-for-woocommerce
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
       - name: Create composer cache directory
         run: mkdir -p ~/.composer/cache
-
       - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
@@ -26,25 +20,21 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
           cache: "pnpm"
-
       - name: Install dependencies and build project
         run: |
           mkdir -p ~/.composer/cache
           composer install --prefer-dist --no-progress
           pnpm install
           pnpm run build
-
       - name: Get branch name and commit hash
         id: vars
         run: |
@@ -54,10 +44,9 @@ jobs:
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           echo "COMMIT_HASH=${COMMIT_HASH}" >> $GITHUB_ENV
           echo "ZIP_FILE_NAME=${ZIP_FILE_NAME}" >> $GITHUB_ENV
-
       - name: Modify version, prepare zip directory, and create zip file
         run: |
-          sed -i "s/ \* Version: \([0-9.]*\)/ \* Version: \1-dev.${BRANCH_NAME}.${COMMIT_HASH}/" ${{ env.PLUGIN_SLUG }}.php
+          sed -i 's| \* Version: \([0-9.]*\)| \* Version: \1-dev.${BRANCH_NAME}.${COMMIT_HASH}|' ${{ env.PLUGIN_SLUG }}.php
           mkdir -p dev-zip-temp/${{ env.PLUGIN_SLUG }}
           rsync -av --exclude-from='.gitignore' --exclude='dev-zip-temp' . dev-zip-temp/${{ env.PLUGIN_SLUG }}
           cd dev-zip-temp
