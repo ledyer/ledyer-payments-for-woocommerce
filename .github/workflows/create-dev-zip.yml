@@ -32,7 +32,8 @@ jobs:
       - name: Install dependencies and build project
         run: |
           mkdir -p ~/.composer/cache
-          composer install --prefer-dist --no-progress
+          composer install --prefer-dist --no-progress --no-dev
+          composer dump-autoload --optimize
           pnpm install
           pnpm run build
       - name: Get branch name and commit hash
