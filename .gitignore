@@ -34,4 +34,6 @@ tmp-*
 
 # Release
 /release/
+
 .aider*
+.phpactor.json

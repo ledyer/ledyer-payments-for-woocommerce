@@ -10,13 +10,14 @@
     "build": "pnpm makepot && pnpm lint && vite build"
   },
   "keywords": [],
-  "author": "Krokedil",
+  "author": "Ledyer/Krokedil",
   "license": "ISC",
   "devDependencies": {
-    "@wordpress/eslint-plugin": "^20.1.0",
-    "prettier": "npm:wp-prettier@^3.0.3",
-    "vite": "^5.2.6",
-    "wp-pot-cli": "^1.5.0",
-    "wp-prettier": "^3.0.3"
+    "@wordpress/eslint-plugin": "20.1.0",
+    "prettier": "npm:wp-prettier@3.0.3",
+    "terser": "5.29.2",
+    "vite": "5.2.6",
+    "wp-pot-cli": "1.5.0",
+    "wp-prettier": "3.0.3"
   }
 }
