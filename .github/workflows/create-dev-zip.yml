@@ -87,6 +87,46 @@ jobs:
             --exclude='scripts/' \
             . dev-zip-temp/${{ env.PLUGIN_SLUG }}
 
+          # Make sure the assets directory exists in the destination
+          mkdir -p dev-zip-temp/${{ env.PLUGIN_SLUG }}/assets/js
+          
+          # Copy built assets that might be excluded by .gitignore
+          if [ -d "assets" ]; then
+            rsync -av assets/ dev-zip-temp/${{ env.PLUGIN_SLUG }}/assets/
+          fi
+          
+          # If using dist directory instead of assets
+          if [ -d "dist" ]; then
+            mkdir -p dev-zip-temp/${{ env.PLUGIN_SLUG }}/dist
+            rsync -av dist/ dev-zip-temp/${{ env.PLUGIN_SLUG }}/dist/
+          fi
+          
+          # Clean up vendor directory to reduce size
+          if [ -d "vendor" ]; then
+            mkdir -p dev-zip-temp/${{ env.PLUGIN_SLUG }}/vendor
+            # Copy only necessary files from vendor (exclude tests, docs, etc.)
+            rsync -av \
+              --exclude='*/tests/' \
+              --exclude='*/test/' \
+              --exclude='*/docs/' \
+              --exclude='*/doc/' \
+              --exclude='*/examples/' \
+              --exclude='*/example/' \
+              --exclude='*/.git/' \
+              --exclude='*/.github/' \
+              --exclude='*/README*' \
+              --exclude='*/CHANGELOG*' \
+              --exclude='*/LICENSE*' \
+              --exclude='*/CONTRIBUTING*' \
+              --exclude='*/.gitignore' \
+              --exclude='*/.travis.yml' \
+              --exclude='*/.scrutinizer.yml' \
+              --exclude='*/phpunit.xml*' \
+              --exclude='*/composer.json' \
+              --exclude='*/composer.lock' \
+              vendor/ dev-zip-temp/${{ env.PLUGIN_SLUG }}/vendor/
+          fi
+          
           # Ensure parent directories exist
           mkdir -p $(dirname ${{ env.ZIP_FILE_NAME }})
 
