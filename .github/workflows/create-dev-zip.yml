@@ -56,5 +56,11 @@ jobs:
           # Ensure parent directories exist
           mkdir -p $(dirname ${{ env.ZIP_FILE_NAME }})
 
-          # Create zip file (without changing directory)
           cd dev-zip-temp && zip -r "../${{ env.ZIP_FILE_NAME }}" ${{ env.PLUGIN_SLUG }}
+
+      - name: Upload zip as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.PLUGIN_SLUG }}-dev
+          path: ${{ env.ZIP_FILE_NAME }}
+          retention-days: 14
