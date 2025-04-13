@@ -12,6 +12,13 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          tools: composer
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql
+
       - name: Create composer cache directory
         run: mkdir -p ~/.composer/cache
 
@@ -37,11 +44,13 @@ jobs:
 
       - name: Install dependencies and build project
         run: |
-          mkdir -p ~/.composer/cache
+          php -v  # Debug PHP version
           composer install --prefer-dist --no-progress --no-dev
           composer dump-autoload --optimize
+          ls -la vendor/
           pnpm install
           pnpm run build
+
       - name: Get branch name and commit hash
         id: vars
         run: |
@@ -131,6 +140,9 @@ jobs:
               --exclude='*/composer.json' \
               --exclude='*/composer.lock' \
               vendor/ dev-zip-temp/${{ env.PLUGIN_SLUG }}/vendor/
+          else
+            echo "Error: vendor/ directory not found!"
+            exit 1
           fi
 
           # Ensure parent directories exist
