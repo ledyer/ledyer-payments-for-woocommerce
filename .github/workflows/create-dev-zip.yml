@@ -81,19 +81,13 @@ jobs:
             --exclude='package.json' \
             --exclude='package-lock.json' \
             --exclude='pnpm-lock.yaml' \
-            --exclude='composer.json' \
-            --exclude='composer.lock' \
             --exclude='.eslintrc' \
             --exclude='.prettierrc' \
             --exclude='.editorconfig' \
             --exclude='phpcs.xml' \
             --exclude='phpunit.xml' \
-            --exclude='webpack.config.js' \
-            --exclude='Gruntfile.js' \
-            --exclude='README.md' \
             --exclude='CHANGELOG.md' \
             --exclude='CONTRIBUTING.md' \
-            --exclude='LICENSE' \
             --exclude='tests/' \
             --exclude='docs/' \
             --exclude='.vscode/' \
@@ -137,8 +131,6 @@ jobs:
               --exclude='*/.travis.yml' \
               --exclude='*/.scrutinizer.yml' \
               --exclude='*/phpunit.xml*' \
-              --exclude='*/composer.json' \
-              --exclude='*/composer.lock' \
               vendor/ dev-zip-temp/${{ env.PLUGIN_SLUG }}/vendor/
           else
             echo "Error: vendor/ directory not found!"
