@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies and build project
         run: |
           php -v  # Debug PHP version
-          composer install --prefer-dist --no-progress --no-dev
+          composer install --prefer-dist --no-progress
           composer dump-autoload --optimize
           ls -la vendor/
           pnpm install
