@@ -51,7 +51,40 @@ jobs:
 
           # Create and populate temp directory
           mkdir -p dev-zip-temp/${{ env.PLUGIN_SLUG }}
-          rsync -av --exclude-from='.gitignore' --exclude='dev-zip-temp' . dev-zip-temp/${{ env.PLUGIN_SLUG }}
+
+          # First, copy everything except what we explicitly exclude
+          rsync -av \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='dev-zip-temp/' \
+            --exclude='.DS_Store' \
+            --exclude='tmp-*/' \
+            --exclude='.aider*' \
+            --exclude='vite.config.js' \
+            --exclude='package.json' \
+            --exclude='package-lock.json' \
+            --exclude='pnpm-lock.yaml' \
+            --exclude='composer.json' \
+            --exclude='composer.lock' \
+            --exclude='.eslintrc' \
+            --exclude='.prettierrc' \
+            --exclude='.editorconfig' \
+            --exclude='phpcs.xml' \
+            --exclude='phpunit.xml' \
+            --exclude='webpack.config.js' \
+            --exclude='Gruntfile.js' \
+            --exclude='README.md' \
+            --exclude='CHANGELOG.md' \
+            --exclude='CONTRIBUTING.md' \
+            --exclude='LICENSE' \
+            --exclude='tests/' \
+            --exclude='docs/' \
+            --exclude='.vscode/' \
+            --exclude='.idea/' \
+            --exclude='bin/' \
+            --exclude='scripts/' \
+            . dev-zip-temp/${{ env.PLUGIN_SLUG }}
 
           # Ensure parent directories exist
           mkdir -p $(dirname ${{ env.ZIP_FILE_NAME }})
