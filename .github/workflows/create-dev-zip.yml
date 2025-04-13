@@ -59,7 +59,7 @@ jobs:
           cd dev-zip-temp && zip -r "../${{ env.ZIP_FILE_NAME }}" ${{ env.PLUGIN_SLUG }}
 
       - name: Upload zip as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PLUGIN_SLUG }}-dev
           path: ${{ env.ZIP_FILE_NAME }}
