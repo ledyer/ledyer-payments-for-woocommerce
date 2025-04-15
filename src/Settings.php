@@ -87,11 +87,11 @@ class Settings {
 				'placeholder' => __( 'Choose your payment method in our checkout.', 'ledyer-payments-for-woocommerce' ),
 				'class'       => 'redirect-only',
 			),
-			'company_number_placement' => array(
-				'title'       => __( 'Company number field', 'ledyer-payments-for-woocommerce' ),
+			'company_fields_placement' => array(
+				'title'       => __( 'Extra company fields placement', 'ledyer-payments-for-woocommerce' ),
 				'type'        => 'select',
 				'default'     => 'payment_form',
-				'description' => __( 'Where to display the company number field.', 'ledyer-payments-for-woocommerce' ),
+				'description' => __( 'Where to display the fields company number, customer reference 1 and 2 on the checkout.', 'ledyer-payments-for-woocommerce' ),
 				'options'     => array(
 					'payment_form' => __( 'Payment form', 'ledyer-payments-for-woocommerce' ),
 					'billing_form' => __( 'Billing form', 'ledyer-payments-for-woocommerce' ),

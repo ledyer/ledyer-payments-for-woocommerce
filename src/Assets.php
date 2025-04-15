@@ -98,7 +98,7 @@ class Assets {
 				'submitOrderUrl'            => \WC_AJAX::get_endpoint( 'checkout' ),
 				'gatewayId'                 => 'ledyer_payments',
 				'reference'                 => $reference,
-				'companyNumberPlacement'    => Ledyer_Payments()->settings( 'company_number_placement' ),
+				'companyFieldsPlacement'    => Ledyer_Payments()->settings( 'company_fields_placement' ),
 				'i18n'                      => array(
 					'companyNumberMissing' => __( 'Please enter a company number.', 'ledyer-payments-for-woocommerce' ),
 					'genericError'         => __( 'Something went wrong. Please try again or contact the store.', 'ledyer-payments-for-woocommerce' ),

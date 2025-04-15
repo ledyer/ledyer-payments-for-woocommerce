@@ -32,10 +32,12 @@ jQuery( function ( $ ) {
             } )
 
             $( document ).ready( () => {
-                // If "billing_form", remove the field from the payment_form and insert it after the company name field. Otherwise, if it is "payment_form", leave as-is.
-                if ( LedyerPayments.params.companyNumberPlacement === "billing_form" ) {
+                // If "billing_form", remove the fields from the payment_form and insert it after the company name field. Otherwise, if it is "payment_form", leave as-is.
+                if ( LedyerPayments.params.companyFieldsPlacement === "billing_form" ) {
                     if ( LedyerPayments.isActiveGateway() ) {
                         $( "#billing_company_number_field" ).remove()
+                        $( "#ledyer_payments_reference_1_field" ).remove()
+                        $( "#ledyer_payments_reference_2_field" ).remove()
                     }
 
                     // Required whenever the customer changes payment method.
@@ -52,15 +54,19 @@ jQuery( function ( $ ) {
         },
 
         /**
-         * Moves the company number field to the billing form or leaves in the payment method.
+         * Moves the extra company fields to the billing form or leaves in the payment method.
          * @returns {void}
          */
         moveCompanyNumberField: () => {
-            if ( LedyerPayments.params.companyNumberPlacement === "billing_form" ) {
+            if ( LedyerPayments.params.companyFieldsPlacement === "billing_form" ) {
                 if ( LedyerPayments.isActiveGateway() ) {
                     $( "#billing_company_number_field" ).detach().insertAfter( "#billing_company_field" ).show()
+                    $( "#ledyer_payments_reference_1_field" ).detach().insertAfter( "#billing_company_number_field" ).show()
+                    $( "#ledyer_payments_reference_2_field" ).detach().insertAfter( "#ledyer_payments_reference_1_field" ).show()
                 } else {
                     $( "#billing_company_number_field" ).hide()
+                    $( "#ledyer_payments_reference_1_field" ).hide()
+                    $( "#ledyer_payments_reference_2_field" ).hide()
                 }
             }
         },
@@ -72,12 +78,12 @@ jQuery( function ( $ ) {
         toggleCheckoutField: () => {
             if ( LedyerPayments.isActiveGateway() ) {
                 LedyerPayments.makeCheckoutFieldRequired( "billing_company_field" )
-                $( "#billing_customer_reference1_field" ).show()
-                $( "#billing_customer_reference2_field" ).show()
+                $( "#ledyer_payments_reference_1_field" ).show()
+                $( "#ledyer_payments_reference_2_field" ).show()
             } else {
                 LedyerPayments.makeCheckoutFieldOptional( "billing_company_field", false )
-                $( "#billing_customer_reference1_field" ).hide()
-                $( "#billing_customer_reference2_field" ).hide()
+                $( "#ledyer_payments_reference_1_field" ).hide()
+                $( "#ledyer_payments_reference_2_field" ).hide()
             }
         },
 
