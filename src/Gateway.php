@@ -56,11 +56,6 @@ class Gateway extends \WC_Payment_Gateway {
 		// Process the custom checkout fields that we inject to the checkout form (e.g., company number field).
 		add_action( 'woocommerce_checkout_update_order_meta', array( $this, 'process_custom_checkout_fields' ) );
 
-		// Add the custom fields to the billing fields.
-		if ( $this->is_available() ) {
-			add_action( 'woocommerce_billing_fields', array( $this, 'additional_billing_fields' ) );
-		}
-
 		// Add the custom fields to the admin billing fields.
 		add_action( 'woocommerce_admin_billing_fields', array( $this, 'additional_admin_billing_fields' ) );
 	}
@@ -122,36 +117,32 @@ class Gateway extends \WC_Payment_Gateway {
 				),
 			)
 		);
-	}
 
-	/**
-	 * Add additional billing fields to the checkout form.
-	 *
-	 * @param array $fields The billing fields.
-	 * @return array
-	 */
-	public function additional_billing_fields( $fields ) {
-
-		// NOTE: If you'll be changing the property name, make sure to update it in the JavaScript code too (file: assets/js/ledyer-payments.js).
-		$fields['billing_customer_reference1'] = array(
-			'label'       => __( 'Reference 1', 'ledyer-payments-for-woocommerce' ),
-			'placeholder' => __( 'For example, reference code or cost center', 'ledyer-payments-for-woocommerce' ),
-			'required'    => false,
-			'class'       => array( 'form-row-wide' ),
-			'clear'       => true,
-			'priority'    => 35,
+		woocommerce_form_field(
+			'ledyer_payments_reference_1',
+			array(
+				'type'        => 'text',
+				'class'       => array(
+					'form-row-wide',
+				),
+				'label'       => __( 'Reference 1', 'ledyer-payments-for-woocommerce' ),
+				'required'    => false,
+				'placeholder' => __( 'For example, reference code or cost center', 'ledyer-payments-for-woocommerce' ),
+			)
 		);
 
-		$fields['billing_customer_reference2'] = array(
-			'label'       => __( 'Reference 2', 'ledyer-payments-for-woocommerce' ),
-			'placeholder' => __( 'For example, purchase order number', 'ledyer-payments-for-woocommerce' ),
-			'required'    => false,
-			'class'       => array( 'form-row-wide' ),
-			'clear'       => true,
-			'priority'    => 35,
+		woocommerce_form_field(
+			'ledyer_payments_reference_2',
+			array(
+				'type'        => 'text',
+				'class'       => array(
+					'form-row-wide',
+				),
+				'label'       => __( 'Reference 2', 'ledyer-payments-for-woocommerce' ),
+				'required'    => false,
+				'placeholder' => __( 'For example, purchase order number', 'ledyer-payments-for-woocommerce' ),
+			)
 		);
-
-		return $fields;
 	}
 
 	/**
