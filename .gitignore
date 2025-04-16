@@ -34,4 +34,7 @@ tmp-*
 
 # Release
 /release/
+
+# Other
 .aider*
+.php-cs-fixer.cache
