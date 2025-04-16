@@ -74,7 +74,8 @@ services:
       wp rewrite structure /%postname%/;
       wp plugin install wordpress-importer --activate;
       wp plugin install wp-rollback --activate;
-      wp plugin install woocommerce --version=8.2.2 --activate;
+      wp plugin install ledyer-order-management-for-woocommerce --activate;
+      wp plugin install woocommerce --version=9.8.1 --activate;
       wp theme install storefront --activate;
       wp wc tool run install_pages --user=1;
       wp import wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=create;
