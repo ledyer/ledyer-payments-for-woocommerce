@@ -17,6 +17,14 @@ This project uses PHP_CodeSniffer to enforce WordPress coding standards. To get 
    composer install
    ```
 
+### Local development
+
+Change PHP version in .env or set env variable PHP_VERSION
+
+```shell
+docker-compose up --build
+```
+
 ### Using Code Standards Tools
 
 The project includes two composer scripts for code standards:
@@ -41,3 +49,4 @@ composer phpcbf -- src/specific-file.php
 ```
 
 Note that not all issues can be fixed automatically with phpcbf. After running it, you should run phpcs again to check for any remaining issues that need manual fixing.
+
