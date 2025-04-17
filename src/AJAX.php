@@ -42,9 +42,20 @@ class AJAX {
 	public static function ledyer_payments_wc_log_js() {
 		check_ajax_referer( 'ledyer_payments_wc_log_js', 'nonce' );
 
-		$message = '[AJAX]: ' . sanitize_text_field( filter_input( INPUT_POST, 'message', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
-		$prefix  = sanitize_text_field( filter_input( INPUT_POST, 'reference', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
-		$level   = sanitize_text_field( filter_input( INPUT_POST, 'level', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) ?? 'notice';
+		// Get the content size of the request.
+		$post_size = (int) $_SERVER['CONTENT_LENGTH'] ?? 0;
+
+		// If the post data is too long, log an error message and return.
+		if ( $post_size > 1024 ) {
+			Ledyer_Payments()->logger()->log( '[AJAX]: Message too long and cannot be logged.', 'error' );
+			wp_send_json_success(); // Return success to not stop anything in the frontend if this happens.
+		}
+
+		$posted_message = filter_input( INPUT_POST, 'message', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$message        = '[AJAX]: ' . sanitize_text_field( $posted_message );
+		$prefix         = sanitize_text_field( filter_input( INPUT_POST, 'reference', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) );
+		$level          = sanitize_text_field( filter_input( INPUT_POST, 'level', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) ?? 'notice';
+
 		if ( ! empty( $message ) ) {
 			Ledyer_Payments()->logger()->log( $message, $level, array( 'prefix' => $prefix ) );
 		}
