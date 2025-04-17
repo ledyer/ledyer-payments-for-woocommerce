@@ -24,9 +24,24 @@ class Assets {
 	 */
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_order_page' ), 10 );
 
 		// The client SDK requires that <script> tag ID is set to 'ledyer-payments'.
 		add_action( 'script_loader_tag', array( $this, 'script_loader_tag' ), 10, 2 );
+	}
+
+	/**
+	 * Enqueues the admin order page styles.
+	 *
+	 * @return void
+	 */
+	public function admin_order_page() {
+		if ( ! HPOS::is_order_page() ) {
+			return;
+		}
+
+		$src = plugins_url( 'src/assets/admin/order-page.css', LEDYER_PAYMENTS_MAIN_FILE );
+		wp_enqueue_style( 'ledyer-admin-order-page', $src, array(), LEDYER_PAYMENTS_VERSION );
 	}
 
 	/**
