@@ -467,7 +467,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$key     = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$gateway = filter_input( INPUT_GET, 'gateway', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
-		if ( $this->id !== $gateway ) {
+		if ( empty( $key ) || $this->id !== $gateway ) {
 			return;
 		}
 
