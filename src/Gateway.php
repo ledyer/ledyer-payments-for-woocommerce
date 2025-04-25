@@ -210,18 +210,12 @@ class Gateway extends \WC_Payment_Gateway {
 		// Notice that the field name is prefixed with 'billing_' unless an 'id' is explicitly set which it is in our case. See additional_admin_billing_fields() in this file.
 		$customer_reference_1 = filter_input( INPUT_POST, '_ledyer_customer_reference_1', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		if ( isset( $customer_reference_1 ) ) {
-			$stored_reference_1 = $order->get_meta( '_ledyer_customer_reference_1' );
-			if ( $customer_reference_1 !== $stored_reference_1 ) {
-				$order->update_meta_data( '_ledyer_customer_reference_1', sanitize_text_field( $customer_reference_1 ) );
-			}
+			$order->update_meta_data( '_ledyer_customer_reference_1', sanitize_text_field( $customer_reference_1 ) );
 		}
 
 		$customer_reference_2 = filter_input( INPUT_POST, '_ledyer_customer_reference_2', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		if ( isset( $customer_reference_2 ) ) {
-			$stored_reference_2 = $order->get_meta( '_ledyer_customer_reference_2' );
-			if ( $customer_reference_2 !== $stored_reference_2 ) {
-				$order->update_meta_data( '_ledyer_customer_reference_2', sanitize_text_field( $customer_reference_2 ) );
-			}
+			$order->update_meta_data( '_ledyer_customer_reference_2', sanitize_text_field( $customer_reference_2 ) );
 		}
 
 		// No need to call save(). This is already handled by the hook.
