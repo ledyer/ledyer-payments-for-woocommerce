@@ -47,7 +47,7 @@ class Gateway extends \WC_Payment_Gateway {
 		);
 
 		add_filter( 'wc_get_template', array( $this, 'payment_categories' ), 10, 3 );
-		add_action( 'init', array( $this, 'maybe_confirm_order' ), 999 );
+		add_action( 'template_redirect', array( $this, 'maybe_confirm_order' ), 9999 );
 
 		// Process the checkout before the payment is processed.
 		add_action( 'woocommerce_checkout_process', array( $this, 'process_checkout' ) );
@@ -467,7 +467,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$key     = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$gateway = filter_input( INPUT_GET, 'gateway', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
-		if ( $this->id !== $gateway ) {
+		if ( empty( $key ) || $this->id !== $gateway ) {
 			return;
 		}
 
@@ -488,7 +488,7 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		if ( ! empty( $order->get_date_paid() ) ) {
-			// Check for if the session wasn't clear properly. This can happen if the order is successfully created, but the customer was not redirected to the checkout page.
+			// Check for if the session wasn't cleared properly. This can happen if the order is successfully created, but the customer was not redirected to the checkout page.
 			$session_id = Ledyer_Payments()->session()->get_id();
 			if ( $order->get_meta( '_wc_ledyer_session_id' ) === $session_id ) {
 				Ledyer_Payments()->logger()->debug( '[MAYBE_CONFIRM]: Order already paid, but session still remained. Session is now cleared.', $context );
