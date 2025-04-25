@@ -59,7 +59,7 @@ class Gateway extends \WC_Payment_Gateway {
 		add_filter( 'woocommerce_admin_billing_fields', array( $this, 'additional_admin_billing_fields' ), 10, 3 );
 
 		// Process admin order updates.
-		add_action( 'woocommerce_saved_order_items', array( $this, 'admin_order_processing' ) );
+		add_action( 'woocommerce_saved_order_items', array( $this, 'update_additional_admin_billing_fields' ) );
 	}
 
 	/**
@@ -201,7 +201,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @param int $order_id The WooCommerce order id.
 	 * @return void
 	 */
-	public function admin_order_processing( $order_id ) {
+	public function update_additional_admin_billing_fields( $order_id ) {
 		$order = wc_get_order( $order_id );
 		if ( ! $this->is_chosen_gateway( $order ) ) {
 			return;
