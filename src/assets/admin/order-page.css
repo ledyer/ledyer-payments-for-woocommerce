@@ -1,0 +1,5 @@
+#order_data .order_data_column_container .form-field._billing_company_number_field,
+#order_data .order_data_column_container .form-field._ledyer_customer_reference_1_field,
+#order_data .order_data_column_container .form-field._ledyer_customer_reference_2_field {
+    width: 100%
+}

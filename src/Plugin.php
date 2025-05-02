@@ -59,9 +59,6 @@ class Plugin {
 
 		$this->load_dependencies();
 		$this->setup_hooks();
-
-		$gateways      = WC()->payment_gateways->payment_gateways();
-		$this->gateway = $gateways['ledyer_payments'] ?? null;
 	}
 
 	/**
@@ -150,7 +147,7 @@ class Plugin {
 	 * @return Gateway
 	 */
 	public function gateway() {
-		return $this->gateway;
+		return WC()->payment_gateways()->payment_gateways()['ledyer_payments'] ?? null;
 	}
 
 	/**
