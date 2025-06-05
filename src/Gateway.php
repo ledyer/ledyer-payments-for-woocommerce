@@ -123,7 +123,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 */
 	public function get_icon() {
 		$image_path = plugin_dir_url( __FILE__ ) . 'assets/img/ledyer-darkgray.svg';
-		return "<img src='{$image_path}' style='max-width:120px;max-height:25px' alt='Ledyer Payments logo' />";
+		return "<img src='{$image_path}' style='max-width:120px;max-height:25px' alt='Ledyer Payments logo' />"; // phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
 	}
 
 	/**
@@ -310,20 +310,15 @@ class Gateway extends \WC_Payment_Gateway {
 	 */
 	public function get_order_by_session_id( $session_id ) {
 		$key    = '_wc_ledyer_session_id';
-		$orders = wc_get_orders(
-			array(
-				'meta_query' => array(
-					array(
-						'key'     => $key,
-						'value'   => $session_id,
-						'compare' => '=',
-					),
-				),
-				'limit'      => '1',
-				'orderby'    => 'date',
-				'order'      => 'DESC',
-			)
+		$args   = array(
+			'meta_key'     => $key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value'   => $session_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'meta_compare' => '=',
+			'order'        => 'DESC',
+			'orderby'      => 'date',
+			'limit'        => 1,
 		);
+		$orders = wc_get_orders( $args );
 
 		$order = reset( $orders );
 		if ( empty( $order ) || $session_id !== $order->get_meta( $key ) ) {
