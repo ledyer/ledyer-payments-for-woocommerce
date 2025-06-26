@@ -203,12 +203,10 @@ class Callback {
 			'limit'        => 1,
 			'date_created' => '>' . ( time() - MONTH_IN_SECONDS ),
 		);
-		$orders = wc_get_orders( $args );
+		$orders = wc_get_orders( $args ) ?: array();
+		$order  = reset( $orders );
 
-		$order_id = isset( $orders[0] ) ? $orders[0]->get_id() : null;
-		$order    = wc_get_order( $order_id );
-
-		if ( ! is_object( $order ) ) {
+		if ( ! is_object( $order ) || empty( $order ) || $ledyer_order_id !== $order->get_meta( '_wc_ledyer_order_id' ) ) {
 			Ledyer_Payments()->logger()->debug( '[CALLBACK]: Could not find woo order with ledyer id: ' . $ledyer_order_id, $context );
 			return;
 		}
