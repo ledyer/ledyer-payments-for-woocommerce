@@ -8,11 +8,13 @@
  * Version: 1.0.0
  * Text Domain: ledyer-payments-for-woocommerce
  * Domain Path: /languages
+ * License: GPL-3.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  *
  * @package ledyer-payments-for-woocommerce
  *
  * WC requires at least: 5.6.0
- * WC tested up to: 9.3.2
+ * WC tested up to: 9.8.5
  * Requires Plugins: woocommerce
  *
  * Copyright (c) 2024 Krokedil
