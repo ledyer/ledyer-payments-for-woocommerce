@@ -1,7 +1,6 @@
 <?php
 /**
  * Plugin Name: Ledyer Payments for WooCommerce
- * Plugin URI: https://krokedil.com/
  * Description: Ledyer Payments for WooCommerce.
  * Author: Krokedil
  * Author URI: https://krokedil.com/
