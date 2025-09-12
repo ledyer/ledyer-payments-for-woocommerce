@@ -30,7 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         mkdir -p ~/.composer/cache
-        composer install --prefer-dist --no-progress
+        composer install --prefer-dist --no-progress --no-dev
 
     - name: Get branch name and commit hash
       id: vars
