@@ -26,8 +26,13 @@ jobs:
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
           ${{ runner.os }}-composer-
+          
+    - name: Install dependencies development
+      run: |
+        mkdir -p ~/.composer/cache
+        composer install --prefer-dist --no-progress
 
-    - name: Install dependencies
+    - name: Install dependencies production
       run: |
         mkdir -p ~/.composer/cache
         composer install --prefer-dist --no-progress --no-dev
