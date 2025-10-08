@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Ledyer Payments for WooCommerce
  * Description: Ledyer Payments for WooCommerce.
- * Author: ledyer
+ * Author: ledyerdevelopment
  * Author URI: https://www.ledyer.com/
  * Version: 1.0.0
  * Text Domain: ledyer-payments-for-woocommerce

@@ -1,5 +1,5 @@
 === Ledyer Payments for WooCommerce ===
-Contributors: ledyer, krokedil
+Contributors: ledyerdevelopment, krokedil
 Tags: woocommerce, ledyer, ecommerce, e-commerce
 Donate link: https://ledyer.com
 Requires at least: 5.0
