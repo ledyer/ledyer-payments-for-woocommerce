@@ -3,6 +3,10 @@
  * Replace the template checkout/payment-method.php with Ledyer's payment categories.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $order_id = absint( get_query_var( 'order-pay', 0 ) );
 if ( ! empty( $order_id ) ) {
 	$_order = wc_get_order( $order_id );
