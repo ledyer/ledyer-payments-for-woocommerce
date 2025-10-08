@@ -1,6 +1,7 @@
 === Ledyer Payments for WooCommerce ===
 Contributors: ledyerdevelopment, krokedil
 Tags: woocommerce, ledyer, ecommerce, e-commerce
+Requires at least: 5.0
 Tested up to: 6.8
 Requires PHP: 7.4
 WC requires at least: 5.6.0
