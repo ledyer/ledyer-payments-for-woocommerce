@@ -41,11 +41,6 @@ Yes. The plugin supports Ledyer’s test environment using sandbox credentials.
 1. Ledyer Payments settings page in WooCommerce admin.
 2. Ledyer as a payment option during checkout.
 
-== Changelog ==
-
-= 1.0.0 =
-* Initial release.
-
 == External Services ==
 
 This plugin connects to the Ledyer Payments API to process payments and manage orders.
@@ -63,11 +58,9 @@ This plugin connects to the Ledyer Payments API to process payments and manage o
 - https://payments.live.ledyer.com
 
 Data is transmitted:
-- when a customer selects Ledyer as a payment method,
+- when the checkout page is loaded,
 - when an order is placed,
-- during authentication,
-- and when orders are updated or refunded.
-
+- and during authentication.
 
 The data includes order details, customer information, and payment amounts.
 
@@ -77,3 +70,8 @@ Terms of Service: https://static.ledyer.com/docs/SE/en-US/payments_terms.pdf
 == License ==
 
 This plugin is licensed under the GNU General Public License v3. See license.txt for details.
+
+== Changelog ==
+
+= 1.0.0 =
+* Initial release.
