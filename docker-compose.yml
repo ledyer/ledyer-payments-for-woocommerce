@@ -52,7 +52,7 @@ services:
     depends_on:
       - db
       - wordpress-dev
-    image: wordpress:cli
+    image: wordpress:cli-2.12.0-php8.1
     restart: on-failure
     environment:
       WORDPRESS_DB_HOST: db
@@ -66,7 +66,7 @@ services:
         define( 'WP_DEBUG_LOG', true );
         define( 'WP_DEBUG_DISPLAY', false );
         define( 'SCRIPT_DEBUG', true );
-    user: xfs
+    user: "33:33"
     command: >
       /bin/sh -c '
       sleep 10;
@@ -75,7 +75,7 @@ services:
       wp plugin install wordpress-importer --activate;
       wp plugin install wp-rollback --activate;
       wp plugin install ledyer-order-management-for-woocommerce --activate;
-      wp plugin install woocommerce --version=9.8.1 --activate;
+      wp plugin install woocommerce --version=10.2.2 --activate;
       wp theme install storefront --activate;
       wp wc tool run install_pages --user=1;
       wp import wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=create;
