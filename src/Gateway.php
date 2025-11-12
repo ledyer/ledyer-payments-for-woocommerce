@@ -26,7 +26,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$this->method_title       = __( 'Ledyer Payments', 'ledyer-payments-for-woocommerce' );
 		$this->method_description = __( 'Ledyer Payments', 'ledyer-payments-for-woocommerce' );
 		$this->supports           = apply_filters(
-			$this->id . '_supports',
+			'ledyer_payments_supports',
 			array(
 				'products',
 			)
