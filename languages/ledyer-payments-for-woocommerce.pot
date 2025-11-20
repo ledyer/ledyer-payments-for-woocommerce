@@ -1,67 +1,58 @@
-# Copyright (C) 2025 
+# Copyright (C) 2025
 # This file is distributed under the same license as the  package.
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: "
-"https://wordpress.org/support/plugin/ledyer-payments-for-woocommerce\n"
-"POT-Creation-Date: 2025-09-19 12:28:00+00:00\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ledyer-payments-"
+"for-woocommerce\n"
+"POT-Creation-Date: 2025-11-20 09:54+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2025-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"X-Generator: grunt-wp-i18n 1.0.3\n"
+"X-Generator: Loco https://localise.biz/\n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;"
 
-#: ledyer-payments-for-woocommerce.php:77
-#. translators: 1: composer command. 2: plugin directory
+#: src/Settings.php:35
+msgid "Account settings"
+msgstr ""
+
+#: src/Gateway.php:404
+msgid "Awaiting payment confirmation from Ledyer."
+msgstr ""
+
+#: src/Settings.php:97
+msgid "Billing form"
+msgstr ""
+
+#: src/Settings.php:42 src/Settings.php:51
 msgid ""
-"Your installation of the Ledyer Payments for WooCommerce Plugin is "
-"incomplete. Please run %1$s within the %2$s directory."
+"Can be found or generated in the merchant portal (Settings → API credentials)"
+"."
 msgstr ""
 
-#: ledyer-payments-for-woocommerce.php:94
-#. translators: 1: composer command. 2: plugin directory
-msgid ""
-"Your installation of the Ledyer Payments plugin is incomplete. Please run "
-"%1$s within the %2$s directory."
+#: src/Settings.php:73
+msgid "Checkout settings"
 msgstr ""
 
-#: src/Assets.php:118
-msgid "Please enter a company number."
+#: src/Settings.php:87
+msgid "Choose your payment method in our checkout."
 msgstr ""
 
-#: src/Assets.php:119
-msgid "Something went wrong. Please try again or contact the store."
+#: src/Settings.php:39
+msgid "Client ID"
 msgstr ""
 
-#: src/Callback.php:107
-msgid "Failed to schedule callback."
-msgstr ""
-
-#: src/Gateway.php:26 src/Gateway.php:27
-msgid "Ledyer Payments"
+#: src/Settings.php:48
+msgid "Client secret"
 msgstr ""
 
 #: src/Gateway.php:113 src/Gateway.php:115 src/Gateway.php:165
 msgid "Company number"
-msgstr ""
-
-#: src/Gateway.php:129
-msgid "Reference 1"
-msgstr ""
-
-#: src/Gateway.php:131
-msgid "For example, reference code or cost center"
-msgstr ""
-
-#: src/Gateway.php:142
-msgid "Reference 2"
-msgstr ""
-
-#: src/Gateway.php:144
-msgid "For example, purchase order number"
 msgstr ""
 
 #: src/Gateway.php:171
@@ -72,132 +63,63 @@ msgstr ""
 msgid "Customer reference 2"
 msgstr ""
 
-#: src/Gateway.php:269
-msgid "Please enter your company number."
+#: src/Settings.php:83
+msgid "Description"
 msgstr ""
 
-#: src/Gateway.php:274
-msgid "Please enter your company name."
-msgstr ""
-
-#: src/Gateway.php:404
-msgid "Awaiting payment confirmation from Ledyer."
-msgstr ""
-
-#: src/Plugin.php:164
-msgid "Settings"
-msgstr ""
-
-#: src/Session.php:253
-msgid "Order not found"
+#: src/Settings.php:127
+msgid "Detailed logging"
 msgstr ""
 
 #: src/Settings.php:28 src/Settings.php:128
 msgid "Enable"
 msgstr ""
 
+#: src/Settings.php:130
+msgid ""
+"Enable detailed logging to capture extra data. Use this only when needed for "
+"debugging hard-to-replicate issues, as it generates significantly more log "
+"entries."
+msgstr ""
+
 #: src/Settings.php:29
 msgid "Enable payment gateway"
-msgstr ""
-
-#: src/Settings.php:35
-msgid "Account settings"
-msgstr ""
-
-#: src/Settings.php:39
-msgid "Client ID"
-msgstr ""
-
-#: src/Settings.php:42 src/Settings.php:51
-msgid ""
-"Can be found or generated in the merchant portal (Settings → API "
-"credentials)."
-msgstr ""
-
-#: src/Settings.php:48
-msgid "Client secret"
-msgstr ""
-
-#: src/Settings.php:57
-msgid "Store ID"
-msgstr ""
-
-#: src/Settings.php:60
-msgid ""
-"Optional. If not set, Ledyer defaults to the first store ID. You can find "
-"the store ID on the on the settings page in merchant portal"
-msgstr ""
-
-#: src/Settings.php:66
-msgid "Test mode"
-msgstr ""
-
-#: src/Settings.php:69
-msgid ""
-"While in test mode, the customer will NOT be charged. Test mode is useful "
-"for testing and debugging purposes."
-msgstr ""
-
-#: src/Settings.php:73
-msgid "Checkout settings"
-msgstr ""
-
-#: src/Settings.php:77
-msgid "Title"
-msgstr ""
-
-#: src/Settings.php:79
-msgid ""
-"The payment gateway title (appears on checkout page if more than one "
-"payment method is available)."
-msgstr ""
-
-#: src/Settings.php:83
-msgid "Description"
-msgstr ""
-
-#: src/Settings.php:85
-msgid ""
-"The payment gateway method description (appears on checkout page if more "
-"than one payment method is available)."
-msgstr ""
-
-#: src/Settings.php:87
-msgid "Choose your payment method in our checkout."
 msgstr ""
 
 #: src/Settings.php:91
 msgid "Extra company fields placement"
 msgstr ""
 
-#: src/Settings.php:94
-msgid ""
-"Where to display the fields company number, customer reference 1 and 2 on "
-"the checkout."
+#: src/Callback.php:107
+msgid "Failed to schedule callback."
 msgstr ""
 
-#: src/Settings.php:96
-msgid "Payment form"
+#: src/Gateway.php:144
+msgid "For example, purchase order number"
 msgstr ""
 
-#: src/Settings.php:97
-msgid "Billing form"
+#: src/Gateway.php:131
+msgid "For example, reference code or cost center"
 msgstr ""
 
-#: src/Settings.php:101
-msgid "Security level"
+#. Author URI of the plugin
+msgid "https://www.ledyer.com/"
 msgstr ""
 
-#: src/Settings.php:104
-msgid ""
-"Refer to the <a "
-"href=\"https://static.ledyer.com/docs/en-US/ledyer-security_levels.pdf\""
-">documentation</a> on what these level mean. This will override the "
-"security level you have set in the merchant portal."
+#: src/Gateway.php:26 src/Gateway.php:27
+msgid "Ledyer Payments"
 msgstr ""
 
-#: src/Settings.php:116
-msgid "Troubleshooting"
+#. Name of the plugin
+msgid "Ledyer Payments for WooCommerce"
+msgstr ""
+
+#. Description of the plugin
+msgid "Ledyer Payments for WooCommerce."
+msgstr ""
+
+#. Author of the plugin
+msgid "ledyerdevelopment"
 msgstr ""
 
 #: src/Settings.php:120
@@ -206,17 +128,115 @@ msgstr ""
 
 #: src/Settings.php:123
 msgid ""
-"Logging is required for troubleshooting any issues related to the plugin. "
-"It is recommended that you always have it enabled."
+"Logging is required for troubleshooting any issues related to the plugin. It "
+"is recommended that you always have it enabled."
 msgstr ""
 
-#: src/Settings.php:127
-msgid "Detailed logging"
-msgstr ""
-
-#: src/Settings.php:130
+#: src/Settings.php:60
 msgid ""
-"Enable detailed logging to capture extra data. Use this only when needed "
-"for debugging hard-to-replicate issues, as it generates significantly more "
-"log entries."
+"Optional. If not set, Ledyer defaults to the first store ID. You can find "
+"the store ID on the on the settings page in merchant portal"
+msgstr ""
+
+#: src/Session.php:253
+msgid "Order not found"
+msgstr ""
+
+#: src/Settings.php:96
+msgid "Payment form"
+msgstr ""
+
+#: src/Assets.php:118
+msgid "Please enter a company number."
+msgstr ""
+
+#: src/Gateway.php:274
+msgid "Please enter your company name."
+msgstr ""
+
+#: src/Gateway.php:269
+msgid "Please enter your company number."
+msgstr ""
+
+#: src/Settings.php:104
+msgid ""
+"Refer to the <a href=\"https://static.ledyer.com/docs/en-US/ledyer-"
+"security_levels.pdf\">documentation</a> on what these level mean. This will "
+"override the security level you have set in the merchant portal."
+msgstr ""
+
+#: src/Gateway.php:129
+msgid "Reference 1"
+msgstr ""
+
+#: src/Gateway.php:142
+msgid "Reference 2"
+msgstr ""
+
+#: src/Settings.php:101
+msgid "Security level"
+msgstr ""
+
+#: src/Plugin.php:164
+msgid "Settings"
+msgstr ""
+
+#: src/Assets.php:119
+msgid "Something went wrong. Please try again or contact the store."
+msgstr ""
+
+#: src/Settings.php:57
+msgid "Store ID"
+msgstr ""
+
+#: src/Settings.php:66
+msgid "Test mode"
+msgstr ""
+
+#: src/Settings.php:85
+msgid ""
+"The payment gateway method description (appears on checkout page if more "
+"than one payment method is available)."
+msgstr ""
+
+#: src/Settings.php:79
+msgid ""
+"The payment gateway title (appears on checkout page if more than one payment "
+"method is available)."
+msgstr ""
+
+#: src/Settings.php:77
+msgid "Title"
+msgstr ""
+
+#: src/Settings.php:116
+msgid "Troubleshooting"
+msgstr ""
+
+#: src/Settings.php:94
+msgid ""
+"Where to display the fields company number, customer reference 1 and 2 on "
+"the checkout."
+msgstr ""
+
+#: src/Settings.php:69
+msgid ""
+"While in test mode, the customer will NOT be charged. Test mode is useful "
+"for testing and debugging purposes."
+msgstr ""
+
+#. 1: composer command. 2: plugin directory
+#: ledyer-payments-for-woocommerce.php:78
+#, php-format
+msgid ""
+"Your installation of the Ledyer Payments for WooCommerce Plugin is "
+"incomplete. Please run %1$s within the %2$s directory."
+msgstr ""
+
+#. 1: composer command. 2: plugin directory
+#: ledyer-payments-for-woocommerce.php:95
+#, php-format
+msgid ""
+"Your installation of the Ledyer Payments plugin is incomplete. Please run "
+"%1$s within the %2$s directory."
 msgstr ""
