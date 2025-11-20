@@ -26,7 +26,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$this->method_title       = __( 'Ledyer Payments', 'ledyer-payments-for-woocommerce' );
 		$this->method_description = __( 'Ledyer Payments', 'ledyer-payments-for-woocommerce' );
 		$this->supports           = apply_filters(
-			$this->id . '_supports',
+			'ledyer_payments_supports',
 			array(
 				'products',
 			)
@@ -47,13 +47,19 @@ class Gateway extends \WC_Payment_Gateway {
 		);
 
 		add_filter( 'wc_get_template', array( $this, 'payment_categories' ), 10, 3 );
-		add_action( 'init', array( $this, 'maybe_confirm_order' ), 999 );
+		add_action( 'template_redirect', array( $this, 'maybe_confirm_order' ), 9999 );
 
 		// Process the checkout before the payment is processed.
 		add_action( 'woocommerce_checkout_process', array( $this, 'process_checkout' ) );
 
 		// Process the custom checkout fields that we inject to the checkout form (e.g., company number field).
 		add_action( 'woocommerce_checkout_update_order_meta', array( $this, 'process_custom_checkout_fields' ) );
+
+		// Add the custom fields to the admin billing fields in the edit view.
+		add_filter( 'woocommerce_admin_billing_fields', array( $this, 'additional_admin_billing_fields' ), 10, 3 );
+
+		// Process admin order updates.
+		add_action( 'woocommerce_saved_order_items', array( $this, 'update_additional_admin_billing_fields' ) );
 	}
 
 	/**
@@ -61,7 +67,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 *
 	 * Due to inconsistencies in the gateway name (e.g., ledyer_payments vs. ledyer_payments_invoice), we need to check for the presence of 'ledyer_payments'.
 	 *
-	 * @param int|null|\WC_Order $order_id The WooCommerce order or its id.
+	 * @param int|null|\WC_Order $order_id The WooCommerce order or its id. If `null`, the current session is used.
 	 * @return bool
 	 */
 	private function is_chosen_gateway( $order_id = null ) {
@@ -108,13 +114,112 @@ class Gateway extends \WC_Payment_Gateway {
 				'required'          => true,
 				'placeholder'       => __( 'Company number', 'ledyer-payments-for-woocommerce' ),
 				'custom_attributes' => array(
-					'required' => 'true',
-					'pattern'  => '^[0-9]{6}-[0-9]{4}$',
+					'pattern' => '^[0-9]{6}-[0-9]{4}$',
 				),
+			)
+		);
+
+		woocommerce_form_field(
+			'ledyer_customer_reference_1',
+			array(
+				'type'        => 'text',
+				'class'       => array(
+					'form-row-wide',
+				),
+				'label'       => __( 'Reference 1', 'ledyer-payments-for-woocommerce' ),
+				'required'    => false,
+				'placeholder' => __( 'For example, reference code or cost center', 'ledyer-payments-for-woocommerce' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'ledyer_customer_reference_2',
+			array(
+				'type'        => 'text',
+				'class'       => array(
+					'form-row-wide',
+				),
+				'label'       => __( 'Reference 2', 'ledyer-payments-for-woocommerce' ),
+				'required'    => false,
+				'placeholder' => __( 'For example, purchase order number', 'ledyer-payments-for-woocommerce' ),
 			)
 		);
 	}
 
+	/**
+	 * Add additional billing fields to the admin order page.
+	 *
+	 * @param array             $billing_fields The billing fields.
+	 * @param \WC_Order|boolean $order The order to show the fields for.
+	 * @param string            $context The context to show the fields for.
+	 * @return array
+	 */
+	public function additional_admin_billing_fields( $billing_fields, $order, $context = 'edit' ) {
+		if ( ! $this->is_chosen_gateway( $order ) ) {
+			return $billing_fields;
+		}
+
+		// The value can be explicitly set by adding a 'value' property. However, if not set, WC will attempt to prefix the field name with 'billing_', and retrieve it from a metadata field by that key. E.g., 'company_number' => $order->get_meta('_billing_company_number').
+		$additional_fields = array(
+			'company_number'              => array(
+				'label' => __( 'Company number', 'ledyer-payments-for-woocommerce' ),
+				'type'  => 'text',
+				'show'  => true,
+			),
+			'ledyer_customer_reference_1' => array(
+				'id'    => '_ledyer_customer_reference_1',
+				'label' => __( 'Customer reference 1', 'ledyer-payments-for-woocommerce' ),
+				'type'  => 'text',
+				'show'  => true,
+				'value' => $order->get_meta( '_ledyer_customer_reference_1' ),
+			),
+			'ledyer_customer_reference_2' => array(
+				'id'    => '_ledyer_customer_reference_2',
+				'label' => __( 'Customer reference 2', 'ledyer-payments-for-woocommerce' ),
+				'type'  => 'text',
+				'show'  => true,
+				'value' => $order->get_meta( '_ledyer_customer_reference_2' ),
+			),
+		);
+
+		// Inserts the additional fields after the 'company' field.
+		$index = array_search(
+			'company',
+			array_keys( $billing_fields ),
+			true
+		);
+
+		// Increment $index by 1 to include the first element too (since $index starts from 0, but length starts from 1).
+		$before = array_slice( $billing_fields, 0, $index + 1 );
+		$after  = array_slice( $billing_fields, $index );
+		return $before + $additional_fields + $after;
+	}
+
+	/**
+	 * Process the admin order update.
+	 *
+	 * @param int $order_id The WooCommerce order id.
+	 * @return void
+	 */
+	public function update_additional_admin_billing_fields( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $this->is_chosen_gateway( $order ) ) {
+			return;
+		}
+
+		// Notice that the field name is prefixed with 'billing_' unless an 'id' is explicitly set which it is in our case. See additional_admin_billing_fields() in this file.
+		$customer_reference_1 = filter_input( INPUT_POST, '_ledyer_customer_reference_1', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		if ( isset( $customer_reference_1 ) ) {
+			$order->update_meta_data( '_ledyer_customer_reference_1', sanitize_text_field( $customer_reference_1 ) );
+		}
+
+		$customer_reference_2 = filter_input( INPUT_POST, '_ledyer_customer_reference_2', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		if ( isset( $customer_reference_2 ) ) {
+			$order->update_meta_data( '_ledyer_customer_reference_2', sanitize_text_field( $customer_reference_2 ) );
+		}
+
+		// No need to call save(). This is already handled by the hook.
+	}
 
 	/**
 	 * The payment gateway icon that will appear on the checkout page.
@@ -123,7 +228,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 */
 	public function get_icon() {
 		$image_path = plugin_dir_url( __FILE__ ) . 'assets/img/ledyer-darkgray.svg';
-		return "<img src='{$image_path}' style='max-width:120px;max-height:25px' alt='Ledyer Payments logo' />";
+		return "<img src='{$image_path}' style='max-width:120px;max-height:25px' alt='Ledyer Payments logo' />"; // phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
 	}
 
 	/**
@@ -187,8 +292,18 @@ class Gateway extends \WC_Payment_Gateway {
 		$company_number = filter_input( INPUT_POST, 'billing_company_number', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		if ( ! empty( $company_number ) ) {
 			$order->update_meta_data( '_billing_company_number', sanitize_text_field( $company_number ) );
-			$order->save();
 		}
+
+		$reference_1 = filter_input( INPUT_POST, 'ledyer_customer_reference_1', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$reference_2 = filter_input( INPUT_POST, 'ledyer_customer_reference_2', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		if ( ! empty( $reference_1 ) ) {
+			$order->update_meta_data( '_ledyer_customer_reference_1', sanitize_text_field( $reference_1 ) );
+		}
+		if ( ! empty( $reference_2 ) ) {
+			$order->update_meta_data( '_ledyer_customer_reference_2', sanitize_text_field( $reference_2 ) );
+		}
+
+		$order->save();
 	}
 
 	/**
@@ -310,20 +425,15 @@ class Gateway extends \WC_Payment_Gateway {
 	 */
 	public function get_order_by_session_id( $session_id ) {
 		$key    = '_wc_ledyer_session_id';
-		$orders = wc_get_orders(
-			array(
-				'meta_query' => array(
-					array(
-						'key'     => $key,
-						'value'   => $session_id,
-						'compare' => '=',
-					),
-				),
-				'limit'      => '1',
-				'orderby'    => 'date',
-				'order'      => 'DESC',
-			)
+		$args   = array(
+			'meta_key'     => $key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value'   => $session_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'meta_compare' => '=',
+			'order'        => 'DESC',
+			'orderby'      => 'date',
+			'limit'        => 1,
 		);
+		$orders = wc_get_orders( $args );
 
 		$order = reset( $orders );
 		if ( empty( $order ) || $session_id !== $order->get_meta( $key ) ) {
@@ -346,7 +456,7 @@ class Gateway extends \WC_Payment_Gateway {
 		$key     = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$gateway = filter_input( INPUT_GET, 'gateway', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
-		if ( $this->id !== $gateway ) {
+		if ( empty( $key ) || $this->id !== $gateway ) {
 			return;
 		}
 
@@ -367,7 +477,7 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		if ( ! empty( $order->get_date_paid() ) ) {
-			// Check for if the session wasn't clear properly. This can happen if the order is successfully created, but the customer was not redirected to the checkout page.
+			// Check for if the session wasn't cleared properly. This can happen if the order is successfully created, but the customer was not redirected to the checkout page.
 			$session_id = Ledyer_Payments()->session()->get_id();
 			if ( $order->get_meta( '_wc_ledyer_session_id' ) === $session_id ) {
 				Ledyer_Payments()->logger()->debug( '[MAYBE_CONFIRM]: Order already paid, but session still remained. Session is now cleared.', $context );

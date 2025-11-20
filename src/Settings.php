@@ -73,11 +73,25 @@ class Settings {
 				'title' => __( 'Checkout settings', 'ledyer-payments-for-woocommerce' ),
 				'type'  => 'title',
 			),
-			'company_number_placement' => array(
-				'title'       => __( 'Company number field', 'ledyer-payments-for-woocommerce' ),
+			'title'                    => array(
+				'title'       => __( 'Title', 'ledyer-payments-for-woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'The payment gateway title (appears on checkout page if more than one payment method is available).', 'ledyer-payments-for-woocommerce' ),
+				'default'     => 'Ledyer Payments',
+			),
+			'redirect_description'     => array(
+				'title'       => __( 'Description', 'ledyer-payments-for-woocommerce' ),
+				'type'        => 'textarea',
+				'description' => __( 'The payment gateway method description (appears on checkout page if more than one payment method is available).', 'ledyer-payments-for-woocommerce' ),
+				'default'     => '',
+				'placeholder' => __( 'Choose your payment method in our checkout.', 'ledyer-payments-for-woocommerce' ),
+				'class'       => 'redirect-only',
+			),
+			'company_fields_placement' => array(
+				'title'       => __( 'Extra company fields placement', 'ledyer-payments-for-woocommerce' ),
 				'type'        => 'select',
 				'default'     => 'payment_form',
-				'description' => __( 'Where to display the company number field.', 'ledyer-payments-for-woocommerce' ),
+				'description' => __( 'Where to display the fields company number, customer reference 1 and 2 on the checkout.', 'ledyer-payments-for-woocommerce' ),
 				'options'     => array(
 					'payment_form' => __( 'Payment form', 'ledyer-payments-for-woocommerce' ),
 					'billing_form' => __( 'Billing form', 'ledyer-payments-for-woocommerce' ),

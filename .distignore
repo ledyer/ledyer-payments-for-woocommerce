@@ -29,3 +29,5 @@ readme.md
 README.md
 webpack.config.js
 yarn.lock
+phpcs.xml
+scoper.custom.php

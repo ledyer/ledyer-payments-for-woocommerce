@@ -27,10 +27,15 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-composer-
 
-    - name: Install dependencies
+    - name: Install dependencies development
       run: |
         mkdir -p ~/.composer/cache
         composer install --prefer-dist --no-progress
+
+    - name: Install dependencies production
+      run: |
+        mkdir -p ~/.composer/cache
+        composer install --prefer-dist --no-progress --no-dev
 
     - name: Get branch name and commit hash
       id: vars
