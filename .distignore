@@ -12,10 +12,6 @@
 DOCKER_ENV
 docker_tag
 output.log
-composer.json
-composer.lock
-composer-dependencies.json
-composer-dependencies.lock
 gruntfile.js
 package.json
 package-lock.json
