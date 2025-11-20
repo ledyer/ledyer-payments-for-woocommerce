@@ -1,7 +1,7 @@
 <?php
 namespace Krokedil\Ledyer\Payments\Requests;
 
-use KrokedilLedyerPaymentsDeps\Krokedil\WpApi\Request;
+use Krokedil\WpApi\Request;
 
 /**
  * Class BaseRequest

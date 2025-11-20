@@ -1,8 +1,8 @@
 <?php
 namespace Krokedil\Ledyer\Payments\Requests\Helpers;
 
-use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce\Order\Order as BaseOrder;
-use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
+use Krokedil\WooCommerce\Order\Order as BaseOrder;
+use Krokedil\WooCommerce as KrokedilWC;
 /**
  * Class Order
  *

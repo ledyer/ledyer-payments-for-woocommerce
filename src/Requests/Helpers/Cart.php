@@ -2,8 +2,8 @@
 namespace Krokedil\Ledyer\Payments\Requests\Helpers;
 
 use Krokedil\Ledyer\Payments\Callback;
-use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce\Cart\Cart as CartBase;
-use KrokedilLedyerPaymentsDeps\Krokedil\WooCommerce as KrokedilWC;
+use Krokedil\WooCommerce\Cart\Cart as CartBase;
+use Krokedil\WooCommerce as KrokedilWC;
 
 /**
  * Class Cart
