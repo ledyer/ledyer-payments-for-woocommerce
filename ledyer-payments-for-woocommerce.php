@@ -13,7 +13,7 @@
  * @package ledyer-payments-for-woocommerce
  *
  * WC requires at least: 5.6.0
- * WC tested up to: 9.8.5
+ * WC tested up to: 10.3.5
  * Requires Plugins: woocommerce
  *
  * Copyright (c) 2024 Krokedil
