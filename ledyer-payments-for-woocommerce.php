@@ -13,10 +13,10 @@
  * @package ledyer-payments-for-woocommerce
  *
  * WC requires at least: 5.6.0
- * WC tested up to: 10.3.5
+ * WC tested up to: 10.4.2
  * Requires Plugins: woocommerce
  *
- * Copyright (c) 2024 Krokedil
+ * Copyright (c) 2025 Krokedil
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
