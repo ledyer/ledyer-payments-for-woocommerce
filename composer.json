@@ -38,5 +38,5 @@
     "composerlock": "composer-dependencies.lock"
 }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }
