@@ -64,7 +64,7 @@ add_action(
  * This will be required to automatically load all the classes in the plugin, even when not using other external packages! This is the only file that should be required in the plugin normally.
  */
 $ledyer_payments_autoloader              = __DIR__ . '/vendor/autoload.php';
-$ledyer_payments_autoloader_dependencies = __DIR__ . '/dependencies/scoper-autoload.php';
+$ledyer_payments_autoloader_dependencies = __DIR__ . '/vendor/dependencies/scoper-autoload.php';
 
 // Check if the autoloaders was read.
 $ledyer_payments_autoloader_result              = is_readable( $ledyer_payments_autoloader ) && require $ledyer_payments_autoloader;
