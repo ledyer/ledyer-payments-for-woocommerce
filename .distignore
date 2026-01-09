@@ -15,7 +15,7 @@ output.log
 gruntfile.js
 package.json
 package-lock.json
-phpcs.ruleset.xml
+phpcs.xml
 phpunit.xml
 pnpm-lock.yaml
 readme.dev.txt
