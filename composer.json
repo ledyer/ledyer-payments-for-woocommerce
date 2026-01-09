@@ -26,15 +26,17 @@
         }
     },
     "extra": {
-        "wpify-scoper": {
-            "prefix": "KrokedilLedyerPaymentsDeps",
-            "folder": "dependencies",
-            "autorun": true,
-            "globals": [
-                "wordpress",
-                "woocommerce"
-            ]
-        }
+"wpify-scoper": {
+    "prefix": "KrokedilLedyerPaymentsDeps",
+    "folder": "vendor/dependencies",
+    "autorun": true,
+    "globals": [
+        "wordpress",
+        "woocommerce"
+    ],
+    "composerjson": "composer-dependencies.json",
+    "composerlock": "composer-dependencies.lock"
+}
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }

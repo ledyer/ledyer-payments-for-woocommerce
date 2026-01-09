@@ -274,9 +274,11 @@ class Session {
 			$billing_address  = WC()->customer->get_billing();
 			$shipping_address = WC()->customer->get_shipping();
 			$shipping_method  = WC()->session->get( 'chosen_shipping_methods' );
+			$coupon_code      = WC()->cart->applied_coupons ? implode( ',', WC()->cart->applied_coupons ) : '';
+			$cart_hash        = WC()->cart->get_cart_hash() ?? '';
 
 			// Calculate a hash from the values.
-			$hash = md5( wp_json_encode( array( $total, $billing_address, $shipping_address, $shipping_method ) ) );
+			$hash = md5( wp_json_encode( array( $total, $billing_address, $shipping_address, $shipping_method, $coupon_code, $cart_hash ) ) );
 		} else {
 			// Get values to use for the combined hash calculation.
 			$total            = $order->get_total( 'edit' );
