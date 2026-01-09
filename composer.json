@@ -1,42 +1,46 @@
 {
-    "name": "krokedil/ledyer-payments-for-woocommerce",
-    "description": "",
-    "version": "1.0.0",
-    "type": "wordpress-plugin",
-    "license": "GPL-3.0-or-later",
-    "require-dev": {
-        "php-stubs/woocommerce-stubs": "^8.1",
-        "wp-coding-standards/wpcs": "^3.0",
-        "phpcompatibility/php-compatibility": "^9.3",
-        "phpunit/phpunit": "^9.6",
-        "wpify/scoper": "3.1.3"
+  "name": "krokedil/ledyer-payments-for-woocommerce",
+  "description": "",
+  "version": "1.0.0",
+  "type": "wordpress-plugin",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "phpcs": "php -d memory_limit=512M vendor/bin/phpcs --standard=phpcs.xml src/**/*.php",
+    "phpcbf": "php -d memory_limit=512M vendor/bin/phpcbf --standard=phpcs.xml src/**/*.php"
+  },
+  "require-dev": {
+    "php-stubs/woocommerce-stubs": "^8.1",
+    "wp-coding-standards/wpcs": "^3.0",
+    "phpcompatibility/php-compatibility": "^9.3",
+    "phpunit/phpunit": "^9.6",
+    "wpify/scoper": "3.1.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Krokedil\\Ledyer\\Payments\\": "src/"
+    }
+  },
+  "config": {
+    "platform": {
+      "php": "7.4"
     },
-    "autoload": {
-        "psr-4": {
-            "Krokedil\\Ledyer\\Payments\\": "src/"
-        }
-    },
-    "config": {
-        "platform": {
-            "php": "7.4"
-        },
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true,
-            "wpify/scoper": true
-        }
-    },
-    "extra": {
-"wpify-scoper": {
-    "prefix": "KrokedilLedyerPaymentsDeps",
-    "folder": "vendor/dependencies",
-    "autorun": true,
-    "globals": [
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "wpify/scoper": true
+    }
+  },
+  "extra": {
+    "wpify-scoper": {
+      "prefix": "KrokedilLedyerPaymentsDeps",
+      "folder": "vendor/dependencies",
+      "autorun": true,
+      "globals": [
         "wordpress",
         "woocommerce"
-    ],
-    "composerjson": "composer-dependencies.json",
-    "composerlock": "composer-dependencies.lock"
-}
-    },
-    "minimum-stability": "stable"
+      ],
+      "composerjson": "composer-dependencies.json",
+      "composerlock": "composer-dependencies.lock"
+    }
+  },
+  "minimum-stability": "stable"
 }
