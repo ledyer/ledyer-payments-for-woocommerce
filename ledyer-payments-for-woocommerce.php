@@ -16,7 +16,7 @@
  * WC tested up to: 10.4.2
  * Requires Plugins: woocommerce
  *
- * Copyright (c) 2025 Krokedil
+ * Copyright (c) 2026 Krokedil
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
