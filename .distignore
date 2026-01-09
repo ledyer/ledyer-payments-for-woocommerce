@@ -27,3 +27,13 @@ webpack.config.js
 yarn.lock
 phpcs.xml
 scoper.custom.php
+
+wpcron.txt
+docker-compose.yml
+README.md
+Dockerfile-wpdebug-php8
+Dockerfile-wpdebug-php7
+Dockerfile-cron
+.aider*
+.php-cs-fixer.cache
+.env
