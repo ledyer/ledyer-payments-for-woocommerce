@@ -69,7 +69,6 @@ $ledyer_payments_autoloader_dependencies = __DIR__ . '/vendor/dependencies/scope
 // Check if the autoloaders was read.
 $ledyer_payments_autoloader_result              = is_readable( $ledyer_payments_autoloader ) && require $ledyer_payments_autoloader;
 $ledyer_payments_autoloader_dependencies_result = is_readable( $ledyer_payments_autoloader_dependencies ) && require $ledyer_payments_autoloader_dependencies;
-$ledyer_payments_autoloader_dependencies_result = true;
 if ( ! $ledyer_payments_autoloader_result || ! $ledyer_payments_autoloader_dependencies_result ) {
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		error_log( //phpcs:ignore
