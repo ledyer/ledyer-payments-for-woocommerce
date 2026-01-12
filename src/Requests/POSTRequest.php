@@ -20,7 +20,7 @@ abstract class POSTRequest extends BaseRequest {
 	 * @return array
 	 */
 	public function get_request_args() {
-		$body = wp_json_encode( apply_filters( "{$this->config['slug']}_request_args", $this->get_body() ) );
+		$body = wp_json_encode( apply_filters( 'ledyer_payments_request_args', $this->get_body() ) );
 
 		return array(
 			'headers'    => $this->get_request_headers(),

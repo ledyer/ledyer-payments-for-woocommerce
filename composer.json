@@ -32,14 +32,15 @@
   "extra": {
     "wpify-scoper": {
       "prefix": "KrokedilLedyerPaymentsDeps",
-      "folder": "dependencies",
+      "folder": "vendor/dependencies",
       "autorun": true,
       "globals": [
         "wordpress",
         "woocommerce"
-      ]
+      ],
+      "composerjson": "composer-dependencies.json",
+      "composerlock": "composer-dependencies.lock"
     }
   },
-  "minimum-stability": "dev"
+  "minimum-stability": "stable"
 }
-

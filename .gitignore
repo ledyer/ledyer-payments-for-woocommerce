@@ -30,7 +30,7 @@ yarn-error.log*
 /vendor/
 dependencies/*
 !dependencies/.gitkeep
-tmp-*
+tmp*
 
 # Release
 /release/

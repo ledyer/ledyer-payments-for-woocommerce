@@ -1,10 +1,9 @@
 <?php
 /**
  * Plugin Name: Ledyer Payments for WooCommerce
- * Plugin URI: https://krokedil.com/
  * Description: Ledyer Payments for WooCommerce.
- * Author: Krokedil
- * Author URI: https://krokedil.com/
+ * Author: ledyerdevelopment
+ * Author URI: https://www.ledyer.com/
  * Version: 1.0.0
  * Text Domain: ledyer-payments-for-woocommerce
  * Domain Path: /languages
@@ -14,10 +13,10 @@
  * @package ledyer-payments-for-woocommerce
  *
  * WC requires at least: 5.6.0
- * WC tested up to: 9.8.5
+ * WC tested up to: 10.4.3
  * Requires Plugins: woocommerce
  *
- * Copyright (c) 2024 Krokedil
+ * Copyright (c) 2026 Krokedil
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,13 +63,13 @@ add_action(
  * If Debug is enabled, then log to the error log as well.
  * This will be required to automatically load all the classes in the plugin, even when not using other external packages! This is the only file that should be required in the plugin normally.
  */
-$autoloader              = __DIR__ . '/vendor/autoload.php';
-$autoloader_dependencies = __DIR__ . '/dependencies/scoper-autoload.php';
+$ledyer_payments_autoloader              = __DIR__ . '/vendor/autoload.php';
+$ledyer_payments_autoloader_dependencies = __DIR__ . '/vendor/dependencies/scoper-autoload.php';
 
 // Check if the autoloaders was read.
-$autoloader_result              = is_readable( $autoloader ) && require $autoloader;
-$autoloader_dependencies_result = is_readable( $autoloader_dependencies ) && require $autoloader_dependencies;
-if ( ! $autoloader_result || ! $autoloader_dependencies_result ) {
+$ledyer_payments_autoloader_result              = is_readable( $ledyer_payments_autoloader ) && require $ledyer_payments_autoloader;
+$ledyer_payments_autoloader_dependencies_result = is_readable( $ledyer_payments_autoloader_dependencies ) && require $ledyer_payments_autoloader_dependencies;
+if ( ! $ledyer_payments_autoloader_result || ! $ledyer_payments_autoloader_dependencies_result ) {
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		error_log( //phpcs:ignore
 			sprintf(
