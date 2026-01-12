@@ -30,7 +30,7 @@
        uses: 10up/action-wordpress-plugin-deploy@stable
        with:
          generate-zip: true
-         dry-run: true # Set to true to test without making any changes in WordPress.org SVN repo
+         dry-run: false # Set to true to test without making any changes in WordPress.org SVN repo
        env:
          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
