@@ -1,20 +1,18 @@
 <?php
-namespace Ledyer\Payments\Requests;
+namespace Krokedil\Ledyer\Payments\Requests;
 
 /**
  * POST request class.
  */
-abstract class POST extends BaseRequest {
+abstract class POSTRequest extends BaseRequest {
 
 	/**
-	 * POST constructor.
+	 * The request method.
 	 *
-	 * @return array Arguments that should be accessible from within the request.
+	 * @var string
 	 */
-	public function __construct( $args = array() ) {
-		parent::__construct( $args );
-		$this->method = 'POST';
-	}
+	public $method = 'POST';
+
 
 	/**
 	 * The args second parameter in wp_remote_request.
@@ -22,7 +20,7 @@ abstract class POST extends BaseRequest {
 	 * @return array
 	 */
 	public function get_request_args() {
-		$body = wp_json_encode( apply_filters( "{$this->config['slug']}_request_args", $this->get_body() ) );
+		$body = wp_json_encode( apply_filters( 'ledyer_payments_request_args', $this->get_body() ) );
 
 		return array(
 			'headers'    => $this->get_request_headers(),

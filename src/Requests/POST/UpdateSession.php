@@ -5,17 +5,19 @@ use Krokedil\Ledyer\Payments\Requests\POSTRequest;
 use Krokedil\Ledyer\Payments\Requests\Helpers\Cart;
 
 /**
- * Create checkout session request class.
+ * Update checkout session request class.
  */
-class CreateSession extends POSTRequest {
+class UpdateSession extends POSTRequest {
 
 	/**
-	 * CreateSession constructor.
+	 * UpdateSession constructor.
+	 *
+	 * @param string $session_id The Ledyer session ID.
 	 */
-	public function __construct() {
+	public function __construct( $session_id ) {
 		parent::__construct();
-		$this->log_title = 'Create session';
-		$this->endpoint  = '/v1/payment-sessions';
+		$this->log_title = 'Update session';
+		$this->endpoint  = "/v1/payment-sessions/$session_id";
 	}
 
 	/**
@@ -36,12 +38,7 @@ class CreateSession extends POSTRequest {
 				'security' => array(
 					'level' => absint( Ledyer_Payments()->settings( 'security_level' ) ),
 				),
-				'urls'     => array(
-					'confirmation' => $cart->get_confirmation_url(),
-					'notification' => $cart->get_notification_url(),
-				),
 			),
-			'storeId'                 => $this->settings['store_id'],
 			'totalOrderAmount'        => $cart->get_total(),
 			'totalOrderAmountExclVat' => $cart->get_total() - $cart->get_total_tax(),
 			'totalOrderVatAmount'     => $cart->get_total_tax(),

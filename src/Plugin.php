@@ -1,5 +1,5 @@
 <?php
-namespace Ledyer\Payments;
+namespace Krokedil\Ledyer\Payments;
 
 /**
  * Class Plugin
@@ -7,6 +7,46 @@ namespace Ledyer\Payments;
  * Handles the plugins initialization.
  */
 class Plugin {
+	use Traits\Singleton;
+
+	/**
+	 * API gateway.
+	 *
+	 * @var API
+	 */
+	private $api = null;
+
+	/**
+	 * Session handler.
+	 *
+	 * @var Session
+	 */
+	private $session = null;
+
+
+	/**
+	 * Logger.
+	 *
+	 * @var Logger
+	 */
+	private $logger = null;
+
+
+	/**
+	 * Plugin settings.
+	 *
+	 * @var array
+	 */
+	private $settings = array();
+
+	/**
+	 * The gateway.
+	 *
+	 * @var Gateway
+	 */
+	private $gateway = null;
+
+
 	/**
 	 * Plugin constructor.
 	 *
@@ -27,6 +67,15 @@ class Plugin {
 	 * @return void
 	 */
 	private function load_dependencies() {
+		$this->api     = new API();
+		$this->session = new Session();
+		$this->logger  = new Logger();
+
+		new AJAX();
+		new Assets();
+		new Callback();
+
+		$this->settings = get_option( 'woocommerce_ledyer_payments_settings', array() );
 	}
 
 	/**
@@ -36,24 +85,70 @@ class Plugin {
 	 */
 	private function setup_hooks() {
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateways' ) );
-		add_action( 'before_woocommerce_init', array( $this, 'declare_wc_compatibility' ) );
+
+		/**
+		 * Override the payment categories ID.
+		 *
+		 * In the templates/payment-categories.php file, we insert the payment categories as unique payment methods (gateways), each with a distinct ID. When Woo process the payment, it will look for a gateway with those IDs, but they don't exist. Only 'ledyer_payments' actually exists. For this reason, we must override the payment method ID to 'ledyer_payments' when the checkout data is posted.
+		 */
+		add_filter(
+			'woocommerce_checkout_posted_data',
+			function ( $data ) {
+				if ( false !== strpos( $data['payment_method'], 'ledyer_payments' ) ) {
+					$data['payment_method'] = 'ledyer_payments';
+				}
+
+				return $data;
+			}
+		);
 	}
 
 	/**
-	 * Declare compatibility with WooCommerce features.
+	 * Get the API gateway.
 	 *
-	 * @return void
+	 * @return API
 	 */
-	public function declare_wc_compatibility() {
-		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
-			// Declare HPOS compatibility.
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
-
-			// Declare Checkout Blocks incompatibility
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, false );
-		}
+	public function api() {
+		return $this->api;
 	}
 
+	/**
+	 * Get the session handler.
+	 *
+	 * @return Session
+	 */
+	public function session() {
+		$this->session->resume();
+		return $this->session;
+	}
+
+	/**
+	 * Get the logger.
+	 *
+	 * @return Logger
+	 */
+	public function logger() {
+		return $this->logger;
+	}
+
+	/**
+	 * Get the value for a setting.
+	 *
+	 * @param string $key The setting key.
+	 * @return mixed
+	 */
+	public function settings( $key ) {
+		return $this->settings[ $key ] ?? null;
+	}
+
+	/**
+	 * Get the gateway.
+	 *
+	 * @return Gateway
+	 */
+	public function gateway() {
+		return WC()->payment_gateways()->payment_gateways()['ledyer_payments'] ?? null;
+	}
 
 	/**
 	 * Add plugin action links.
@@ -83,7 +178,7 @@ class Plugin {
 				array(
 					'page'    => 'wc-settings',
 					'tab'     => 'checkout',
-					'section' => Gateway::ID,
+					'section' => 'ledyer_payments',
 
 				),
 				'admin.php'
@@ -98,7 +193,7 @@ class Plugin {
 	 * @return array.
 	 */
 	public function add_gateways( $methods ) {
-		$methods[] = '\Ledyer\Payments\Gateway';
+		$methods[] = Gateway::class;
 		return $methods;
 	}
 }
