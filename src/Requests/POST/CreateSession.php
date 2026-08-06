@@ -34,7 +34,7 @@ class CreateSession extends POSTRequest {
 			'reference'               => Ledyer_Payments()->session()->get_reference(),
 			'settings'                => array(
 				'security' => array(
-					'level' => absint( Ledyer_Payments()->settings( 'security_level' ) ),
+					'level' => 200,
 				),
 				'urls'     => array(
 					'confirmation' => $cart->get_confirmation_url(),

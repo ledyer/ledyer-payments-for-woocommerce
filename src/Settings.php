@@ -97,21 +97,6 @@ class Settings {
 					'billing_form' => __( 'Billing form', 'ledyer-payments-for-woocommerce' ),
 				),
 			),
-			'security_level'           => array(
-				'title'       => __( 'Security level', 'ledyer-payments-for-woocommerce' ),
-				'type'        => 'select',
-				'default'     => '200',
-				'description' => __( 'Refer to the <a href="https://static.ledyer.com/docs/en-US/ledyer-security_levels.pdf">documentation</a> on what these level mean. This will override the security level you have set in the merchant portal.', 'ledyer-payments-for-woocommerce' ),
-				'options'     => array(
-					'100' => '100',
-					'110' => '110',
-					'120' => '120',
-					'200' => '200',
-					'210' => '210',
-					'220' => '220',
-					'300' => '300',
-				),
-			),
 			'troubleshooting'          => array(
 				'title' => __( 'Troubleshooting', 'ledyer-payments-for-woocommerce' ),
 				'type'  => 'title',

@@ -36,7 +36,7 @@ class UpdateSession extends POSTRequest {
 			'reference'               => Ledyer_Payments()->session()->get_reference(),
 			'settings'                => array(
 				'security' => array(
-					'level' => absint( Ledyer_Payments()->settings( 'security_level' ) ),
+					'level' => 200,
 				),
 			),
 			'totalOrderAmount'        => $cart->get_total(),
