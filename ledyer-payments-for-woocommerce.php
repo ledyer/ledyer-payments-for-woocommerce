@@ -4,7 +4,7 @@
  * Description: Ledyer Payments for WooCommerce.
  * Author: ledyerdevelopment
  * Author URI: https://www.ledyer.com/
- * Version: 1.0.0
+ * Version: 1.0.1
  * Text Domain: ledyer-payments-for-woocommerce
  * Domain Path: /languages
  * License: GPL-3.0-or-later
@@ -13,7 +13,7 @@
  * @package ledyer-payments-for-woocommerce
  *
  * WC requires at least: 5.6.0
- * WC tested up to: 10.4.3
+ * WC tested up to: 11.0.1
  * Requires Plugins: woocommerce
  *
  * Copyright (c) 2026 Krokedil
@@ -38,7 +38,7 @@ use Krokedil\Ledyer\Payments\Plugin;
 defined( 'ABSPATH' ) || exit;
 
 // Following our practice of using constants, we define a few here for the plugin version, main file, path and URL. These can then be used later in the plugin when needed.
-define( 'LEDYER_PAYMENTS_VERSION', '1.0.0' );
+define( 'LEDYER_PAYMENTS_VERSION', '1.0.1' );
 define( 'LEDYER_PAYMENTS_MAIN_FILE', __FILE__ );
 define( 'LEDYER_PAYMENTS_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'LEDYER_PAYMENTS_PLUGIN_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );

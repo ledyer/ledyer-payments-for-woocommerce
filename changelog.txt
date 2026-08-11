@@ -1,4 +1,7 @@
 *** Ledyer Payments for WooCommerce Changelog ***
 
+2026.08.11      - version 1.0.1
+* Tweak         - Security level handling is now managed by Ledyer and the security level option has been removed from plugin settings.
+
 1.0.0
 * Initial release.

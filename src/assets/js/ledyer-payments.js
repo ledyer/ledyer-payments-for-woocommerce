@@ -61,8 +61,14 @@ jQuery( function ( $ ) {
             if ( LedyerPayments.params.companyFieldsPlacement === "billing_form" ) {
                 if ( LedyerPayments.isActiveGateway() ) {
                     $( "#billing_company_number_field" ).detach().insertAfter( "#billing_company_field" ).show()
-                    $( "#ledyer_customer_reference_1_field" ).detach().insertAfter( "#billing_company_number_field" ).show()
-                    $( "#ledyer_customer_reference_2_field" ).detach().insertAfter( "#ledyer_customer_reference_1_field" ).show()
+                    $( "#ledyer_customer_reference_1_field" )
+                        .detach()
+                        .insertAfter( "#billing_company_number_field" )
+                        .show()
+                    $( "#ledyer_customer_reference_2_field" )
+                        .detach()
+                        .insertAfter( "#ledyer_customer_reference_1_field" )
+                        .show()
                 } else {
                     $( "#billing_company_number_field" ).hide()
                     $( "#ledyer_customer_reference_1_field" ).hide()
