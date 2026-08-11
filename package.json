@@ -1,6 +1,6 @@
 {
   "name": "ledyer-payments-for-woocommerce",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Ledyer Payments for WooCommerce",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
