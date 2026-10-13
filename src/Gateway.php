@@ -409,6 +409,7 @@ class Gateway extends \WC_Payment_Gateway {
 			$order->save();
 
 			// The order status is set based on the payment status, the same way as in Ledyer Checkout.
+			$acknowledged   = false;
 			$payment_status = Ledyer_Payments()->api()->get_payment_status( $payment_id );
 			if ( is_wp_error( $payment_status ) ) {
 				$context['paymentId'] = $payment_id;
@@ -418,7 +419,11 @@ class Gateway extends \WC_Payment_Gateway {
 					$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
 				}
 			} else {
-				$this->process_order_status( $order, $payment_status, $payment_id );
+				$acknowledged = $this->process_order_status( $order, $payment_status, $payment_id );
+			}
+
+			if ( ! $acknowledged ) {
+				$this->acknowledge_order( $payment_id, $context );
 			}
 		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
 			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
@@ -435,7 +440,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @param \WC_Order $order The WooCommerce order.
 	 * @param array     $payment_status The Ledyer payment status response.
 	 * @param string    $ledyer_order_id The Ledyer order ID.
-	 * @return void
+	 * @return bool Whether the order was acknowledged.
 	 */
 	public function process_order_status( $order, $payment_status, $ledyer_order_id ) {
 		$context = array(
@@ -458,7 +463,7 @@ class Gateway extends \WC_Payment_Gateway {
 			case PaymentStatus::PAYMENT_PENDING:
 				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
 					// translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
-					$order->update_status( 'on-hold', sprintf( __( 'New payment pending payment created in Ledyer with Payment ID %1$s. %2$s', 'ledyer-payments-for-woocommerce' ), $ledyer_order_id, $note ) );
+					$order->update_status( 'on-hold', sprintf( __( 'New pending payment created in Ledyer with Payment ID %1$s. %2$s', 'ledyer-payments-for-woocommerce' ), $ledyer_order_id, $note ) );
 					$ack_order = true;
 				}
 				break;
@@ -502,10 +507,23 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		if ( $ack_order ) {
-			$response = Ledyer_Payments()->api()->acknowledge_order( $ledyer_order_id );
-			if ( is_wp_error( $response ) ) {
-				Ledyer_Payments()->logger()->error( "[ORDER STATUS]: Failed to acknowledge order: {$response->get_error_message()}", $context );
-			}
+			$this->acknowledge_order( $ledyer_order_id, $context );
+		}
+
+		return $ack_order;
+	}
+
+	/**
+	 * Acknowledge the order in Ledyer.
+	 *
+	 * @param string $ledyer_order_id The Ledyer order ID.
+	 * @param array  $context The logging context.
+	 * @return void
+	 */
+	private function acknowledge_order( $ledyer_order_id, $context ) {
+		$response = Ledyer_Payments()->api()->acknowledge_order( $ledyer_order_id );
+		if ( is_wp_error( $response ) ) {
+			Ledyer_Payments()->logger()->error( "[ACKNOWLEDGE]: Failed to acknowledge order: {$response->get_error_message()}", $context );
 		}
 	}
 

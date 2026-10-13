@@ -20,6 +20,9 @@ class Callback {
 	public const REST_API_ENDPOINT  = '/callback';
 	public const API_ENDPOINT       = 'wp-json/' . self::REST_API_NAMESPACE . self::REST_API_ENDPOINT;
 
+	private const READY_FOR_CAPTURE_EVENT = 'com.ledyer.order.ready_for_capture';
+	private const MAX_RETRIES             = 3;
+
 
 	/**
 	 * Callback constructor.
@@ -27,7 +30,7 @@ class Callback {
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_action( 'ledyer_payments_scheduled_auth_create_callback', array( $this, 'handle_auth_create_callback' ) );
-		add_action( 'ledyer_payments_scheduled_notification', array( $this, 'handle_notification' ), 10, 2 );
+		add_action( 'ledyer_payments_scheduled_notification', array( $this, 'handle_notification' ), 10, 3 );
 		add_action( 'ledyer_payments_scheduled_order_ready_for_capture_callback', array( $this, 'handle_notification' ), 10, 2 );
 	}
 
@@ -184,14 +187,16 @@ class Callback {
 	 *
 	 * @param string $ledyer_order_id The Ledyer order ID.
 	 * @param string $event_type The Ledyer event type.
+	 * @param int    $attempt The number of previous failed attempts.
 	 * @return void
 	 */
-	public function handle_notification( $ledyer_order_id, $event_type ) {
+	public function handle_notification( $ledyer_order_id, $event_type, $attempt = 0 ) {
 		$context = array(
 			'filter'          => current_filter(),
 			'function'        => __FUNCTION__,
 			'ledyer_order_id' => $ledyer_order_id,
 			'event_type'      => $event_type,
+			'attempt'         => $attempt,
 		);
 
 		$order = Ledyer_Payments()->gateway()->get_order_by_ledyer_order_id( $ledyer_order_id );
@@ -203,10 +208,19 @@ class Callback {
 		$payment_status = Ledyer_Payments()->api()->get_payment_status( $ledyer_order_id );
 		if ( is_wp_error( $payment_status ) ) {
 			Ledyer_Payments()->logger()->error( "[CALLBACK]: Failed to get Ledyer payment status: {$payment_status->get_error_message()}", $context );
+
+			// Retry later, since Ledyer will not send the notification again.
+			if ( $attempt < self::MAX_RETRIES ) {
+				as_schedule_single_action(
+					time() + ( $attempt + 1 ) * 5 * MINUTE_IN_SECONDS,
+					'ledyer_payments_scheduled_notification',
+					array( $ledyer_order_id, $event_type, $attempt + 1 )
+				);
+			}
 			return;
 		}
 
-		if ( 'com.ledyer.order.ready_for_capture' === $event_type ) {
+		if ( self::READY_FOR_CAPTURE_EVENT === $event_type ) {
 			$this->process_ready_for_capture( $order, $payment_status, $ledyer_order_id );
 			return;
 		}
@@ -252,19 +266,22 @@ class Callback {
 
 		$hook              = 'ledyer_payments_scheduled_notification';
 		$as_args           = array(
-			'hook'   => $hook,
-			'status' => \ActionScheduler_Store::STATUS_PENDING,
+			'hook'     => $hook,
+			'status'   => \ActionScheduler_Store::STATUS_PENDING,
+			'search'   => $ledyer_order_id,
+			'per_page' => -1,
 		);
 		$scheduled_actions = as_get_scheduled_actions( $as_args, OBJECT );
 
 		/**
-		 * Loop all actions to check if this event has been scheduled already for this order.
+		 * Loop all actions to check if this order is already scheduled for processing. All events except ready for capture are handled the same way (by fetching the current payment status), so at most one of each is needed per order.
 		 *
 		 * @var \ActionScheduler_Action $action The action from the Action scheduler.
 		 */
+		$is_ready_for_capture = self::READY_FOR_CAPTURE_EVENT === $event_type;
 		foreach ( $scheduled_actions as $action ) {
 			$action_args = $action->get_args();
-			if ( $ledyer_order_id === $action_args[0] && $event_type === $action_args[1] ) {
+			if ( $ledyer_order_id === $action_args[0] && ( self::READY_FOR_CAPTURE_EVENT === $action_args[1] ) === $is_ready_for_capture ) {
 				Ledyer_Payments()->logger()->debug( '[CALLBACK]: The event is already scheduled for processing.', $context );
 				return true;
 			}
