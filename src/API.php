@@ -73,6 +73,33 @@ class API {
 		return $this->check_for_api_error( $response );
 	}
 
+	/**
+	 * Get the payment status of a Ledyer order.
+	 *
+	 * @param string $ledyer_order_id The Ledyer order ID.
+	 *
+	 * @return \WP_Error|array
+	 */
+	public function get_payment_status( $ledyer_order_id ) {
+		$request  = new Requests\GET\GetPaymentStatus( $ledyer_order_id );
+		$response = $request->request();
+
+		return $this->check_for_api_error( $response );
+	}
+
+	/**
+	 * Acknowledge a Ledyer order.
+	 *
+	 * @param string $ledyer_order_id The Ledyer order ID.
+	 *
+	 * @return \WP_Error|array|null
+	 */
+	public function acknowledge_order( $ledyer_order_id ) {
+		$request  = new Requests\POST\AcknowledgeOrder( $ledyer_order_id );
+		$response = $request->request();
+
+		return $this->check_for_api_error( $response );
+	}
 
 	/**
 	 * Checks for API errors, and determines whether these should be printed to the customer.
