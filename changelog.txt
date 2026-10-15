@@ -1,5 +1,8 @@
 *** Ledyer Payments for WooCommerce Changelog ***
 
+2026.10.15      - version 1.0.3
+* Fix           - Re-release of 1.0.2 to WordPress.org.
+
 2026.10.15      - version 1.0.2
 * Tweak         - Orders now stay On hold until Ledyer has confirmed the payment and marked the order ready for capture, aligning order status handling with Ledyer Checkout.
 
