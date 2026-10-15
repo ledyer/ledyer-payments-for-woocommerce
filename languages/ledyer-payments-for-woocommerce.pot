@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/ledyer-payments-for-woocommerce\n"
-"POT-Creation-Date: 2026-08-11 08:54:32+00:00\n"
+"POT-Creation-Date: 2026-10-15 17:39:21+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -36,7 +36,7 @@ msgstr ""
 msgid "Something went wrong. Please try again or contact the store."
 msgstr ""
 
-#: src/Callback.php:107
+#: src/Callback.php:109
 msgid "Failed to schedule callback."
 msgstr ""
 
@@ -80,8 +80,23 @@ msgstr ""
 msgid "Please enter your company name."
 msgstr ""
 
-#: src/Gateway.php:404
+#: src/Gateway.php:419 src/Gateway.php:429
 msgid "Awaiting payment confirmation from Ledyer."
+msgstr ""
+
+#: src/Gateway.php:460
+#. translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
+msgid "New session created in Ledyer with Payment ID %1$s. %2$s"
+msgstr ""
+
+#: src/Gateway.php:466
+#. translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
+msgid "New pending payment created in Ledyer with Payment ID %1$s. %2$s"
+msgstr ""
+
+#: src/Gateway.php:473
+#. translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
+msgid "Payment successfully confirmed in Ledyer with Payment ID %1$s. %2$s"
 msgstr ""
 
 #: src/Plugin.php:164
