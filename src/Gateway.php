@@ -396,15 +396,6 @@ class Gateway extends \WC_Payment_Gateway {
 
 		// The orderId is not available when the purchase is awaiting signatory.
 		$payment_id = wc_get_var( $ledyer_order['orderId'] );
-		if ( 'authorized' === $ledyer_order['state'] ) {
-			// orderId not available if state is awaitingSignatory.
-			$order->update_meta_data( '_wc_ledyer_order_id', $payment_id );
-			$order->payment_complete( $payment_id );
-		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
-			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
-		} else {
-			Ledyer_Payments()->logger()->warning( "[CONFIRM: Unknown order state: {$ledyer_order['state']}", $context );
-		}
 
 		$order->set_payment_method( $this->id );
 		$order->set_transaction_id( $payment_id );
@@ -412,7 +403,128 @@ class Gateway extends \WC_Payment_Gateway {
 		$env = wc_string_to_bool( Ledyer_Payments()->settings( 'test_mode' ) ?? 'no' ) ? 'sandbox' : 'production';
 		$order->update_meta_data( '_wc_ledyer_environment', $env );
 		$order->update_meta_data( '_wc_ledyer_session_id', $ledyer_order['id'] );
+
+		if ( 'authorized' === $ledyer_order['state'] ) {
+			$order->update_meta_data( '_wc_ledyer_order_id', $payment_id );
+			$order->save();
+
+			// The order status is set based on the payment status, the same way as in Ledyer Checkout.
+			$acknowledged   = false;
+			$payment_status = Ledyer_Payments()->api()->get_payment_status( $payment_id );
+			if ( is_wp_error( $payment_status ) ) {
+				$context['paymentId'] = $payment_id;
+				Ledyer_Payments()->logger()->error( '[CONFIRM]: Failed to get Ledyer payment status. The order status will be updated by callback.', $context );
+
+				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
+					$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
+				}
+			} else {
+				$acknowledged = $this->process_order_status( $order, $payment_status, $payment_id );
+			}
+
+			if ( ! $acknowledged ) {
+				$this->acknowledge_order( $payment_id, $context );
+			}
+		} elseif ( 'awaitingSignatory' === $ledyer_order['state'] ) {
+			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
+		} else {
+			Ledyer_Payments()->logger()->warning( "[CONFIRM]: Unknown order state: {$ledyer_order['state']}", $context );
+		}
+
 		$order->save();
+	}
+
+	/**
+	 * Update the order status based on the Ledyer payment status.
+	 *
+	 * @param \WC_Order $order The WooCommerce order.
+	 * @param array     $payment_status The Ledyer payment status response.
+	 * @param string    $ledyer_order_id The Ledyer order ID.
+	 * @return bool Whether the order was acknowledged.
+	 */
+	public function process_order_status( $order, $payment_status, $ledyer_order_id ) {
+		$context = array(
+			'filter'          => current_filter(),
+			'function'        => __FUNCTION__,
+			'order_id'        => $order->get_id(),
+			'ledyer_order_id' => $ledyer_order_id,
+			'payment_status'  => $payment_status['status'] ?? '',
+		);
+
+		$note      = sanitize_text_field( $payment_status['note'] ?? '' );
+		$ack_order = false;
+		switch ( $payment_status['status'] ?? '' ) {
+			case PaymentStatus::ORDER_PENDING:
+				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
+					// translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
+					$order->update_status( 'on-hold', sprintf( __( 'New session created in Ledyer with Payment ID %1$s. %2$s', 'ledyer-payments-for-woocommerce' ), $ledyer_order_id, $note ) );
+				}
+				break;
+			case PaymentStatus::PAYMENT_PENDING:
+				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
+					// translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
+					$order->update_status( 'on-hold', sprintf( __( 'New pending payment created in Ledyer with Payment ID %1$s. %2$s', 'ledyer-payments-for-woocommerce' ), $ledyer_order_id, $note ) );
+					$ack_order = true;
+				}
+				break;
+			case PaymentStatus::PAYMENT_CONFIRMED:
+				if ( ! $order->has_status( array( 'processing', 'completed' ) ) ) {
+					// translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
+					$order->add_order_note( sprintf( __( 'Payment successfully confirmed in Ledyer with Payment ID %1$s. %2$s', 'ledyer-payments-for-woocommerce' ), $ledyer_order_id, $note ) );
+					$ack_order = true;
+
+					// If the order does not need payment, we need to ensure the "ready-for-capture" event has been triggered.
+					$ready_for_capture = $order->get_meta( '_ledyer_ready_for_capture', true );
+					if ( ! $order->needs_payment() && empty( $ready_for_capture ) ) {
+						$order->update_meta_data( '_ledyer_waiting_on_ready_for_capture', true );
+						$order->save();
+						Ledyer_Payments()->logger()->debug( '[ORDER STATUS]: Order is paid but waiting for the ready for capture event.', $context );
+						break;
+					}
+
+					$order->payment_complete( $ledyer_order_id );
+				}
+				break;
+			case PaymentStatus::ORDER_CAPTURED:
+				/**
+				 * Filters the order status to set when the Ledyer order has been captured.
+				 *
+				 * @param string $new_status The new order status. Default 'completed'.
+				 * @param array  $payment_status The Ledyer payment status response.
+				 */
+				$new_status = apply_filters( 'ledyer_payments_captured_update_status', 'completed', $payment_status );
+				$order->update_status( $new_status );
+				break;
+			case PaymentStatus::ORDER_REFUNDED:
+				$order->update_status( 'refunded' );
+				break;
+			case PaymentStatus::ORDER_CANCELLED:
+				$order->update_status( 'cancelled' );
+				break;
+			default:
+				Ledyer_Payments()->logger()->debug( '[ORDER STATUS]: No status change for payment status.', $context );
+				break;
+		}
+
+		if ( $ack_order ) {
+			$this->acknowledge_order( $ledyer_order_id, $context );
+		}
+
+		return $ack_order;
+	}
+
+	/**
+	 * Acknowledge the order in Ledyer.
+	 *
+	 * @param string $ledyer_order_id The Ledyer order ID.
+	 * @param array  $context The logging context.
+	 * @return void
+	 */
+	private function acknowledge_order( $ledyer_order_id, $context ) {
+		$response = Ledyer_Payments()->api()->acknowledge_order( $ledyer_order_id );
+		if ( is_wp_error( $response ) ) {
+			Ledyer_Payments()->logger()->error( "[ACKNOWLEDGE]: Failed to acknowledge order: {$response->get_error_message()}", $context );
+		}
 	}
 
 	/**
@@ -441,6 +553,33 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		return $order ?? false;
+	}
+
+	/**
+	 * Get order by Ledyer order ID.
+	 *
+	 * @param string $ledyer_order_id The Ledyer order ID.
+	 * @return \WC_Order|bool The WC_Order or false if not found.
+	 */
+	public function get_order_by_ledyer_order_id( $ledyer_order_id ) {
+		$key    = '_wc_ledyer_order_id';
+		$args   = array(
+			'meta_key'     => $key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value'   => $ledyer_order_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'meta_compare' => '=',
+			'order'        => 'DESC',
+			'orderby'      => 'date',
+			'limit'        => 1,
+			'date_created' => '>' . ( time() - MONTH_IN_SECONDS ),
+		);
+		$orders = wc_get_orders( $args );
+
+		$order = reset( $orders );
+		if ( empty( $order ) || $ledyer_order_id !== $order->get_meta( $key ) ) {
+			return false;
+		}
+
+		return $order;
 	}
 
 	/**
@@ -476,15 +615,16 @@ class Gateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		if ( ! empty( $order->get_date_paid() ) ) {
+		// On-hold orders are moved forward by callbacks only, the same way as in Ledyer Checkout.
+		if ( ! empty( $order->get_date_paid() ) || $order->has_status( 'on-hold' ) ) {
 			// Check for if the session wasn't cleared properly. This can happen if the order is successfully created, but the customer was not redirected to the checkout page.
 			$session_id = Ledyer_Payments()->session()->get_id();
 			if ( $order->get_meta( '_wc_ledyer_session_id' ) === $session_id ) {
-				Ledyer_Payments()->logger()->debug( '[MAYBE_CONFIRM]: Order already paid, but session still remained. Session is now cleared.', $context );
+				Ledyer_Payments()->logger()->debug( '[MAYBE_CONFIRM]: Order already confirmed, but session still remained. Session is now cleared.', $context );
 				Ledyer_Payments()->session()->clear_session( $order );
 			}
 
-			Ledyer_Payments()->logger()->debug( '[MAYBE_CONFIRM]: Order already paid. Customer probably refreshed thankyou page.', $context );
+			Ledyer_Payments()->logger()->debug( '[MAYBE_CONFIRM]: Order already confirmed. Customer probably refreshed thankyou page.', $context );
 			return;
 		}
 
