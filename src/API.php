@@ -127,6 +127,11 @@ class API {
 	 * @return void
 	 */
 	private function print_error( $wp_error ) {
+		// REST callbacks return their own errors; checkout notices would corrupt the response.
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return;
+		}
+
 		if ( is_ajax() && function_exists( 'wc_add_notice' ) ) {
 			$print = 'wc_add_notice';
 		} elseif ( function_exists( 'wc_print_notice' ) ) {
