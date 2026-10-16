@@ -376,9 +376,10 @@ class Gateway extends \WC_Payment_Gateway {
 	 *
 	 * @param \WC_Order $order The WooCommerce order.
 	 * @param array     $context The logging context. Optional.
-	 * @return void
+	 * @param bool      $create_missing_order Whether to create a missing Ledyer order from an authorization notification.
+	 * @return true|\WP_Error
 	 */
-	public function confirm_order( $order, $context = array() ) {
+	public function confirm_order( $order, $context = array(), $create_missing_order = false ) {
 		if ( empty( $context ) ) {
 			$context = array(
 				'filter'   => current_filter(),
@@ -390,12 +391,30 @@ class Gateway extends \WC_Payment_Gateway {
 		$ledyer_order = Ledyer_Payments()->api()->get_session( $session_id );
 		if ( is_wp_error( $ledyer_order ) ) {
 			$context['sessionId'] = $session_id;
-			Ledyer_Payments()->logger()->error( '[CONFIRM]: Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
-			return;
+			Ledyer_Payments()->logger()->error( '[CONFIRM]: Failed to get Ledyer session.', $context );
+			return $ledyer_order;
+		}
+
+		if ( $create_missing_order && empty( $ledyer_order['orderId'] ) ) {
+			// Fetch the authorization from Ledyer instead of trusting the public webhook payload.
+			if ( 'authorized' !== $ledyer_order['state'] || empty( $ledyer_order['authorizationToken'] ) ) {
+				return new \WP_Error( 'missing_authorization', 'Ledyer session has no usable authorization for order creation.' );
+			}
+
+			$result = Ledyer_Payments()->api()->create_order( $order->get_id(), $ledyer_order['authorizationToken'] );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+			if ( empty( $result['orderId'] ) ) {
+				return new \WP_Error( 'missing_order_id', 'Ledyer order creation returned no order ID.' );
+			}
+
+			$ledyer_order['orderId'] = $result['orderId'];
+			$order->update_meta_data( 'ledyer_payments_payment_id', $result['orderId'] );
 		}
 
 		// The orderId is not available when the purchase is awaiting signatory.
-		$payment_id = wc_get_var( $ledyer_order['orderId'] );
+		$payment_id = $ledyer_order['orderId'] ?? '';
 
 		$order->set_payment_method( $this->id );
 		$order->set_transaction_id( $payment_id );
@@ -418,6 +437,8 @@ class Gateway extends \WC_Payment_Gateway {
 				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
 					$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
 				}
+				$order->save();
+				return $payment_status;
 			} else {
 				$acknowledged = $this->process_order_status( $order, $payment_status, $payment_id );
 			}
@@ -432,6 +453,7 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		$order->save();
+		return true;
 	}
 
 	/**
