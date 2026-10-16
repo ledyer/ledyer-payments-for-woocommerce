@@ -1,0 +1,16 @@
+{
+  "pluginDevZipE2e": {
+    "pages": [
+      {
+        "url": "/wp-admin/admin.php?page=wc-settings&tab=checkout&section=ledyer_payments",
+        "assertions": [
+          {
+            "selector": "h2.wc-admin-header",
+            "text": "Ledyer Payments",
+            "match": "contains"
+          }
+        ]
+      }
+    ]
+  }
+}
