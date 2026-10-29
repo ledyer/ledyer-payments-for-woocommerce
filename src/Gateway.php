@@ -313,12 +313,22 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return array An associative array containing the success status and redirect URl.
 	 */
 	public function process_payment( $order_id ) {
+		$session = Ledyer_Payments()->session();
+
+		// Do not authorize with the browser's stale session ID after a session replacement.
+		if ( WC()->session->reload_checkout ) {
+			return array(
+				'result' => 'failure',
+				'reload' => true,
+			);
+		}
+
 		$helper   = new Order( wc_get_order( $order_id ) );
 		$customer = $helper->get_customer();
 
 		$order = $helper->order;
-		$order->update_meta_data( '_wc_ledyer_reference', Ledyer_Payments()->session()->get_reference() );
-		$order->update_meta_data( '_wc_ledyer_session_id', Ledyer_Payments()->session()->get_id() );
+		$order->update_meta_data( '_wc_ledyer_reference', $session->get_reference() );
+		$order->update_meta_data( '_wc_ledyer_session_id', $session->get_id() );
 		$order->save();
 
 		// Update the nonce only if WordPress determines it necessary, such as when a guest becomes signed in.

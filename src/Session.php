@@ -171,6 +171,8 @@ class Session {
 	 * @return void
 	 */
 	public function clear_session( $order = null ) {
+		$this->reset();
+
 		if ( isset( WC()->session ) ) {
 			WC()->session->__unset( self::SESSION_KEY );
 		}
@@ -199,6 +201,20 @@ class Session {
 			$this->session_country    = $session['session_country'];
 			$this->payment_categories = $session['payment_categories'];
 			$this->session_reference  = $session['session_reference'];
+
+			// A completed session may remain if the customer never reached the confirmation page.
+			if ( is_checkout() && ! is_order_received_page() ) {
+				// This optional check must not add customer-facing notices on failure.
+				$request = new Requests\GET\GetSession( $this->get_id() );
+				$result  = $request->request();
+				if ( ! is_wp_error( $result ) && 'completed' === ( $result['state'] ?? null ) ) {
+					$this->clear_session();
+					if ( is_ajax() ) {
+						WC()->session->reload_checkout = true;
+					}
+					return false;
+				}
+			}
 		}
 
 		return ! empty( $session );
@@ -363,7 +379,7 @@ class Session {
 				exit;
 			}
 
-			if ( 'expired' === $session['state'] ) {
+			if ( in_array( $session['state'], array( 'expired', 'completed' ), true ) ) {
 				$this->clear_session();
 
 				if ( isset( WC()->session ) ) {
