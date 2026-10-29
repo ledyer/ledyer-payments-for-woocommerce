@@ -204,9 +204,14 @@ class Session {
 
 			// A completed session may remain if the customer never reached the confirmation page.
 			if ( is_checkout() && ! is_order_received_page() ) {
-				$result = Ledyer_Payments()->api()->get_session( $this->get_id() );
+				// This optional check must not add customer-facing notices on failure.
+				$request = new Requests\GET\GetSession( $this->get_id() );
+				$result  = $request->request();
 				if ( ! is_wp_error( $result ) && 'completed' === ( $result['state'] ?? null ) ) {
 					$this->clear_session();
+					if ( is_ajax() ) {
+						WC()->session->reload_checkout = true;
+					}
 					return false;
 				}
 			}

@@ -353,6 +353,11 @@ jQuery( function ( $ ) {
                 dataType: "json",
                 success: async ( data ) => {
                     try {
+                        if ( data.reload ) {
+                            window.location.reload()
+                            return
+                        }
+
                         if ( data.nonce ) {
                             LedyerPayments.updateNonce( data.nonce )
                         }
