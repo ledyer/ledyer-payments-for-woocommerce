@@ -132,6 +132,11 @@ class API {
 			return;
 		}
 
+		// The order is already placed, so a raw API error on the thankyou page only confuses the customer. Failures are logged and noted on the order.
+		if ( function_exists( 'is_order_received_page' ) && is_order_received_page() ) {
+			return;
+		}
+
 		if ( is_ajax() && function_exists( 'wc_add_notice' ) ) {
 			$print = 'wc_add_notice';
 		} elseif ( function_exists( 'wc_print_notice' ) ) {
