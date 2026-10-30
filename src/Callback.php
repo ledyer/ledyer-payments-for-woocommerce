@@ -92,7 +92,14 @@ class Callback {
 					return new \WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
 				}
 
-				$status = $this->schedule_auth_create_callback( $session_id ) ? 200 : 500;
+				// Only acknowledge after creation/sync succeeds, so Ledyer can retry failed deliveries.
+				$result = Ledyer_Payments()->gateway()->confirm_order( $order, $context );
+				if ( is_wp_error( $result ) ) {
+					Ledyer_Payments()->logger()->error( '[CALLBACK]: Authorization processing failed: ' . $result->get_error_message(), $context );
+					return new \WP_Error( 'authorization_processing_failed', __( 'Failed to process Ledyer authorization.', 'ledyer-payments-for-woocommerce' ), array( 'status' => 500 ) );
+				}
+
+				$status = 200;
 				break;
 			default:
 				// Any other event is a trigger to fetch the payment status and update the order status accordingly.
@@ -132,54 +139,6 @@ class Callback {
 		}
 
 		Ledyer_Payments()->gateway()->confirm_order( $order, $context );
-	}
-
-	/**
-	 * Schedule a callback for later processing.
-	 *
-	 * @param string $session_id The session ID.
-	 * @return bool True if the callback was scheduled, false otherwise.
-	 */
-	private function schedule_auth_create_callback( $session_id ) {
-		$context = array(
-			'filter'     => current_filter(),
-			'function'   => __FUNCTION__,
-			'session_id' => $session_id,
-		);
-
-		$hook              = 'ledyer_payments_scheduled_auth_create_callback';
-		$as_args           = array(
-			'hook'   => $hook,
-			'status' => \ActionScheduler_Store::STATUS_PENDING,
-		);
-		$scheduled_actions = as_get_scheduled_actions( $as_args, OBJECT );
-
-		/**
-		 * Loop all actions to check if this one has been scheduled already.
-		 *
-		 * @var \ActionScheduler_Action $action The action from the Action scheduler.
-		 */
-		foreach ( $scheduled_actions as $action ) {
-			$action_args = $action->get_args();
-			if ( $session_id === $action_args['session_id'] ) {
-				Ledyer_Payments()->logger()->debug( '[CALLBACK]: The order is already scheduled for processing.', $context );
-				return true;
-			}
-		}
-
-		// If we get here, we should be good to create a new scheduled action, since none are currently scheduled for this order.
-		$did_schedule = as_schedule_single_action(
-			time() + 60,
-			$hook,
-			array(
-				'session_id' => $session_id,
-			)
-		);
-
-		$context['schedule_id'] = $did_schedule;
-		Ledyer_Payments()->logger()->debug( '[CALLBACK]: Successfully scheduled auth create callback.', $context );
-
-		return 0 !== $did_schedule;
 	}
 
 	/**

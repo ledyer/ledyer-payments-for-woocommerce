@@ -7,6 +7,8 @@
 
 namespace Krokedil\Ledyer\Payments;
 
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -374,11 +376,15 @@ class Gateway extends \WC_Payment_Gateway {
 	/**
 	 * Confirm the order.
 	 *
+	 * The thankyou page and the authorization callback can confirm the same order at the same time, so only one request at a time may confirm it.
+	 *
 	 * @param \WC_Order $order The WooCommerce order.
 	 * @param array     $context The logging context. Optional.
-	 * @return void
+	 * @return true|\WP_Error
 	 */
 	public function confirm_order( $order, $context = array() ) {
+		global $wpdb;
+
 		if ( empty( $context ) ) {
 			$context = array(
 				'filter'   => current_filter(),
@@ -386,16 +392,97 @@ class Gateway extends \WC_Payment_Gateway {
 			);
 		}
 
+		// A database lock is released by MySQL if the request dies, so it cannot get stuck. Lock names are server-wide, so include the table prefix to keep sites sharing a database server apart.
+		$lock = $wpdb->prefix . 'ledyer_payments_confirm_' . $order->get_id();
+		if ( ! $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $lock, 15 ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			Ledyer_Payments()->logger()->warning( '[CONFIRM]: The order is already being confirmed by another request.', $context );
+			return new \WP_Error( 'confirm_locked', 'The order is already being confirmed by another request.' );
+		}
+
+		try {
+			// Reload the order, since the request holding the lock before us may have changed it.
+			$order_id = $order->get_id();
+			clean_post_cache( $order_id );
+			if ( class_exists( OrderUtil::class ) && method_exists( OrderUtil::class, 'orders_cache_usage_is_enabled' ) && OrderUtil::orders_cache_usage_is_enabled() ) {
+				wc_get_container()->get( OrderCache::class )->remove( $order_id );
+			}
+
+			$order = wc_get_order( $order_id );
+			if ( empty( $order ) ) {
+				return new \WP_Error( 'order_not_found', 'The order no longer exists.' );
+			}
+
+			return $this->process_confirmation( $order, $context );
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		}
+	}
+
+	/**
+	 * Confirm the order against the Ledyer session, creating the Ledyer order if the checkout failed to.
+	 *
+	 * @param \WC_Order $order The WooCommerce order.
+	 * @param array     $context The logging context.
+	 * @return true|\WP_Error
+	 */
+	private function process_confirmation( $order, $context ) {
+		// Already confirmed by an earlier or concurrent request.
+		if ( ! empty( $order->get_meta( '_wc_ledyer_order_id' ) ) && $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
+			Ledyer_Payments()->logger()->debug( '[CONFIRM]: Order already confirmed.', $context );
+			return true;
+		}
+
 		$session_id   = $order->get_meta( '_wc_ledyer_session_id' );
 		$ledyer_order = Ledyer_Payments()->api()->get_session( $session_id );
 		if ( is_wp_error( $ledyer_order ) ) {
 			$context['sessionId'] = $session_id;
-			Ledyer_Payments()->logger()->error( '[CONFIRM]: Failed to get Ledyer order. Unrecoverable error, aborting.', $context );
-			return;
+			Ledyer_Payments()->logger()->error( '[CONFIRM]: Failed to get Ledyer session.', $context );
+			return $ledyer_order;
+		}
+
+		// The checkout normally creates the Ledyer order. If that failed, create it here. Ledyer returns the same order if it already exists for the token.
+		if ( 'authorized' === ( $ledyer_order['state'] ?? '' ) && empty( $ledyer_order['orderId'] ) ) {
+			// Use the authorization from Ledyer instead of trusting the public webhook payload.
+			$result = empty( $ledyer_order['authorizationToken'] )
+				? new \WP_Error( 'missing_authorization', 'Ledyer session has no authorization token.' )
+				: Ledyer_Payments()->api()->create_order( $order->get_id(), $ledyer_order['authorizationToken'] );
+			if ( ! is_wp_error( $result ) && empty( $result['orderId'] ) ) {
+				$result = new \WP_Error( 'missing_order_id', 'Ledyer order creation returned no order ID.' );
+			}
+
+			if ( is_wp_error( $result ) ) {
+				Ledyer_Payments()->logger()->error( "[CONFIRM]: Failed to create Ledyer order: {$result->get_error_message()}", $context );
+
+				// Tell the merchant once, not on every retry.
+				if ( empty( $order->get_meta( '_wc_ledyer_create_order_failed' ) ) ) {
+					$order->update_meta_data( '_wc_ledyer_create_order_failed', 'yes' );
+					// translators: %s: Error message from Ledyer.
+					$note = sprintf( __( 'The payment was authorized, but the order could not be created in Ledyer: %s. Ledyer will retry, but please verify the order in the Ledyer portal.', 'ledyer-payments-for-woocommerce' ), $result->get_error_message() );
+					if ( $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
+						$order->add_order_note( $note );
+					} else {
+						// On-hold also stops WooCommerce from cancelling the unpaid order while Ledyer retries.
+						$order->update_status( 'on-hold', $note );
+					}
+					$order->save();
+				}
+
+				return $result;
+			}
+
+			$ledyer_order['orderId'] = $result['orderId'];
+			$order->update_meta_data( 'ledyer_payments_payment_id', $result['orderId'] );
+
+			// Let the merchant know the earlier failure is resolved.
+			if ( ! empty( $order->get_meta( '_wc_ledyer_create_order_failed' ) ) ) {
+				$order->delete_meta_data( '_wc_ledyer_create_order_failed' );
+				// translators: %s: Ledyer order ID.
+				$order->add_order_note( sprintf( __( 'The order was created in Ledyer with Payment ID %s after an earlier failure.', 'ledyer-payments-for-woocommerce' ), $result['orderId'] ) );
+			}
 		}
 
 		// The orderId is not available when the purchase is awaiting signatory.
-		$payment_id = wc_get_var( $ledyer_order['orderId'] );
+		$payment_id = $ledyer_order['orderId'] ?? '';
 
 		$order->set_payment_method( $this->id );
 		$order->set_transaction_id( $payment_id );
@@ -432,6 +519,7 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		$order->save();
+		return true;
 	}
 
 	/**
@@ -629,6 +717,8 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		$this->confirm_order( $order, $context );
-		Ledyer_Payments()->session()->clear_session( $order );
+
+		// confirm_order() works on a freshly loaded order, so saving our stale copy could overwrite its changes.
+		Ledyer_Payments()->session()->clear_session( wc_get_order( $order->get_id() ) );
 	}
 }

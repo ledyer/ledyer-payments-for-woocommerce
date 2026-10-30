@@ -428,7 +428,9 @@ jQuery( function ( $ ) {
                 },
                 async: false,
                 success: ( data ) => {
-                    if ( ! data.success ) {
+                    // A failed response still has a location when the order can be recovered on the thankyou page.
+                    const location = data.data && data.data.location
+                    if ( ! location ) {
                         LedyerPayments.submitOrderFail(
                             "createOrder",
                             "The payment was successful, but the order could not be created.",
@@ -437,9 +439,6 @@ jQuery( function ( $ ) {
                         return
                     }
 
-                    const {
-                        data: { location },
-                    } = data
                     window.location = location
                 },
                 error: ( jqXHR, textStatus, errorThrown ) => {
