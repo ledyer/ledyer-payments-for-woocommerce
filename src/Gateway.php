@@ -448,11 +448,32 @@ class Gateway extends \WC_Payment_Gateway {
 			if ( is_wp_error( $result ) ) {
 				Ledyer_Payments()->logger()->error( "[CONFIRM]: Failed to create Ledyer order: {$result->get_error_message()}", $context );
 
+				// Tell the merchant once, not on every retry.
+				if ( empty( $order->get_meta( '_wc_ledyer_create_order_failed' ) ) ) {
+					$order->update_meta_data( '_wc_ledyer_create_order_failed', 'yes' );
+					// translators: %s: Error message from Ledyer.
+					$note = sprintf( __( 'The payment was authorized, but the order could not be created in Ledyer: %s. Ledyer will retry, but please verify the order in the Ledyer portal.', 'ledyer-payments-for-woocommerce' ), $result->get_error_message() );
+					if ( $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
+						$order->add_order_note( $note );
+					} else {
+						// On-hold also stops WooCommerce from cancelling the unpaid order while Ledyer retries.
+						$order->update_status( 'on-hold', $note );
+					}
+					$order->save();
+				}
+
 				return $result;
 			}
 
 			$ledyer_order['orderId'] = $result['orderId'];
 			$order->update_meta_data( 'ledyer_payments_payment_id', $result['orderId'] );
+
+			// Let the merchant know the earlier failure is resolved.
+			if ( ! empty( $order->get_meta( '_wc_ledyer_create_order_failed' ) ) ) {
+				$order->delete_meta_data( '_wc_ledyer_create_order_failed' );
+				// translators: %s: Ledyer order ID.
+				$order->add_order_note( sprintf( __( 'The order was created in Ledyer with Payment ID %s after an earlier failure.', 'ledyer-payments-for-woocommerce' ), $result['orderId'] ) );
+			}
 		}
 
 		// The orderId is not available when the purchase is awaiting signatory.
