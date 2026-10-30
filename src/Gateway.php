@@ -714,6 +714,8 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		$this->confirm_order( $order, $context );
-		Ledyer_Payments()->session()->clear_session( $order );
+
+		// confirm_order() works on a freshly loaded order, so saving our stale copy could overwrite its changes.
+		Ledyer_Payments()->session()->clear_session( wc_get_order( $order->get_id() ) );
 	}
 }
