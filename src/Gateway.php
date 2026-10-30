@@ -392,8 +392,8 @@ class Gateway extends \WC_Payment_Gateway {
 			);
 		}
 
-		// A database lock is released by MySQL if the request dies, so it cannot get stuck.
-		$lock = 'ledyer_payments_confirm_' . $order->get_id();
+		// A database lock is released by MySQL if the request dies, so it cannot get stuck. Lock names are server-wide, so include the table prefix to keep sites sharing a database server apart.
+		$lock = $wpdb->prefix . 'ledyer_payments_confirm_' . $order->get_id();
 		if ( ! $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $lock, 15 ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			Ledyer_Payments()->logger()->warning( '[CONFIRM]: The order is already being confirmed by another request.', $context );
 			return new \WP_Error( 'confirm_locked', 'The order is already being confirmed by another request.' );
