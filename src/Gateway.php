@@ -7,6 +7,8 @@
 
 namespace Krokedil\Ledyer\Payments;
 
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -374,16 +376,55 @@ class Gateway extends \WC_Payment_Gateway {
 	/**
 	 * Confirm the order.
 	 *
+	 * The thankyou page and the authorization callback can confirm the same order at the same time, so only one request at a time may confirm it.
+	 *
 	 * @param \WC_Order $order The WooCommerce order.
 	 * @param array     $context The logging context. Optional.
 	 * @return true|\WP_Error
 	 */
 	public function confirm_order( $order, $context = array() ) {
+		global $wpdb;
+
 		if ( empty( $context ) ) {
 			$context = array(
 				'filter'   => current_filter(),
 				'function' => __FUNCTION__,
 			);
+		}
+
+		// A database lock is released by MySQL if the request dies, so it cannot get stuck.
+		$lock = 'ledyer_payments_confirm_' . $order->get_id();
+		if ( ! $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $lock, 15 ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			Ledyer_Payments()->logger()->warning( '[CONFIRM]: The order is already being confirmed by another request.', $context );
+			return new \WP_Error( 'confirm_locked', 'The order is already being confirmed by another request.' );
+		}
+
+		try {
+			// Reload the order, since the request holding the lock before us may have changed it.
+			$order_id = $order->get_id();
+			clean_post_cache( $order_id );
+			if ( class_exists( OrderUtil::class ) && method_exists( OrderUtil::class, 'orders_cache_usage_is_enabled' ) && OrderUtil::orders_cache_usage_is_enabled() ) {
+				wc_get_container()->get( OrderCache::class )->remove( $order_id );
+			}
+
+			return $this->process_confirmation( wc_get_order( $order_id ), $context );
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		}
+	}
+
+	/**
+	 * Confirm the order against the Ledyer session, creating the Ledyer order if the checkout failed to.
+	 *
+	 * @param \WC_Order $order The WooCommerce order.
+	 * @param array     $context The logging context.
+	 * @return true|\WP_Error
+	 */
+	private function process_confirmation( $order, $context ) {
+		// Already confirmed by an earlier or concurrent request.
+		if ( ! empty( $order->get_meta( '_wc_ledyer_order_id' ) ) && $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
+			Ledyer_Payments()->logger()->debug( '[CONFIRM]: Order already confirmed.', $context );
+			return true;
 		}
 
 		$session_id   = $order->get_meta( '_wc_ledyer_session_id' );
