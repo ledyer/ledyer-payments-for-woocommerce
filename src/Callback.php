@@ -93,7 +93,7 @@ class Callback {
 				}
 
 				// Only acknowledge after creation/sync succeeds, so Ledyer can retry failed deliveries.
-				$result = Ledyer_Payments()->gateway()->confirm_order( $order, $context, true );
+				$result = Ledyer_Payments()->gateway()->confirm_order( $order, $context );
 				if ( is_wp_error( $result ) ) {
 					Ledyer_Payments()->logger()->error( '[CALLBACK]: Authorization processing failed: ' . $result->get_error_message(), $context );
 					return new \WP_Error( 'authorization_processing_failed', __( 'Failed to process Ledyer authorization.', 'ledyer-payments-for-woocommerce' ), array( 'status' => 500 ) );

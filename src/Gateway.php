@@ -376,10 +376,9 @@ class Gateway extends \WC_Payment_Gateway {
 	 *
 	 * @param \WC_Order $order The WooCommerce order.
 	 * @param array     $context The logging context. Optional.
-	 * @param bool      $create_missing_order Whether to create a missing Ledyer order from an authorization notification.
 	 * @return true|\WP_Error
 	 */
-	public function confirm_order( $order, $context = array(), $create_missing_order = false ) {
+	public function confirm_order( $order, $context = array() ) {
 		if ( empty( $context ) ) {
 			$context = array(
 				'filter'   => current_filter(),
@@ -395,18 +394,20 @@ class Gateway extends \WC_Payment_Gateway {
 			return $ledyer_order;
 		}
 
-		if ( $create_missing_order && empty( $ledyer_order['orderId'] ) ) {
-			// Fetch the authorization from Ledyer instead of trusting the public webhook payload.
-			if ( 'authorized' !== $ledyer_order['state'] || empty( $ledyer_order['authorizationToken'] ) ) {
-				return new \WP_Error( 'missing_authorization', 'Ledyer session has no usable authorization for order creation.' );
+		// The checkout normally creates the Ledyer order. If that failed, create it here. Ledyer returns the same order if it already exists for the token.
+		if ( 'authorized' === ( $ledyer_order['state'] ?? '' ) && empty( $ledyer_order['orderId'] ) ) {
+			// Use the authorization from Ledyer instead of trusting the public webhook payload.
+			$result = empty( $ledyer_order['authorizationToken'] )
+				? new \WP_Error( 'missing_authorization', 'Ledyer session has no authorization token.' )
+				: Ledyer_Payments()->api()->create_order( $order->get_id(), $ledyer_order['authorizationToken'] );
+			if ( ! is_wp_error( $result ) && empty( $result['orderId'] ) ) {
+				$result = new \WP_Error( 'missing_order_id', 'Ledyer order creation returned no order ID.' );
 			}
 
-			$result = Ledyer_Payments()->api()->create_order( $order->get_id(), $ledyer_order['authorizationToken'] );
 			if ( is_wp_error( $result ) ) {
+				Ledyer_Payments()->logger()->error( "[CONFIRM]: Failed to create Ledyer order: {$result->get_error_message()}", $context );
+
 				return $result;
-			}
-			if ( empty( $result['orderId'] ) ) {
-				return new \WP_Error( 'missing_order_id', 'Ledyer order creation returned no order ID.' );
 			}
 
 			$ledyer_order['orderId'] = $result['orderId'];
