@@ -429,7 +429,7 @@ jQuery( function ( $ ) {
                 async: false,
                 success: ( data ) => {
                     // A failed response still has a location when the order can be recovered on the thankyou page.
-                    const location = data.data?.location
+                    const location = data.data && data.data.location
                     if ( ! location ) {
                         LedyerPayments.submitOrderFail(
                             "createOrder",
