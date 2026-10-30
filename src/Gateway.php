@@ -407,7 +407,12 @@ class Gateway extends \WC_Payment_Gateway {
 				wc_get_container()->get( OrderCache::class )->remove( $order_id );
 			}
 
-			return $this->process_confirmation( wc_get_order( $order_id ), $context );
+			$order = wc_get_order( $order_id );
+			if ( empty( $order ) ) {
+				return new \WP_Error( 'order_not_found', 'The order no longer exists.' );
+			}
+
+			return $this->process_confirmation( $order, $context );
 		} finally {
 			$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		}
