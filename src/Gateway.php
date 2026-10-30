@@ -505,8 +505,6 @@ class Gateway extends \WC_Payment_Gateway {
 				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
 					$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-payments-for-woocommerce' ) );
 				}
-				$order->save();
-				return $payment_status;
 			} else {
 				$acknowledged = $this->process_order_status( $order, $payment_status, $payment_id );
 			}
