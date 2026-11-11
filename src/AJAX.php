@@ -91,16 +91,6 @@ class AJAX {
 			wp_send_json_error( 'Order not found' );
 		}
 
-		$result = Ledyer_Payments()->api()->create_order( $order_id, $auth_token );
-		if ( is_wp_error( $result ) ) {
-			Ledyer_Payments()->logger()->error( "[AJAX]: Create order failed: {$result->get_error_message()}", $context );
-			wp_send_json_error( $result );
-		}
-
-		$payment_id = $result['orderId'] ?? null;
-		$order->update_meta_data( 'ledyer_payments_payment_id', $payment_id );
-		$order->save();
-
 		$redirect_to = add_query_arg(
 			array(
 				'gateway' => 'ledyer_payments',
@@ -108,6 +98,20 @@ class AJAX {
 			),
 			$order->get_checkout_order_received_url()
 		);
+
+		$result = Ledyer_Payments()->api()->create_order( $order_id, $auth_token );
+		if ( is_wp_error( $result ) ) {
+			Ledyer_Payments()->logger()->error( "[AJAX]: Create order failed: {$result->get_error_message()}", $context );
+
+			// The payment is already authorized, so send the customer to the thankyou page, which retries creating the Ledyer order. Showing an error here would invite a second purchase.
+			// Drop the error notice queued by the API class too, or it is shown on the customer's next page.
+			wc_clear_notices();
+			wp_send_json_error( array( 'location' => $redirect_to ) );
+		}
+
+		$payment_id = $result['orderId'] ?? null;
+		$order->update_meta_data( 'ledyer_payments_payment_id', $payment_id );
+		$order->save();
 
 		$context = array(
 			'function'   => __FUNCTION__,

@@ -34,7 +34,7 @@ class CreateOrder extends POSTRequest {
 		$order = new Order( $this->arguments['order_id'] );
 
 		return array(
-			'country'                 => WC()->customer->get_billing_country(),
+			'country'                 => $order->get_country(),
 			'currency'                => $order->get_currency(),
 			'customer'                => $order->get_customer(),
 			'locale'                  => $order->get_locale(),
