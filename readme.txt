@@ -5,8 +5,8 @@ Requires at least: 5.0
 Tested up to: 7.1
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 11.2.1
-Stable tag: 1.0.3
+WC tested up to: 11.2.2
+Stable tag: 1.0.4
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -72,6 +72,15 @@ Terms of Service: https://static.ledyer.com/docs/SE/en-US/payments_terms.pdf
 This plugin is licensed under the GNU General Public License v3. See license.txt for details.
 
 == Changelog ==
+
+= 2026.11.11  	- version 1.0.4 =
+* Fix           - If creating the Ledyer order fails after the payment is authorized, the plugin now tries again on the order confirmation page and from Ledyer's authorization webhook, so the WooCommerce order no longer ends up without a Ledyer order.
+* Fix           - The authorization webhook is now handled right away and returns an error when processing fails, so Ledyer can retry it.
+* Fix           - The billing country sent when creating the Ledyer order is now taken from the order, so it is also correct when the order is created from the webhook.
+* Fix           - Only one request at a time can confirm an order, which stops the confirmation page and the webhook from processing the same order twice.
+* Fix           - Customers are now sent to the order confirmation page when creating the Ledyer order fails, instead of seeing an error that could lead them to pay again.
+* Tweak         - An order note is added when the Ledyer order could not be created, and another when it was later created successfully.
+* Tweak         - Updated the krokedil/wp-api dependency to 1.2.2, so the correct user agent is sent to Ledyer.
 
 = 2026.10.15  	- version 1.0.3 =
 * Fix           - Re-release of 1.0.2 to WordPress.org.
