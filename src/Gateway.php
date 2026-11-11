@@ -703,8 +703,9 @@ class Gateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		// On-hold orders are moved forward by callbacks only, the same way as in Ledyer Checkout.
-		if ( ! empty( $order->get_date_paid() ) || $order->has_status( 'on-hold' ) ) {
+		// On-hold orders are moved forward by callbacks only, the same way as in Ledyer Checkout. The exception is an order put on hold because creating the Ledyer order failed, which we retry here.
+		$create_order_failed = ! empty( $order->get_meta( '_wc_ledyer_create_order_failed' ) );
+		if ( ! empty( $order->get_date_paid() ) || ( $order->has_status( 'on-hold' ) && ! $create_order_failed ) ) {
 			// Check for if the session wasn't cleared properly. This can happen if the order is successfully created, but the customer was not redirected to the checkout page.
 			$session_id = Ledyer_Payments()->session()->get_id();
 			if ( $order->get_meta( '_wc_ledyer_session_id' ) === $session_id ) {
