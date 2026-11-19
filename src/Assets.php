@@ -144,12 +144,18 @@ class Assets {
 	}
 
 	/**
-	 * Whether the current page renders the WooCommerce checkout block.
+	 * Whether the current page is the checkout page, and it is rendered by the WooCommerce checkout block.
+	 *
+	 * The checkout block renders the pay for order and order received endpoints with the shortcode checkout, so they are not considered checkout block pages.
 	 *
 	 * @return bool
 	 */
 	public static function is_checkout_block() {
-		return has_block( 'woocommerce/checkout' );
+		if ( ! is_checkout() || is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'order-received' ) ) {
+			return false;
+		}
+
+		return has_block( 'woocommerce/checkout', wc_get_page_id( 'checkout' ) );
 	}
 
 	/**

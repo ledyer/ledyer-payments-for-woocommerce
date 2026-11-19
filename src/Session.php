@@ -82,6 +82,11 @@ class Session {
 			return;
 		}
 
+		// On the checkout block, the session is only created (or updated) when an order is placed with Ledyer (see Gateway::process_payment()). This avoids creating Ledyer sessions for customers who pay with another payment method.
+		if ( ! $force && Assets::is_checkout_block() ) {
+			return;
+		}
+
 		// Resume existing session.
 		$this->resume();
 
