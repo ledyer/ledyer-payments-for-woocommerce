@@ -7,6 +7,7 @@
 
 namespace Krokedil\Ledyer\Payments;
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
@@ -299,6 +300,8 @@ class Gateway extends \WC_Payment_Gateway {
 	 *
 	 * For the checkout block, the Store API copies the payment method data to $_POST before calling process_payment().
 	 *
+	 * A field that is submitted empty is removed from the order. Otherwise, a value cleared by the customer would still be sent to Ledyer when an order is reused (e.g., when the payment is retried).
+	 *
 	 * @param \WC_Order $order The WooCommerce order.
 	 * @return void
 	 */
@@ -311,8 +314,15 @@ class Gateway extends \WC_Payment_Gateway {
 
 		foreach ( $fields as $field => $meta_key ) {
 			// phpcs:ignore WordPress.Security.NonceVerification -- The nonce is verified by WooCommerce (classic) or the Store API (block).
-			$value = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
-			if ( ! empty( $value ) ) {
+			if ( ! isset( $_POST[ $field ] ) ) {
+				continue;
+			}
+
+			// phpcs:ignore WordPress.Security.NonceVerification -- The nonce is verified by WooCommerce (classic) or the Store API (block).
+			$value = sanitize_text_field( wp_unslash( $_POST[ $field ] ) );
+			if ( '' === $value ) {
+				$order->delete_meta_data( $meta_key );
+			} else {
 				$order->update_meta_data( $meta_key, $value );
 			}
 		}
@@ -328,7 +338,9 @@ class Gateway extends \WC_Payment_Gateway {
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( $order->is_created_via( 'store-api' ) ) {
+
+		// Use the flow of the current request, not how the order was created. An order placed through the checkout block can later be paid for on the (shortcode) pay for order page.
+		if ( self::is_store_api_request() ) {
 			return $this->process_block_payment( $order );
 		}
 
@@ -357,6 +369,34 @@ class Gateway extends \WC_Payment_Gateway {
 	}
 
 	/**
+	 * Whether the current request is a Store API request, i.e., the payment is processed by the checkout block.
+	 *
+	 * @return bool
+	 */
+	private static function is_store_api_request() {
+		if ( method_exists( WC(), 'is_store_api_request' ) ) {
+			return WC()->is_store_api_request();
+		}
+
+		// Fallback for WooCommerce versions without WooCommerce::is_store_api_request().
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		return false !== strpos( $request_uri, trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
+	}
+
+	/**
+	 * Get the visibility of the company field on the checkout block.
+	 *
+	 * @return string 'hidden', 'optional' or 'required'.
+	 */
+	private static function get_company_field_visibility() {
+		if ( method_exists( CartCheckoutUtils::class, 'get_company_field_visibility' ) ) {
+			return CartCheckoutUtils::get_company_field_visibility();
+		}
+
+		return get_option( 'woocommerce_checkout_company_field', 'hidden' );
+	}
+
+	/**
 	 * Process the payment for an order placed through the checkout block (Store API).
 	 *
 	 * The order is created before the customer authorizes the payment. The returned data is passed to the block script, which then calls the Ledyer SDK to authorize the payment. The Store API only supports scalar payment details, therefore arrays are JSON-encoded.
@@ -379,7 +419,7 @@ class Gateway extends \WC_Payment_Gateway {
 		}
 
 		// As in the shortcode checkout, the company name is only required if the field is displayed.
-		if ( 'hidden' !== get_option( 'woocommerce_checkout_company_field', 'optional' ) && empty( $order->get_billing_company() ) ) {
+		if ( 'hidden' !== self::get_company_field_visibility() && empty( $order->get_billing_company() ) ) {
 			return array(
 				'result'  => 'failure',
 				'message' => __( 'Please enter your company name.', 'ledyer-payments-for-woocommerce' ),
