@@ -7,19 +7,24 @@
     "lint": "pnpx wp-prettier src/assets/js --paren-spacing --tab-width 4 --print-width 120 --no-semi --write",
     "makepot": "pnpx grunt makepot",
     "cssmin": "pnpx grunt cssmin",
-    "jsmin": "pnpx webpack",
-    "build": "pnpm makepot && pnpm cssmin && pnpm lint &&pnpm jsmin"
+    "build:blocks": "pnpm typecheck && webpack",
+    "typecheck": "tsc --noEmit",
+    "build": "pnpm makepot && pnpm cssmin && pnpm lint && pnpm build:blocks"
   },
   "keywords": [],
   "author": "Krokedil",
   "license": "ISC",
   "devDependencies": {
+    "@types/react": "^18",
+    "@woocommerce/dependency-extraction-webpack-plugin": "^3",
     "@wordpress/eslint-plugin": "^20.1.0",
     "grunt": "^1.6.1",
     "grunt-contrib-cssmin": "^5.0.0",
     "grunt-contrib-uglify": "^5.2.2",
     "grunt-wp-i18n": "^1.0.3",
     "prettier": "npm:wp-prettier@^3.0.3",
+    "ts-loader": "^9",
+    "typescript": "^5",
     "webpack": "^5.93.0",
     "webpack-cli": "^5.1.4",
     "wp-prettier": "^3.0.3"

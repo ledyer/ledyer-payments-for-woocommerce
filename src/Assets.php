@@ -59,6 +59,11 @@ class Assets {
 			return;
 		}
 
+		// The checkout block loads its own scripts (see Blocks\CheckoutBlock).
+		if ( self::is_checkout_block() ) {
+			return;
+		}
+
 		// The reference is stored in the session. Create the session if necessary.
 		Ledyer_Payments()->session()->get_session();
 		$reference  = Ledyer_Payments()->session()->get_reference();
@@ -123,8 +128,34 @@ class Assets {
 
 		wp_enqueue_script( self::CHECKOUT_HANDLE );
 
+		self::register_sdk( array( self::CHECKOUT_HANDLE ) );
+		wp_enqueue_script( self::SDK_HANDLE );
+	}
+
+	/**
+	 * Registers the Ledyer client SDK script.
+	 *
+	 * @param array $dependencies The script dependencies.
+	 * @return void
+	 */
+	public static function register_sdk( $dependencies = array() ) {
 		$env = wc_string_to_bool( Ledyer_Payments()->settings( 'test_mode' ) ) ? 'sandbox' : 'live';
-		wp_enqueue_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", array( self::CHECKOUT_HANDLE ), LEDYER_PAYMENTS_VERSION, true );
+		wp_register_script( self::SDK_HANDLE, "https://payments.$env.ledyer.com/bootstrap.js", $dependencies, LEDYER_PAYMENTS_VERSION, true );
+	}
+
+	/**
+	 * Whether the current page is the checkout page, and it is rendered by the WooCommerce checkout block.
+	 *
+	 * The checkout block renders the pay for order and order received endpoints with the shortcode checkout, so they are not considered checkout block pages.
+	 *
+	 * @return bool
+	 */
+	public static function is_checkout_block() {
+		if ( ! is_checkout() || is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'order-received' ) ) {
+			return false;
+		}
+
+		return has_block( 'woocommerce/checkout', wc_get_page_id( 'checkout' ) );
 	}
 
 	/**

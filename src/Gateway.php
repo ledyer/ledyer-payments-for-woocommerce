@@ -7,6 +7,7 @@
 
 namespace Krokedil\Ledyer\Payments;
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Krokedil\Ledyer\Payments\Requests\Helpers\Order;
@@ -36,7 +37,8 @@ class Gateway extends \WC_Payment_Gateway {
 		$this->init_form_fields();
 		$this->init_settings();
 
-		$this->description = $this->get_option( 'description' );
+		$this->title       = $this->get_option( 'title' );
+		$this->description = $this->get_option( 'redirect_description' );
 		$this->enabled     = $this->get_option( 'enabled' );
 		$this->has_fields  = true;
 
@@ -290,19 +292,39 @@ class Gateway extends \WC_Payment_Gateway {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification
-		$company_number = filter_input( INPUT_POST, 'billing_company_number', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		if ( ! empty( $company_number ) ) {
-			$order->update_meta_data( '_billing_company_number', sanitize_text_field( $company_number ) );
-		}
+		$this->save_custom_checkout_fields( $order );
+	}
 
-		$reference_1 = filter_input( INPUT_POST, 'ledyer_customer_reference_1', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		$reference_2 = filter_input( INPUT_POST, 'ledyer_customer_reference_2', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		if ( ! empty( $reference_1 ) ) {
-			$order->update_meta_data( '_ledyer_customer_reference_1', sanitize_text_field( $reference_1 ) );
-		}
-		if ( ! empty( $reference_2 ) ) {
-			$order->update_meta_data( '_ledyer_customer_reference_2', sanitize_text_field( $reference_2 ) );
+	/**
+	 * Save the company number and customer references from the posted data to the order.
+	 *
+	 * For the checkout block, the Store API copies the payment method data to $_POST before calling process_payment().
+	 *
+	 * A field that is submitted empty is removed from the order. Otherwise, a value cleared by the customer would still be sent to Ledyer when an order is reused (e.g., when the payment is retried).
+	 *
+	 * @param \WC_Order $order The WooCommerce order.
+	 * @return void
+	 */
+	private function save_custom_checkout_fields( $order ) {
+		$fields = array(
+			'billing_company_number'      => '_billing_company_number',
+			'ledyer_customer_reference_1' => '_ledyer_customer_reference_1',
+			'ledyer_customer_reference_2' => '_ledyer_customer_reference_2',
+		);
+
+		foreach ( $fields as $field => $meta_key ) {
+			// phpcs:ignore WordPress.Security.NonceVerification -- The nonce is verified by WooCommerce (classic) or the Store API (block).
+			if ( ! isset( $_POST[ $field ] ) ) {
+				continue;
+			}
+
+			// phpcs:ignore WordPress.Security.NonceVerification -- The nonce is verified by WooCommerce (classic) or the Store API (block).
+			$value = sanitize_text_field( wp_unslash( $_POST[ $field ] ) );
+			if ( '' === $value ) {
+				$order->delete_meta_data( $meta_key );
+			} else {
+				$order->update_meta_data( $meta_key, $value );
+			}
 		}
 
 		$order->save();
@@ -315,10 +337,16 @@ class Gateway extends \WC_Payment_Gateway {
 	 * @return array An associative array containing the success status and redirect URl.
 	 */
 	public function process_payment( $order_id ) {
-		$helper   = new Order( wc_get_order( $order_id ) );
+		$order = wc_get_order( $order_id );
+
+		// Use the flow of the current request, not how the order was created. An order placed through the checkout block can later be paid for on the (shortcode) pay for order page.
+		if ( self::is_store_api_request() ) {
+			return $this->process_block_payment( $order );
+		}
+
+		$helper   = new Order( $order );
 		$customer = $helper->get_customer();
 
-		$order = $helper->order;
 		$order->update_meta_data( '_wc_ledyer_reference', Ledyer_Payments()->session()->get_reference() );
 		$order->update_meta_data( '_wc_ledyer_session_id', Ledyer_Payments()->session()->get_id() );
 		$order->save();
@@ -337,6 +365,111 @@ class Gateway extends \WC_Payment_Gateway {
 			'redirect'  => $order->get_checkout_order_received_url(),
 			'nonce'     => $nonce,
 			'result'    => 'success',
+		);
+	}
+
+	/**
+	 * Whether the current request is a Store API request, i.e., the payment is processed by the checkout block.
+	 *
+	 * @return bool
+	 */
+	private static function is_store_api_request() {
+		if ( method_exists( WC(), 'is_store_api_request' ) ) {
+			return WC()->is_store_api_request();
+		}
+
+		// Fallback for WooCommerce versions without WooCommerce::is_store_api_request().
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		return false !== strpos( $request_uri, trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
+	}
+
+	/**
+	 * Get the visibility of the company field on the checkout block.
+	 *
+	 * @return string 'hidden', 'optional' or 'required'.
+	 */
+	private static function get_company_field_visibility() {
+		if ( method_exists( CartCheckoutUtils::class, 'get_company_field_visibility' ) ) {
+			return CartCheckoutUtils::get_company_field_visibility();
+		}
+
+		return get_option( 'woocommerce_checkout_company_field', 'hidden' );
+	}
+
+	/**
+	 * Process the payment for an order placed through the checkout block (Store API).
+	 *
+	 * The order is created before the customer authorizes the payment. The returned data is passed to the block script, which then calls the Ledyer SDK to authorize the payment. The Store API only supports scalar payment details, therefore arrays are JSON-encoded.
+	 *
+	 * @param \WC_Order $order The WooCommerce order.
+	 * @return array
+	 */
+	private function process_block_payment( $order ) {
+		$context = array(
+			'filter'   => __FUNCTION__,
+			'order_id' => $order->get_id(),
+		);
+
+		// phpcs:ignore WordPress.Security.NonceVerification -- The nonce is verified by the Store API.
+		if ( empty( $_POST['billing_company_number'] ) ) {
+			return array(
+				'result'  => 'failure',
+				'message' => __( 'Please enter your company number.', 'ledyer-payments-for-woocommerce' ),
+			);
+		}
+
+		// As in the shortcode checkout, the company name is only required if the field is displayed.
+		if ( 'hidden' !== self::get_company_field_visibility() && empty( $order->get_billing_company() ) ) {
+			return array(
+				'result'  => 'failure',
+				'message' => __( 'Please enter your company name.', 'ledyer-payments-for-woocommerce' ),
+			);
+		}
+
+		$this->save_custom_checkout_fields( $order );
+
+		// The cart may have changed in the block checkout (e.g., coupons, shipping or address), and those changes are not sent to Ledyer as they happen. Make sure the Ledyer session reflects the cart before the customer authorizes the payment.
+		$session = Ledyer_Payments()->session()->get_session( false, true );
+		if ( is_wp_error( $session ) && empty( Ledyer_Payments()->session()->get_id() ) ) {
+			// The session was invalid (e.g., expired) and has been cleared. Try once more with a new session.
+			$session = Ledyer_Payments()->session()->get_session( false, true );
+		}
+
+		$session_id = Ledyer_Payments()->session()->get_id();
+		if ( is_wp_error( $session ) || empty( $session_id ) ) {
+			$message = is_wp_error( $session ) ? $session->get_error_message() : 'Missing session ID.';
+			Ledyer_Payments()->logger()->error( "[PROCESS_PAYMENT]: Failed to create or update the Ledyer session: {$message}", $context );
+
+			return array(
+				'result'  => 'failure',
+				'message' => __( 'Something went wrong. Please try again or contact the store.', 'ledyer-payments-for-woocommerce' ),
+			);
+		}
+
+		$order->update_meta_data( '_wc_ledyer_reference', Ledyer_Payments()->session()->get_reference() );
+		$order->update_meta_data( '_wc_ledyer_session_id', $session_id );
+		$order->save();
+
+		$helper = new Order( $order );
+		Ledyer_Payments()->logger()->debug( '[PROCESS_PAYMENT]: Order placed through the checkout block. Awaiting authorization.', $context );
+
+		return array(
+			'result'                       => 'success',
+			// Only used if the block script doesn't return its own redirect URL. The query args let maybe_confirm_order() confirm the order.
+			'redirect'                     => add_query_arg(
+				array(
+					'gateway' => 'ledyer_payments',
+					'key'     => $order->get_order_key(),
+				),
+				$order->get_checkout_order_received_url()
+			),
+			'ledyer_order_key'             => $order->get_order_key(),
+			'ledyer_session_id'            => $session_id,
+			'ledyer_customer'              => wp_json_encode( $helper->get_customer() ),
+			// Nonces are refreshed since a guest may have been signed in as part of placing the order.
+			'ledyer_create_order_nonce'    => wp_create_nonce( 'ledyer_payments_create_order' ),
+			'ledyer_pending_payment_nonce' => wp_create_nonce( 'ledyer_payments_pending_payment' ),
+			'ledyer_log_nonce'             => wp_create_nonce( 'ledyer_payments_wc_log_js' ),
 		);
 	}
 

@@ -24,6 +24,8 @@ README.DEV.md
 readme.md
 README.md
 webpack.config.js
+tsconfig.json
+/blocks/src
 yarn.lock
 scoper.custom.php
 

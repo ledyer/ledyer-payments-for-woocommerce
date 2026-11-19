@@ -91,7 +91,7 @@ class Settings {
 				'title'       => __( 'Extra company fields placement', 'ledyer-payments-for-woocommerce' ),
 				'type'        => 'select',
 				'default'     => 'payment_form',
-				'description' => __( 'Where to display the fields company number, customer reference 1 and 2 on the checkout.', 'ledyer-payments-for-woocommerce' ),
+				'description' => __( 'Where to display the fields company number, customer reference 1 and 2 on the classic (shortcode) checkout. This setting does not apply to the checkout block, where the fields are always displayed in the payment method.', 'ledyer-payments-for-woocommerce' ),
 				'options'     => array(
 					'payment_form' => __( 'Payment form', 'ledyer-payments-for-woocommerce' ),
 					'billing_form' => __( 'Billing form', 'ledyer-payments-for-woocommerce' ),

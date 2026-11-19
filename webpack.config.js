@@ -1,29 +1,32 @@
 const path = require( 'path' );
-module.exports = {
-	mode: 'production', // production
-	entry: {
-		'ledyer-payments-checkout': './assets/js/ledyer-payments-checkout',
-		'ledyer-payments-admin': './assets/js/ledyer-payments-admin',
-	},
+const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 
-	output: {
-		filename: '[name].min.js',
-		path: path.resolve( __dirname, './assets/js' ),
+/**
+ * Builds the WooCommerce Checkout block integration.
+ *
+ * WordPress and WooCommerce packages (react, @wordpress/*, @woocommerce/*) are not bundled. They are loaded as script
+ * dependencies, which are written to blocks/build/[name].asset.php.
+ */
+module.exports = {
+	mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
+	entry: {
+		checkout: './blocks/src/checkout/index.tsx',
 	},
-	devtool: 'source-map',
+	output: {
+		filename: '[name].js',
+		path: path.resolve( __dirname, './blocks/build' ),
+	},
+	resolve: {
+		extensions: [ '.ts', '.tsx', '.js' ],
+	},
 	module: {
 		rules: [
 			{
-				test: /\.m?js$/,
-				exclude: /(node_modules|bower_components)/,
-				use: {
-					loader: 'babel-loader',
-					options: {
-						presets: [ '@babel/preset-env' ],
-						plugins: [ '@babel/plugin-proposal-object-rest-spread' ],
-					},
-				},
+				test: /\.tsx?$/,
+				use: 'ts-loader',
+				exclude: /node_modules/,
 			},
 		],
 	},
+	plugins: [ new DependencyExtractionWebpackPlugin() ],
 };

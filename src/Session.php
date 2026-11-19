@@ -69,15 +69,21 @@ class Session {
 	 * Create or update an existing session if necessary.
 	 *
 	 * @param \WC_Order|numeric|null $order The order object or order ID. Pass `null` to retrieve session from WC_Session (default).
+	 * @param bool                   $force Whether to bypass the checkout page check. Used when the order is placed through the checkout block, as Store API requests are not considered checkout pages.
 	 * @return array|\WP_Error|null The result from the API request, a WP_Error if an error occurred, or `null` if the gateway is either not available or if we're on a non-checkout page.
 	 */
-	public function get_session( $order = false ) {
+	public function get_session( $order = false, $force = false ) {
 		$gateways = WC()->payment_gateways->get_available_payment_gateways();
 		if ( ! isset( $gateways['ledyer_payments'] ) ) {
 			return;
 		}
 
-		if ( ( ! is_checkout() && ! is_checkout_pay_page() ) || is_order_received_page() ) {
+		if ( ! $force && ( ( ! is_checkout() && ! is_checkout_pay_page() ) || is_order_received_page() ) ) {
+			return;
+		}
+
+		// On the checkout block, the session is only created (or updated) when an order is placed with Ledyer (see Gateway::process_payment()). This avoids creating Ledyer sessions for customers who pay with another payment method.
+		if ( ! $force && Assets::is_checkout_block() ) {
 			return;
 		}
 
@@ -171,6 +177,8 @@ class Session {
 	 * @return void
 	 */
 	public function clear_session( $order = null ) {
+		$this->reset();
+
 		if ( isset( WC()->session ) ) {
 			WC()->session->__unset( self::SESSION_KEY );
 		}
@@ -362,13 +370,13 @@ class Session {
 				}
 				exit;
 			}
+		}
 
-			if ( 'expired' === $session['state'] ) {
-				$this->clear_session();
+		if ( 'expired' === $session['state'] ) {
+			$this->clear_session();
 
-				if ( isset( WC()->session ) ) {
-					WC()->session->reload_checkout = true;
-				}
+			if ( is_checkout() && isset( WC()->session ) ) {
+				WC()->session->reload_checkout = true;
 			}
 		}
 	}
