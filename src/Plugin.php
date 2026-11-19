@@ -86,6 +86,14 @@ class Plugin {
 	private function setup_hooks() {
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateways' ) );
 
+		// Register the payment method for the checkout block. This action is only fired when WooCommerce Blocks is loaded.
+		add_action(
+			'woocommerce_blocks_payment_method_type_registration',
+			function ( $registry ) {
+				$registry->register( new Blocks\CheckoutBlock() );
+			}
+		);
+
 		/**
 		 * Override the payment categories ID.
 		 *

@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/ledyer-payments-for-woocommerce\n"
-"POT-Creation-Date: 2026-11-11 09:01:19+00:00\n"
+"POT-Creation-Date: 2026-11-19 13:36:49+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -28,12 +28,51 @@ msgid ""
 "%1$s within the %2$s directory."
 msgstr ""
 
-#: src/Assets.php:118
+#: src/Assets.php:123
 msgid "Please enter a company number."
 msgstr ""
 
-#: src/Assets.php:119
+#: src/Assets.php:124 src/Blocks/CheckoutBlock.php:109 src/Gateway.php:405
 msgid "Something went wrong. Please try again or contact the store."
+msgstr ""
+
+#: src/Blocks/CheckoutBlock.php:86 src/Gateway.php:28 src/Gateway.php:29
+msgid "Ledyer Payments"
+msgstr ""
+
+#: src/Blocks/CheckoutBlock.php:101 src/Gateway.php:116 src/Gateway.php:118
+#: src/Gateway.php:168
+msgid "Company number"
+msgstr ""
+
+#: src/Blocks/CheckoutBlock.php:102
+msgid "Customer reference 1 (optional)"
+msgstr ""
+
+#: src/Blocks/CheckoutBlock.php:103 src/Gateway.php:134
+msgid "For example, reference code or cost center"
+msgstr ""
+
+#: src/Blocks/CheckoutBlock.php:104
+msgid "Customer reference 2 (optional)"
+msgstr ""
+
+#: src/Blocks/CheckoutBlock.php:105 src/Gateway.php:147
+msgid "For example, purchase order number"
+msgstr ""
+
+#: src/Blocks/CheckoutBlock.php:106 src/Gateway.php:272 src/Gateway.php:377
+msgid "Please enter your company number."
+msgstr ""
+
+#: src/Blocks/CheckoutBlock.php:107
+msgid "Pay with Ledyer"
+msgstr ""
+
+#: src/Blocks/CheckoutBlock.php:108
+msgid ""
+"The payment was not completed. Please try again or choose another payment "
+"method."
 msgstr ""
 
 #: src/Callback.php:99
@@ -44,82 +83,62 @@ msgstr ""
 msgid "Failed to schedule callback."
 msgstr ""
 
-#: src/Gateway.php:28 src/Gateway.php:29
-msgid "Ledyer Payments"
-msgstr ""
-
-#: src/Gateway.php:115 src/Gateway.php:117 src/Gateway.php:167
-msgid "Company number"
-msgstr ""
-
-#: src/Gateway.php:131
+#: src/Gateway.php:132
 msgid "Reference 1"
 msgstr ""
 
-#: src/Gateway.php:133
-msgid "For example, reference code or cost center"
-msgstr ""
-
-#: src/Gateway.php:144
+#: src/Gateway.php:145
 msgid "Reference 2"
 msgstr ""
 
-#: src/Gateway.php:146
-msgid "For example, purchase order number"
-msgstr ""
-
-#: src/Gateway.php:173
+#: src/Gateway.php:174
 msgid "Customer reference 1"
 msgstr ""
 
-#: src/Gateway.php:180
+#: src/Gateway.php:181
 msgid "Customer reference 2"
 msgstr ""
 
-#: src/Gateway.php:271
-msgid "Please enter your company number."
-msgstr ""
-
-#: src/Gateway.php:276
+#: src/Gateway.php:277 src/Gateway.php:385
 msgid "Please enter your company name."
 msgstr ""
 
-#: src/Gateway.php:460
+#: src/Gateway.php:553
 #. translators: %s: Error message from Ledyer.
 msgid ""
 "The payment was authorized, but the order could not be created in Ledyer: "
 "%s. Ledyer will retry, but please verify the order in the Ledyer portal."
 msgstr ""
 
-#: src/Gateway.php:480
+#: src/Gateway.php:573
 #. translators: %s: Ledyer order ID.
 msgid "The order was created in Ledyer with Payment ID %s after an earlier failure."
 msgstr ""
 
-#: src/Gateway.php:506 src/Gateway.php:516
+#: src/Gateway.php:599 src/Gateway.php:609
 msgid "Awaiting payment confirmation from Ledyer."
 msgstr ""
 
-#: src/Gateway.php:548
+#: src/Gateway.php:641
 #. translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
 msgid "New session created in Ledyer with Payment ID %1$s. %2$s"
 msgstr ""
 
-#: src/Gateway.php:554
+#: src/Gateway.php:647
 #. translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
 msgid "New pending payment created in Ledyer with Payment ID %1$s. %2$s"
 msgstr ""
 
-#: src/Gateway.php:561
+#: src/Gateway.php:654
 #. translators: %1$s: Ledyer order ID, %2$s: Ledyer note.
 msgid "Payment successfully confirmed in Ledyer with Payment ID %1$s. %2$s"
 msgstr ""
 
-#: src/Plugin.php:164
+#: src/Plugin.php:172
 msgid "Settings"
 msgstr ""
 
-#: src/Session.php:253
+#: src/Session.php:256
 msgid "Order not found"
 msgstr ""
 

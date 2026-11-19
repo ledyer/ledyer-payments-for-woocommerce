@@ -8,6 +8,12 @@ importers:
 
   .:
     devDependencies:
+      '@types/react':
+        specifier: ^18
+        version: 18.3.31
+      '@woocommerce/dependency-extraction-webpack-plugin':
+        specifier: ^3
+        version: 3.1.0(webpack@5.93.0)
       '@wordpress/eslint-plugin':
         specifier: ^20.1.0
         version: 20.1.0(@babel/core@7.25.2)(@types/eslint@9.6.0)(eslint@8.57.0)(typescript@5.5.4)(wp-prettier@3.0.3)
@@ -26,6 +32,12 @@ importers:
       prettier:
         specifier: npm:wp-prettier@^3.0.3
         version: wp-prettier@3.0.3
+      ts-loader:
+        specifier: ^9
+        version: 9.6.2(typescript@5.5.4)(webpack@5.93.0)
+      typescript:
+        specifier: ^5
+        version: 5.5.4
       webpack:
         specifier: ^5.93.0
         version: 5.93.0(webpack-cli@5.1.4)
@@ -757,6 +769,12 @@ packages:
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
 
+  '@types/prop-types@15.7.15':
+    resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
+
+  '@types/react@18.3.31':
+    resolution: {integrity: sha512-vfEqpXTvwT91yhmwdfouStN2hSKwTvyRs8qpLfADyrq/kxDw0hZM7Wk9Ug1FELj8hIby+S/+kQCSRFF32nv2Qw==}
+
   '@types/semver@7.5.8':
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
 
@@ -919,6 +937,10 @@ packages:
       webpack-dev-server:
         optional: true
 
+  '@woocommerce/dependency-extraction-webpack-plugin@3.1.0':
+    resolution: {integrity: sha512-e/hOgJlLpisEqc0CjtNmK5eso1U4NaURIxFIgrH5AAFQbS1XN8BP6/SaTcWEfnNnoGqOSfn5p6hQFL6lz7OSrA==}
+    engines: {node: ^20.11.1, pnpm: 9.1.3}
+
   '@wordpress/babel-preset-default@8.4.0':
     resolution: {integrity: sha512-BIbHlZxXGG6gEDrTUJ3s7wU2mAPbHFCkc7QkeTD+7GMIixEzEPr7IBbrpHkcwLIRWqEvc9LB69YPrWklUKJZmg==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
@@ -926,6 +948,12 @@ packages:
   '@wordpress/browserslist-config@6.4.0':
     resolution: {integrity: sha512-6Uvh++K+UCOSSlE589uHtxVWa7vJmcFjDYHT7/VsdrHkwpCRwJd0UAUrmTBqiekGYo3NQzZW/ikODxR+lkORjw==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
+
+  '@wordpress/dependency-extraction-webpack-plugin@3.7.0':
+    resolution: {integrity: sha512-SHyp88D1ICSaRVMfs/kKEicjKXWf1y2wecUeZIiMtkfAi8Bnk3JsnUo11LH7drJIXfjmDoer2B2rrBMZmRm8VA==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      webpack: ^4.8.3 || ^5.0.0
 
   '@wordpress/eslint-plugin@20.1.0':
     resolution: {integrity: sha512-2FVQsdvG92qiKKnXhR0JO4RVyjrdRVY5vS6C6OZjp4M+O/kC/k5sx/BsjOX09qyUGletXJyQRmy11uoCE9lmAA==}
@@ -1193,6 +1221,9 @@ packages:
   cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
     engines: {node: '>= 8'}
+
+  csstype@3.2.4:
+    resolution: {integrity: sha512-PoKaoPzQapnEoqUSnHx1u6W6ku8CVEgKsnpmmzU3m1nwkidpPBQ8V/Zq2+bWNrsOKoKLwTGdbx6xF7BXP1zLVQ==}
 
   damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
@@ -1973,6 +2004,9 @@ packages:
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
 
+  json2php@0.0.4:
+    resolution: {integrity: sha512-hFzejhs28f70sGnutcsRS459MnAsjRVI85RgPAL1KQIZEpjiDitc27CZv4IgOtaR86vrqOVlu9vJNew2XyTH4g==}
+
   json5@1.0.2:
     resolution: {integrity: sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==}
     hasBin: true
@@ -2252,6 +2286,10 @@ packages:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
 
+  picomatch@4.0.7:
+    resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
+    engines: {node: '>=12'}
+
   pify@4.0.1:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
     engines: {node: '>=6'}
@@ -2442,6 +2480,10 @@ packages:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
 
+  source-map@0.7.6:
+    resolution: {integrity: sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ==}
+    engines: {node: '>= 12'}
+
   spdx-exceptions@2.5.0:
     resolution: {integrity: sha512-PiU42r+xO4UbUS1buo3LPJkjlO7430Xn5SVAhdpzzsPHsjbYVflnnFdATgabnLude+Cqu25p6N+g2lw/PFsa4w==}
 
@@ -2562,6 +2604,17 @@ packages:
     engines: {node: '>=16'}
     peerDependencies:
       typescript: '>=4.2.0'
+
+  ts-loader@9.6.2:
+    resolution: {integrity: sha512-R4iuczmtgxvtuI556s+hTZ6/7Ee03VCAk/l/M8LY1OAsUgB7YydsCxkgq9D9pKRaD7GJqUi2u8fp9zZP/ufjKA==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      loader-utils: '*'
+      typescript: '*'
+      webpack: ^4.0.0 || ^5.0.0
+    peerDependenciesMeta:
+      loader-utils:
+        optional: true
 
   tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
@@ -3686,6 +3739,13 @@ snapshots:
 
   '@types/parse-json@4.0.2': {}
 
+  '@types/prop-types@15.7.15': {}
+
+  '@types/react@18.3.31':
+    dependencies:
+      '@types/prop-types': 15.7.15
+      csstype: 3.2.4
+
   '@types/semver@7.5.8': {}
 
   '@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)':
@@ -3908,6 +3968,12 @@ snapshots:
       webpack: 5.93.0(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.93.0)
 
+  '@woocommerce/dependency-extraction-webpack-plugin@3.1.0(webpack@5.93.0)':
+    dependencies:
+      '@wordpress/dependency-extraction-webpack-plugin': 3.7.0(webpack@5.93.0)
+    transitivePeerDependencies:
+      - webpack
+
   '@wordpress/babel-preset-default@8.4.0':
     dependencies:
       '@babel/core': 7.25.2
@@ -3925,6 +3991,12 @@ snapshots:
       - supports-color
 
   '@wordpress/browserslist-config@6.4.0': {}
+
+  '@wordpress/dependency-extraction-webpack-plugin@3.7.0(webpack@5.93.0)':
+    dependencies:
+      json2php: 0.0.4
+      webpack: 5.93.0(webpack-cli@5.1.4)
+      webpack-sources: 3.2.3
 
   '@wordpress/eslint-plugin@20.1.0(@babel/core@7.25.2)(@types/eslint@9.6.0)(eslint@8.57.0)(typescript@5.5.4)(wp-prettier@3.0.3)':
     dependencies:
@@ -4229,6 +4301,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  csstype@3.2.4: {}
 
   damerau-levenshtein@1.0.8: {}
 
@@ -5167,6 +5241,8 @@ snapshots:
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 
+  json2php@0.0.4: {}
+
   json5@1.0.2:
     dependencies:
       minimist: 1.2.8
@@ -5445,6 +5521,8 @@ snapshots:
 
   picomatch@2.3.1: {}
 
+  picomatch@4.0.7: {}
+
   pify@4.0.1: {}
 
   pkg-dir@4.2.0:
@@ -5647,6 +5725,8 @@ snapshots:
 
   source-map@0.6.1: {}
 
+  source-map@0.7.6: {}
+
   spdx-exceptions@2.5.0: {}
 
   spdx-expression-parse@4.0.0:
@@ -5770,6 +5850,14 @@ snapshots:
   ts-api-utils@1.3.0(typescript@5.5.4):
     dependencies:
       typescript: 5.5.4
+
+  ts-loader@9.6.2(typescript@5.5.4)(webpack@5.93.0):
+    dependencies:
+      chalk: 4.1.2
+      picomatch: 4.0.7
+      source-map: 0.7.6
+      typescript: 5.5.4
+      webpack: 5.93.0(webpack-cli@5.1.4)
 
   tsconfig-paths@3.15.0:
     dependencies:
